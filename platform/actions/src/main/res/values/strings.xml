@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_automation_default">Automation notifications</string>
+    <string name="channel_automation_high">Important automation notifications</string>
+    <string name="channel_automation_low">Quiet automation notifications</string>
+    <string name="channel_shortcuts">Tap-to-open shortcuts</string>
+    <string name="channel_shortcuts_description">Shown when Android does not allow an automation to open an app or screen in the background.</string>
+    <string name="tap_to_open_title">Tap to open %1$s</string>
+    <string name="tap_to_open_text">Automation \"%1$s\" wants to open this. Android blocks apps from opening screens in the background.</string>
+    <string name="settings_panel_wifi">Wi-Fi settings</string>
+    <string name="settings_panel_bluetooth">Bluetooth settings</string>
+    <string name="settings_panel_internet">Internet settings</string>
+    <string name="settings_panel_volume">Volume</string>
+    <string name="settings_panel_display">Display settings</string>
+    <string name="settings_panel_battery_saver">Battery saver</string>
+    <string name="settings_panel_airplane">Airplane mode</string>
+    <string name="settings_panel_location">Location settings</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capability_notifications_title">Notifications</string>
+    <string name="capability_notifications_rationale">Needed to show the notifications your automations create, and tap-to-open shortcuts when Android blocks opening apps in the background.</string>
+    <string name="capability_notifications_denied">This automation cannot show notifications until notification permission is granted.</string>
+
+    <string name="capability_exact_alarms_title">Alarms &amp; reminders</string>
+    <string name="capability_exact_alarms_rationale">Lets time-based automations run exactly on time. Without it, Android may delay them by several minutes to save battery.</string>
+    <string name="capability_exact_alarms_denied">Time triggers will still run, but Android may delay them by several minutes.</string>
+
+    <string name="capability_write_settings_title">Modify system settings</string>
+    <string name="capability_write_settings_rationale">Needed to change screen brightness. Android only allows this after you enable it on the system settings screen.</string>
+    <string name="capability_write_settings_denied">This automation cannot change brightness until \"Modify system settings\" is allowed.</string>
+
+    <string name="capability_notification_policy_title">Do Not Disturb access</string>
+    <string name="capability_notification_policy_rationale">Needed to turn Do Not Disturb on or off.</string>
+    <string name="capability_notification_policy_denied">This automation cannot change Do Not Disturb until access is granted.</string>
+
+    <string name="capability_usage_access_title">Usage access</string>
+    <string name="capability_usage_access_rationale">Android only tells an app which other app is open if you grant usage access. AutoFlow uses it only to detect the apps you chose as triggers; nothing leaves your device.</string>
+    <string name="capability_usage_access_denied">\"App opened\" triggers cannot work until usage access is granted.</string>
+
+    <string name="capability_location_title">Location</string>
+    <string name="capability_location_rationale">Android only reveals the name of the Wi-Fi network you are connected to when location permission is granted. AutoFlow does not track or store your location.</string>
+    <string name="capability_location_denied">This automation cannot recognise specific Wi-Fi networks until location permission is granted.</string>
+
+    <string name="capability_background_location_title">Location all the time</string>
+    <string name="capability_background_location_rationale">Needed to read the Wi-Fi network name while AutoFlow is not on screen. Choose \"Allow all the time\" on the next screen.</string>
+    <string name="capability_background_location_denied">Specific Wi-Fi networks can only be recognised while AutoFlow is open.</string>
+
+    <string name="capability_bluetooth_title">Nearby devices</string>
+    <string name="capability_bluetooth_rationale">Needed to know which Bluetooth device connected or disconnected.</string>
+    <string name="capability_bluetooth_denied">Bluetooth triggers cannot work until \"Nearby devices\" permission is granted.</string>
+
+    <string name="capability_background_start_title">Display over other apps</string>
+    <string name="capability_background_start_rationale">Android blocks apps from opening other apps or screens while in the background. With this permission AutoFlow can open them directly; without it you get a tap-to-open notification instead.</string>
+    <string name="capability_background_start_unavailable">This Android version does not let automation apps open other apps from the background. AutoFlow shows a tap-to-open notification instead.</string>
+    <string name="capability_background_start_denied">Apps and links will open through a notification you tap.</string>
+</resources>

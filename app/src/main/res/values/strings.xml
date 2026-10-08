@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoFlow</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_automations">Automations</string>
+    <string name="nav_templates">Templates</string>
+    <string name="nav_history">History</string>
+    <string name="nav_variables">Variables</string>
+    <string name="settings">Settings</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search automations, actions, history…</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_no_results_hint">Try another word, like \"battery\", \"Wi-Fi\" or the name of an app.</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_close">Close</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_done">Done</string>
+    <string name="action_duplicate">Duplicate</string>
+    <string name="action_ok">OK</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_run_now">Run now</string>
+    <string name="action_save">Save</string>
+    <string name="action_share">Share</string>
+    <string name="more_options">More options</string>
+    <string name="move_up">Move up</string>
+    <string name="move_down">Move down</string>
+    <string name="refresh">Refresh</string>
+    <string name="see_all">See all</string>
+    <string name="drag_to_reorder">Long press and drag to reorder</string>
+    <string name="copy_suffix">(copy)</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Good morning 👋</string>
+    <string name="greeting_afternoon">Good afternoon 👋</string>
+    <string name="greeting_evening">Good evening 👋</string>
+    <string name="master_on">Automations are on</string>
+    <string name="master_off">All automations are paused</string>
+    <string name="master_on_detail">Watching: %1$s</string>
+    <string name="master_on_idle">No background monitoring needed right now.</string>
+    <string name="master_off_detail">Nothing will run automatically until you switch this back on. Manual runs still work.</string>
+    <string name="home_active_automations">Active automations</string>
+    <string name="home_no_active">No active automations yet. Create one or start from a template.</string>
+    <string name="home_quick_actions">Quick actions</string>
+    <string name="home_quick_actions_hint">Turn on \"Show as quick action\" in an automation to run it from here and from the home-screen widget.</string>
+    <string name="home_recent_activity">Recent activity</string>
+    <string name="home_no_activity">Nothing has run yet.</string>
+    <string name="executed_format">%1$s · %2$s</string>
+    <string name="quick_wifi">Wi-Fi</string>
+    <string name="quick_bluetooth">Bluetooth</string>
+    <string name="new_automation">New automation</string>
+    <string name="edit_automation">Edit automation</string>
+
+    <!-- Automation list -->
+    <string name="empty_automations_title">No automations yet</string>
+    <string name="empty_automations_message">Automations follow a simple pattern: WHEN something happens, IF conditions are met, THEN do actions.</string>
+    <string name="browse_templates">Browse templates</string>
+    <string name="run_started">Running %1$s…</string>
+    <string name="share_automation">Share automation</string>
+    <string name="delete_automation_title">Delete automation?</string>
+    <string name="delete_automation_message">\"%1$s\" will be deleted. Its history is kept.</string>
+
+    <!-- Builder -->
+    <string name="builder_when">WHEN</string>
+    <string name="builder_if">IF</string>
+    <string name="builder_then">THEN</string>
+    <string name="builder_options">OPTIONS</string>
+    <string name="builder_no_triggers">No trigger: this automation only runs when you start it (quick action, widget or Run now).</string>
+    <string name="add_trigger">Add trigger</string>
+    <string name="add_condition">Add condition</string>
+    <string name="add_action">Add action</string>
+    <string name="conditions_empty">No conditions: actions always run when triggered.</string>
+    <string name="group_empty">Empty group</string>
+    <string name="group_and">Group: all must match (AND)</string>
+    <string name="group_or">Group: any can match (OR)</string>
+    <string name="add_not">Negate (NOT)</string>
+    <string name="remove_not">Remove NOT</string>
+    <string name="branch_then">Then</string>
+    <string name="branch_else">Else</string>
+    <string name="branch_repeat">Repeat these</string>
+    <string name="option_enabled">Enabled</string>
+    <string name="option_quick_action">Show as quick action and in widget</string>
+    <string name="option_stop_on_error">Stop at the first failing action</string>
+    <string name="test_run">Test run</string>
+    <string name="test_run_done">Test run finished</string>
+    <string name="view_log">View log</string>
+    <string name="error_name_required">Give this automation a name</string>
+    <string name="error_action_required">Add at least one action</string>
+    <string name="discard_title">Discard changes?</string>
+    <string name="discard_message">Your unsaved changes will be lost.</string>
+    <string name="pick_app">Choose an app</string>
+    <string name="use_current_network">Use current network</string>
+    <string name="current_network_unknown">Could not read the network name. Connect to Wi-Fi and grant location permission, or type the name.</string>
+    <string name="range_hint">Between %1$d and %2$d</string>
+
+    <string name="category_time">Time</string>
+    <string name="category_connectivity">Connectivity</string>
+    <string name="category_battery">Battery &amp; power</string>
+    <string name="category_hardware">Hardware</string>
+    <string name="category_apps">Apps &amp; screens</string>
+    <string name="category_logic">Logic</string>
+    <string name="category_notifications">Notifications</string>
+    <string name="category_device">Device</string>
+    <string name="category_audio">Audio</string>
+    <string name="category_web">Web</string>
+    <string name="category_restricted">Not allowed by Android</string>
+
+    <string name="restricted_wifi_title">Turn Wi-Fi on/off</string>
+    <string name="restricted_wifi">Since Android 10 apps cannot switch Wi-Fi. Adds \"Open Wi-Fi panel\" instead.</string>
+    <string name="restricted_bluetooth_title">Turn Bluetooth on/off</string>
+    <string name="restricted_bluetooth">Since Android 13 apps cannot switch Bluetooth. Adds \"Open Bluetooth settings\" instead.</string>
+    <string name="restricted_airplane_title">Airplane mode</string>
+    <string name="restricted_airplane">Only system apps can change airplane mode. Adds \"Open airplane mode settings\" instead.</string>
+    <string name="restricted_battery_saver_title">Turn battery saver on</string>
+    <string name="restricted_battery_saver">Only system apps can enable battery saver. Adds \"Open battery saver settings\" instead.</string>
+
+    <!-- Triggers -->
+    <string name="trigger_time">At a time</string>
+    <string name="trigger_interval">Every X minutes</string>
+    <string name="trigger_wifi_connected">Wi-Fi connected</string>
+    <string name="trigger_wifi_disconnected">Wi-Fi disconnected</string>
+    <string name="trigger_bluetooth_connected">Bluetooth device connected</string>
+    <string name="trigger_bluetooth_disconnected">Bluetooth device disconnected</string>
+    <string name="trigger_battery_level">Battery level</string>
+    <string name="trigger_charger_connected">Charger connected</string>
+    <string name="trigger_charger_disconnected">Charger disconnected</string>
+    <string name="trigger_app_opened">App opened</string>
+    <string name="trigger_headphones_connected">Headphones connected</string>
+    <string name="trigger_headphones_disconnected">Headphones disconnected</string>
+    <string name="event_manual">Started manually</string>
+    <string name="any_network">Any network</string>
+    <string name="any_device">Any device</string>
+    <string name="battery_below">Drops below %1$d%%</string>
+    <string name="battery_above">Rises above %1$d%%</string>
+    <string name="summary_manual">Manual</string>
+
+    <!-- Conditions -->
+    <string name="condition_time_range">Time between</string>
+    <string name="condition_days">Day of week</string>
+    <string name="condition_battery">Battery level</string>
+    <string name="condition_charging">Charging</string>
+    <string name="condition_wifi">Wi-Fi</string>
+    <string name="condition_bluetooth">Bluetooth</string>
+    <string name="condition_headphones">Headphones</string>
+    <string name="condition_variable">Variable</string>
+    <string name="logic_and">AND</string>
+    <string name="logic_or">OR</string>
+    <string name="logic_not">NOT</string>
+    <string name="logic_all">All (AND)</string>
+    <string name="logic_any">Any (OR)</string>
+    <string name="comparison_contains">contains</string>
+    <string name="comparison_matches">matches regex</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="state_connected">Connected</string>
+    <string name="state_disconnected">Disconnected</string>
+    <string name="state_connected_to">Connected to %1$s</string>
+    <string name="state_not_connected_to">Not connected to %1$s</string>
+    <string name="state_charging">Charging</string>
+    <string name="state_not_charging">Not charging</string>
+    <string name="every_day">Every day</string>
+    <string name="weekdays">Monday–Friday</string>
+    <string name="weekend">Weekend</string>
+
+    <!-- Actions -->
+    <string name="action_notification">Show notification</string>
+    <string name="action_launch_app">Launch app</string>
+    <string name="action_open_url">Open URL</string>
+    <string name="action_open_settings">Open settings panel</string>
+    <string name="action_brightness">Set brightness</string>
+    <string name="action_volume">Set volume</string>
+    <string name="action_dnd">Do Not Disturb</string>
+    <string name="action_speak">Speak text</string>
+    <string name="action_play_sound">Play sound</string>
+    <string name="action_vibrate">Vibrate</string>
+    <string name="action_http">HTTP request</string>
+    <string name="action_delay">Wait</string>
+    <string name="action_set_variable">Set variable</string>
+    <string name="action_if_else">If / Else</string>
+    <string name="action_repeat">Repeat</string>
+    <string name="stream_media">Media</string>
+    <string name="stream_ring">Ringtone</string>
+    <string name="stream_notification">Notifications</string>
+    <string name="stream_alarm">Alarm</string>
+    <string name="stream_call">Calls</string>
+    <string name="panel_wifi">Wi-Fi</string>
+    <string name="panel_bluetooth">Bluetooth</string>
+    <string name="panel_internet">Internet</string>
+    <string name="panel_volume">Volume</string>
+    <string name="panel_display">Display</string>
+    <string name="panel_battery_saver">Battery saver</string>
+    <string name="panel_airplane">Airplane mode</string>
+    <string name="panel_location">Location</string>
+    <string name="sound_notification">Notification</string>
+    <string name="sound_alarm">Alarm</string>
+    <string name="sound_ringtone">Ringtone</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_default">Normal</string>
+    <string name="priority_high">High</string>
+    <string name="headphones_any">Any</string>
+    <string name="headphones_wired">Wired</string>
+    <string name="headphones_bluetooth">Bluetooth</string>
+    <string name="scope_global">Saved (global)</string>
+    <string name="scope_local">This run only</string>
+    <string name="auth_none">None</string>
+    <string name="auth_basic">Basic</string>
+    <string name="auth_bearer">Bearer</string>
+    <string name="duration_ms">%1$d ms</string>
+    <string name="duration_seconds">%1$d s</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours">%1$d h</string>
+
+    <plurals name="every_minutes">
+        <item quantity="one">Every minute</item>
+        <item quantity="other">Every %1$d minutes</item>
+    </plurals>
+    <plurals name="repeat_times">
+        <item quantity="one">%1$d time</item>
+        <item quantity="other">%1$d times</item>
+    </plurals>
+    <plurals name="action_count">
+        <item quantity="one">%1$d action</item>
+        <item quantity="other">%1$d actions</item>
+    </plurals>
+
+    <!-- Fields -->
+    <string name="field_name">Name</string>
+    <string name="field_description">Description (optional)</string>
+    <string name="field_at">At</string>
+    <string name="field_from">From</string>
+    <string name="field_to">To</string>
+    <string name="field_days">Days (none = every day)</string>
+    <string name="field_every_minutes">Every (minutes)</string>
+    <string name="field_ssid">Network name (SSID)</string>
+    <string name="field_device_name">Device name or address</string>
+    <string name="field_threshold">Threshold</string>
+    <string name="field_level">Level</string>
+    <string name="field_comparison">Comparison</string>
+    <string name="field_bluetooth_on">Bluetooth is on</string>
+    <string name="field_variable">Variable</string>
+    <string name="field_value">Value</string>
+    <string name="field_title">Title</string>
+    <string name="field_message">Message</string>
+    <string name="field_url">URL</string>
+    <string name="field_panel">Settings panel</string>
+    <string name="field_brightness">Brightness</string>
+    <string name="field_stream">Volume type</string>
+    <string name="field_volume">Volume</string>
+    <string name="field_text">Text</string>
+    <string name="field_max_duration">Play at most</string>
+    <string name="field_duration">Duration</string>
+    <string name="field_seconds">Seconds</string>
+    <string name="field_math">Calculate (e.g. $counter + 1)</string>
+    <string name="field_times">Times</string>
+    <string name="field_method">Method</string>
+    <string name="field_headers">Headers</string>
+    <string name="field_query">Query parameters</string>
+    <string name="field_body">Body</string>
+    <string name="field_content_type">Content type</string>
+    <string name="field_username">Username</string>
+    <string name="field_password">Password</string>
+    <string name="field_token">Token</string>
+    <string name="field_timeout">Timeout (seconds)</string>
+    <string name="field_response_variable">Store response in</string>
+
+    <!-- Hints -->
+    <string name="hint_exact_alarm">Allow \"Alarms &amp; reminders\" so this runs exactly on time. Otherwise Android may delay it by a few minutes.</string>
+    <string name="hint_interval">Short intervals use more battery. Android may group very frequent runs together.</string>
+    <string name="hint_ssid">Leave empty for any network. Reading network names requires location permission (an Android rule).</string>
+    <string name="hint_device_name">Leave empty for any device.</string>
+    <string name="hint_battery_trigger">Runs once each time the level crosses the threshold.</string>
+    <string name="hint_app_opened">Needs usage access. AutoFlow checks the foreground app every few seconds while the screen is on.</string>
+    <string name="hint_time_range">Ranges can cross midnight, for example 22:00 – 06:00.</string>
+    <string name="hint_variable_condition">Without prefix: counter, battery, http.data.id…</string>
+    <string name="hint_placeholders" formatted="false">Use %battery%, %time%, $myVariable…</string>
+    <string name="hint_background_launch">Android blocks apps from opening screens in the background. If AutoFlow is not allowed to, you get a tap-to-open notification instead.</string>
+    <string name="hint_settings_panel">Android does not let apps toggle Wi-Fi, Bluetooth, airplane mode or battery saver. This opens the right panel so you can switch it with one tap.</string>
+    <string name="hint_brightness">Turns off adaptive brightness. Requires \"Modify system settings\".</string>
+    <string name="hint_delay">Long waits are only reliable while the background monitoring service is running.</string>
+    <string name="hint_variable_name">Letters, digits and _ only. Use it as $name.</string>
+    <string name="hint_variable_value">Placeholders are replaced before saving.</string>
+    <string name="hint_if_else">Choose the condition here; add the Then / Else actions in the list after saving this dialog.</string>
+    <string name="hint_headers">One per line: Name: value</string>
+    <string name="hint_query">One per line: name=value</string>
+    <string name="hint_secret_variable">Tip: store secrets in a secret variable and write $variableName here.</string>
+    <string name="hint_response_variable">Body → $%1$s (JSON fields: $%1$s.field), status → $%1$s_status</string>
+
+    <!-- Templates -->
+    <string name="use_template">Use template</string>
+    <string name="template_music_title">Music mode</string>
+    <string name="template_music_description" formatted="false">Headphones connected between 07:00 and 22:00 → media volume 70%, launch Spotify, notify.</string>
+    <string name="template_music_notification">Music mode activated</string>
+    <string name="template_night_title">Night mode</string>
+    <string name="template_night_description">At 23:00 → dim the screen, lower volumes and enable Do Not Disturb.</string>
+    <string name="template_morning_title">Morning</string>
+    <string name="template_morning_description">Weekdays at 07:30 → disable Do Not Disturb, raise the ringtone and greet you.</string>
+    <string name="template_morning_speech" formatted="false">Good morning. It is %time%. Battery is at %battery% percent.</string>
+    <string name="template_work_title">Work mode</string>
+    <string name="template_work_description">Office Wi-Fi on a weekday during work hours → quieter ringtone, launch Teams, open Bluetooth settings.</string>
+    <string name="template_work_ssid">Office-WiFi</string>
+    <string name="template_battery_title">Battery saver</string>
+    <string name="template_battery_description" formatted="false">Battery drops below 20% → reduce brightness, notify and open battery saver.</string>
+    <string name="template_battery_notification" formatted="false">Battery is at %battery%%. Brightness reduced.</string>
+    <string name="template_charging_title">Charging at night</string>
+    <string name="template_charging_description">Charger connected between 22:00 and 07:00 → Do Not Disturb and minimum brightness.</string>
+    <string name="template_http_title">Report to a web service</string>
+    <string name="template_http_description">Every hour → POST battery status as JSON to your own endpoint (edit the URL first).</string>
+
+    <!-- History -->
+    <string name="empty_history_title">No runs yet</string>
+    <string name="empty_history_message">Every automation run is logged here with each step, so you can see what happened and why.</string>
+    <string name="clear_history">Clear history</string>
+    <string name="clear_history_message">Delete the execution log of all automations.</string>
+    <string name="history_cleared">History cleared</string>
+    <string name="filter_all">All</string>
+    <string name="status_success">Success</string>
+    <string name="status_partial">Partial</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_skipped">Skipped</string>
+    <string name="detail_started">Started: %1$s</string>
+    <string name="detail_duration">Duration: %1$d ms</string>
+    <string name="detail_trigger">Trigger: %1$s</string>
+    <string name="open_automation">Open automation</string>
+    <string name="info_conditions_met">Conditions satisfied</string>
+    <string name="info_conditions_not_met">Conditions not satisfied</string>
+    <string name="info_already_running">Already running</string>
+    <string name="info_aborted">Stopped after a failure</string>
+    <string name="info_cancelled">Cancelled by the system</string>
+    <string name="failure_permission">Permission denied: grant it in Settings › Permissions.</string>
+    <string name="failure_not_supported">Not supported on this device.</string>
+    <string name="failure_invalid">Check the configuration of this step.</string>
+    <string name="failure_timeout">Took too long.</string>
+    <string name="failure_error">Could not be executed.</string>
+
+    <!-- Variables -->
+    <string name="variables_user">Your variables</string>
+    <string name="variables_user_hint">Use them in any text as $name. Automations can change them with \"Set variable\".</string>
+    <string name="variables_none">No variables yet.</string>
+    <string name="variables_builtin">Built-in</string>
+    <string name="variables_builtin_hint" formatted="false">Current values. Use them as %name%. Trigger details are available as %trigger_ssid%, %trigger_package%…</string>
+    <string name="add_variable">Add variable</string>
+    <string name="edit_variable">Edit variable</string>
+    <string name="variable_secret">Secret</string>
+    <string name="variable_secret_hint">Secret values are encrypted with the Android Keystore, hidden in the app and never exported.</string>
+    <string name="error_variable_name">Use letters, digits and _ (not starting with a digit)</string>
+    <string name="error_variable_exists">A variable with this name already exists</string>
+    <string name="delete_variable_title">Delete variable?</string>
+    <string name="delete_variable_message">$%1$s will be deleted.</string>
+
+    <!-- Settings -->
+    <string name="settings_automation">Automation</string>
+    <string name="settings_master">Run automations</string>
+    <string name="settings_master_hint">Master switch. When off, no trigger runs anything and background monitoring stops.</string>
+    <string name="settings_log_skipped">Log runs whose conditions were not met</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_permissions_hint">See what AutoFlow may access and why</string>
+    <string name="settings_battery">Battery optimization</string>
+    <string name="settings_battery_optimized">Optimized: some phones may stop background monitoring. Tap to change.</string>
+    <string name="settings_battery_unrestricted">Unrestricted: background monitoring is reliable.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Use wallpaper colors</string>
+    <string name="settings_data">Backup &amp; data</string>
+    <string name="settings_export">Export all</string>
+    <string name="settings_export_hint">Save automations and non-secret variables as a JSON file</string>
+    <string name="settings_import">Import</string>
+    <string name="settings_import_hint">Imported automations start disabled so you can review them</string>
+    <string name="export_done">Backup saved</string>
+    <string name="import_done">Imported %1$d automation(s) and %2$d variable(s)</string>
+    <string name="import_failed">Import failed: %1$s</string>
+    <string name="io_failed">Could not read or write the file</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="privacy_statement">Everything stays on this phone. AutoFlow has no account, no analytics and no server. Data only leaves the device when one of your automations sends an HTTP request you configured. AutoFlow never records audio, video or photos and never tracks your location; location permission is only used because Android requires it to read Wi-Fi network names. The ongoing notification shows whenever background monitoring is active.</string>
+    <string name="settings_about">About</string>
+    <string name="about_version">AutoFlow %1$s</string>
+    <string name="about_logcat">Developer logs: adb logcat -s AutoFlow</string>
+    <string name="permissions_intro">AutoFlow only asks for a permission when an automation needs it. You can revoke any of them at any time in Android settings.</string>
+    <string name="permission_grant">Grant</string>
+    <string name="permission_open_settings">Open settings</string>
+    <string name="permission_recommended">recommended</string>
+    <string name="permission_granted">Allowed</string>
+    <string name="permission_not_needed">Not needed on this Android version</string>
+
+    <!-- Runtime notifications -->
+    <string name="channel_monitor">Automation monitoring</string>
+    <string name="channel_monitor_description">Ongoing notification shown while AutoFlow listens for triggers in the background.</string>
+    <string name="monitor_notification_title">Automations active</string>
+    <string name="monitor_notification_text">Watching %1$s</string>
+    <string name="monitor_notification_idle">Starting…</string>
+    <string name="running_notification_title">Running automation…</string>
+    <string name="resume_monitoring_title">Tap to resume automations</string>
+    <string name="resume_monitoring_text">Android did not allow AutoFlow to start monitoring in the background.</string>
+    <string name="family_time">time</string>
+    <string name="family_wifi">Wi-Fi</string>
+    <string name="family_bluetooth">Bluetooth</string>
+    <string name="family_battery">battery</string>
+    <string name="family_power">charger</string>
+    <string name="family_app">apps</string>
+    <string name="family_headphones">headphones</string>
+
+    <!-- Widget -->
+    <string name="widget_name">AutoFlow quick actions</string>
+    <string name="widget_description">Run your quick-action automations with one tap</string>
+    <string name="widget_title">AutoFlow</string>
+    <string name="widget_empty">Mark automations as \"quick action\" to show them here.</string>
+</resources>
