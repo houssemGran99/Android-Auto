@@ -1,0 +1,52 @@
+package com.autoflow.core.engine.variable
+
+import com.autoflow.core.engine.DeviceState
+import com.autoflow.core.model.TriggerEvent
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
+
+/** Names and resolution of `%built-in%` variables. */
+object BuiltInVariables {
+    /** Built-in names shown in the variables screen (trigger_* names depend on the event). */
+    val NAMES: List<String> = listOf(
+        "battery", "charging", "wifi", "ssid", "bluetooth", "headphones", "volume", "brightness",
+        "time", "date", "datetime", "day", "timestamp", "device", "android", "automation", "trigger",
+    )
+
+    private val TIME = DateTimeFormatter.ofPattern("HH:mm")
+    private val DATE = DateTimeFormatter.ISO_LOCAL_DATE
+    private val DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+    fun resolve(
+        name: String,
+        state: DeviceState,
+        now: ZonedDateTime,
+        automationName: String,
+        event: TriggerEvent,
+    ): String? = when (name) {
+        "battery" -> state.batteryLevel?.toString()
+        "charging" -> state.charging?.onOff()
+        "wifi" -> state.wifiConnected?.onOff()
+        "ssid" -> state.wifiSsid
+        "bluetooth" -> state.bluetoothEnabled?.onOff()
+        "headphones" -> state.headphonesConnected?.onOff()
+        "volume" -> state.mediaVolumePercent?.toString()
+        "brightness" -> state.brightnessPercent?.toString()
+        "time" -> now.format(TIME)
+        "date" -> now.format(DATE)
+        "datetime" -> now.format(DATETIME)
+        "day" -> now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        "timestamp" -> now.toEpochSecond().toString()
+        "device" -> state.deviceModel
+        "android" -> state.osVersion
+        "automation" -> automationName
+        "trigger" -> event.key
+        else -> if (name.startsWith(TRIGGER_PREFIX)) event.details[name.removePrefix(TRIGGER_PREFIX)] else null
+    }
+
+    private const val TRIGGER_PREFIX = "trigger_"
+
+    private fun Boolean.onOff() = if (this) "on" else "off"
+}

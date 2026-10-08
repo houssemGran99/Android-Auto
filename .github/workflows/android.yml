@@ -1,0 +1,62 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build, test and lint
+        # One invocation with --continue so every module's errors are reported in a single run.
+        run: |
+          set -o pipefail
+          ./gradlew --continue \
+            :core:model:test :core:engine:test \
+            assembleDebug testDebugUnitTest lintDebug 2>&1 | tee build.log
+
+      - name: Error summary
+        if: failure()
+        run: |
+          echo "::group::Compiler, test and lint errors"
+          grep -nE "^e: |error:|Error:|FAILED|What went wrong|Execution failed|Lint found|tests completed" build.log | grep -v "^\s*at " | head -200 || true
+          echo "::endgroup::"
+          for f in $(find . -path "*/build/reports/lint-results-debug.txt"); do echo "== $f"; head -100 "$f"; done
+          for f in $(find . -path "*/build/test-results/*" -name "*.xml"); do grep -l "<failure" "$f" >/dev/null 2>&1 && { echo "== $f"; grep -A8 "<failure" "$f" | head -40; }; done || true
+
+      - name: Upload debug APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoflow-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
+
+      - name: Upload reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+          if-no-files-found: ignore
