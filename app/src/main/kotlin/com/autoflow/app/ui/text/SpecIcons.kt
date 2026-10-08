@@ -21,7 +21,7 @@ import androidx.compose.material.icons.outlined.Power
 import androidx.compose.material.icons.outlined.PowerOff
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material.icons.outlined.Repeat
-import androidx.compose.material.icons.outlined.Rule
+import androidx.compose.material.icons.automirrored.outlined.Rule
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Timer
@@ -43,7 +43,7 @@ object SpecIcons {
         "CHARGER_DISCONNECTED" -> Icons.Outlined.PowerOff
         "APP_OPENED" -> Icons.Outlined.Apps
         "HEADPHONES_CONNECTED", "HEADPHONES_DISCONNECTED" -> Icons.Outlined.Headphones
-        else -> Icons.Outlined.Rule
+        else -> Icons.AutoMirrored.Outlined.Rule
     }
 
     fun condition(typeKey: String): ImageVector = when (typeKey) {
@@ -55,7 +55,7 @@ object SpecIcons {
         "BLUETOOTH_STATE" -> Icons.Outlined.Bluetooth
         "HEADPHONES_STATE" -> Icons.Outlined.Headphones
         "VARIABLE" -> Icons.Outlined.DataObject
-        else -> Icons.Outlined.Rule
+        else -> Icons.AutoMirrored.Outlined.Rule
     }
 
     fun action(typeKey: String): ImageVector = when (typeKey) {
