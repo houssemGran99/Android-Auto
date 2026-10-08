@@ -44,7 +44,7 @@ class AutomationMonitorService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        startInForeground(emptySet())
+        if (!startInForeground(emptySet())) return
         serviceScope.launch {
             coordinator.monitoredFamilies.collect { families ->
                 updateSources(families)
@@ -53,10 +53,8 @@ class AutomationMonitorService : Service() {
         }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startInForeground(sources.keys)
-        return START_STICKY
-    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
+        if (startInForeground(sources.keys)) START_STICKY else START_NOT_STICKY
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -85,18 +83,29 @@ class AutomationMonitorService : Service() {
         appScope.launch { engine.handleEvent(event) }
     }
 
-    private fun startInForeground(families: Set<TriggerFamily>) {
+    /** Returns false (and stops the service) when Android refuses the foreground start. */
+    private fun startInForeground(families: Set<TriggerFamily>): Boolean {
         val watching = families.sortedBy { it.ordinal }.joinToString { getString(familyLabel(it)) }
         val notification = AppNotifications.monitorNotification(this, watching)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ServiceCompat.startForeground(
-                this,
-                AppNotifications.MONITOR_NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
-            )
-        } else {
-            startForeground(AppNotifications.MONITOR_NOTIFICATION_ID, notification)
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                ServiceCompat.startForeground(
+                    this,
+                    AppNotifications.MONITOR_NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+                )
+            } else {
+                startForeground(AppNotifications.MONITOR_NOTIFICATION_ID, notification)
+            }
+            true
+        } catch (e: IllegalStateException) {
+            // Android 12+ throws ForegroundServiceStartNotAllowedException (an IllegalStateException),
+            // e.g. when the system restarts this sticky service while the app is in the background.
+            Log.w(TAG, "Monitoring service is not allowed to run in the foreground now", e)
+            AppNotifications.showResumeMonitoring(this)
+            stopSelf()
+            false
         }
     }
 

@@ -94,7 +94,8 @@ fun HomeScreen(
             item {
                 MasterSwitchCard(
                     enabled = state.masterEnabled,
-                    monitoring = state.monitoring.sortedBy { it.ordinal }.joinToString { familyName(it) },
+                    // map is inline, so the composable familyName may be called here; joinToString's lambda is not.
+                    monitoring = state.monitoring.sortedBy { it.ordinal }.map { familyName(it) }.joinToString(),
                     onToggle = viewModel::setMasterEnabled,
                 )
             }

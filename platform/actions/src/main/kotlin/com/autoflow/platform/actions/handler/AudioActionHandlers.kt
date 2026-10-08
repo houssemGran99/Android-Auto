@@ -45,6 +45,11 @@ class SpeakActionHandler(private val context: Context) : ActionHandler<ActionSpe
                 override fun onError(utteranceId: String?, errorCode: Int) {
                     done.complete(false)
                 }
+
+                // Called instead of onDone when speech is stopped or flushed; without it await() could hang.
+                override fun onStop(utteranceId: String?, interrupted: Boolean) {
+                    done.complete(false)
+                }
             })
             tts.setAudioAttributes(
                 AudioAttributes.Builder()

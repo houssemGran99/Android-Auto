@@ -34,7 +34,7 @@ dependencies {
     implementation(project(":platform:permissions"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.okhttp)
+    api(libs.okhttp)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

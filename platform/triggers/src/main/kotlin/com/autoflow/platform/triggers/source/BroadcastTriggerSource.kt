@@ -21,6 +21,13 @@ abstract class BroadcastTriggerSource(context: Context) : TriggerSource {
 
     protected open fun onRegistered() = Unit
 
+    /**
+     * Broadcasts sent by system_server reach not-exported receivers. Broadcasts sent by another
+     * system app (e.g. the Bluetooth stack) only reach exported ones; this is safe for protected
+     * broadcasts, which ordinary apps cannot send.
+     */
+    protected open val exported: Boolean = false
+
     override fun register(onEvent: (TriggerEvent) -> Unit) {
         unregister()
         listener = onEvent
@@ -31,7 +38,12 @@ abstract class BroadcastTriggerSource(context: Context) : TriggerSource {
             }
         }
         receiver = newReceiver
-        ContextCompat.registerReceiver(context, newReceiver, filter(), ContextCompat.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(
+            context,
+            newReceiver,
+            filter(),
+            if (exported) ContextCompat.RECEIVER_EXPORTED else ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
     }
 
     override fun unregister() {

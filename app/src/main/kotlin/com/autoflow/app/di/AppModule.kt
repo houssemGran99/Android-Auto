@@ -31,6 +31,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,7 +50,12 @@ object AppModule {
     @Provides
     @Singleton
     @ApplicationScope
-    fun applicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    fun applicationScope(): CoroutineScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e ->
+            // A failing background job (storage, alarms, engine) must not crash the whole process.
+            AndroidEngineLogger.warn("Uncaught error in application scope", e)
+        },
+    )
 
     @Provides
     @Singleton

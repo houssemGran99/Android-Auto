@@ -13,12 +13,14 @@ import com.autoflow.data.storage.settings.SettingsRepository
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -63,9 +65,7 @@ class TriggerCoordinator @Inject constructor(
     }
 
     /** Recomputes alarms, e.g. after an alarm fired, a reboot or a time zone change. */
-    fun refresh() {
-        scope.launch { sync(activeAutomations()) }
-    }
+    fun refresh(): Job = scope.launch { sync(activeAutomations()) }
 
     /** Starts the monitoring service again if it should run (e.g. after Android refused a background start). */
     fun ensureMonitoring() {
@@ -83,8 +83,14 @@ class TriggerCoordinator @Inject constructor(
         }
         val families = active.flatMapTo(mutableSetOf()) { it.triggerFamilies }
             .filterTo(mutableSetOf()) { it.needsMonitoringService }
-        _monitoredFamilies.value = families
-        if (families.isEmpty()) stopService() else startService()
+        val previous = _monitoredFamilies.getAndUpdate { families }
+        // A running service follows monitoredFamilies itself; only start it when monitoring begins
+        // (ensureMonitoring() recovers if a start was refused while in the background).
+        when {
+            families.isEmpty() -> stopService()
+            previous.isEmpty() -> startService()
+            else -> Unit
+        }
     }
 
     private fun startService() {

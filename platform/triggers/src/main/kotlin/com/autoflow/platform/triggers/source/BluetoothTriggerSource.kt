@@ -21,6 +21,9 @@ class BluetoothTriggerSource(
 ) : BroadcastTriggerSource(context) {
     override val family = TriggerFamily.BLUETOOTH
 
+    // ACL broadcasts are protected but sent by the Bluetooth app, not system_server.
+    override val exported = true
+
     override fun filter() = IntentFilter().apply {
         addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)

@@ -28,8 +28,9 @@ class TimeTriggerReceiver : InjectingReceiver() {
         val automationId = intent.getStringExtra(TimeTriggerScheduler.EXTRA_AUTOMATION_ID) ?: return
         val scheduledAt = intent.getLongExtra(TimeTriggerScheduler.EXTRA_SCHEDULED_AT, System.currentTimeMillis())
         AutomationRunWorker.enqueueTimeTrigger(context, automationId, scheduledAt)
-        // Schedule the next occurrence.
-        coordinator.refresh()
+        // Schedule the next occurrence; keep the receiver alive until the alarms are updated.
+        val pending = goAsync()
+        coordinator.refresh().invokeOnCompletion { pending.finish() }
     }
 }
 
@@ -40,6 +41,20 @@ class BootReceiver : InjectingReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        coordinator.refresh()
+        // Exported receiver: ignore explicit intents carrying any other action.
+        if (intent.action !in HANDLED_ACTIONS) return
+        val pending = goAsync()
+        coordinator.refresh().invokeOnCompletion { pending.finish() }
+    }
+
+    private companion object {
+        val HANDLED_ACTIONS = setOf(
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_MY_PACKAGE_REPLACED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            // AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED (API 31)
+            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED",
+        )
     }
 }

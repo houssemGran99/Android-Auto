@@ -1,11 +1,13 @@
 package com.autoflow.platform.actions
 
 import android.Manifest
+import android.app.AppOpsManager
 import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.os.Process
 import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -92,11 +94,13 @@ class ActionHandlersTest {
     @Test
     fun brightnessRequiresWriteSettings() = runTest {
         val handler = SetBrightnessActionHandler(context)
-        org.robolectric.shadows.ShadowSettings.ShadowSystem.setCanWrite(false)
+        // Settings.System.canWrite() checks the WRITE_SETTINGS app op (no ShadowSettings switch exists).
+        val appOps = shadowOf(context.getSystemService(AppOpsManager::class.java))
+        appOps.setMode(AppOpsManager.OPSTR_WRITE_SETTINGS, Process.myUid(), context.opPackageName, AppOpsManager.MODE_ERRORED)
         val denied = handler.execute(ActionSpec.SetBrightness(50), automationContext)
         assertEquals(FailureKind.PERMISSION_DENIED, (denied as ActionResult.Failure).kind)
 
-        org.robolectric.shadows.ShadowSettings.ShadowSystem.setCanWrite(true)
+        appOps.setMode(AppOpsManager.OPSTR_WRITE_SETTINGS, Process.myUid(), context.opPackageName, AppOpsManager.MODE_ALLOWED)
         assertTrue(handler.execute(ActionSpec.SetBrightness(50), automationContext) is ActionResult.Success)
         assertEquals(128, Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS))
     }

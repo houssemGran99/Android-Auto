@@ -38,10 +38,10 @@ ksp {
 
 dependencies {
     api(project(":core:engine"))
-    implementation(libs.androidx.room.runtime)
+    api(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.datastore.preferences)
+    api(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

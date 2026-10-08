@@ -38,13 +38,21 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) : Engine
 
     override suspend fun logSkippedRuns(): Boolean = settings.first().logSkippedRuns
 
-    suspend fun setMasterEnabled(enabled: Boolean) = dataStore.edit { it[MASTER] = enabled }
+    suspend fun setMasterEnabled(enabled: Boolean) {
+        dataStore.edit { it[MASTER] = enabled }
+    }
 
-    suspend fun setThemeMode(mode: ThemeMode) = dataStore.edit { it[THEME] = mode.name }
+    suspend fun setThemeMode(mode: ThemeMode) {
+        dataStore.edit { it[THEME] = mode.name }
+    }
 
-    suspend fun setDynamicColor(enabled: Boolean) = dataStore.edit { it[DYNAMIC_COLOR] = enabled }
+    suspend fun setDynamicColor(enabled: Boolean) {
+        dataStore.edit { it[DYNAMIC_COLOR] = enabled }
+    }
 
-    suspend fun setLogSkippedRuns(enabled: Boolean) = dataStore.edit { it[LOG_SKIPPED] = enabled }
+    suspend fun setLogSkippedRuns(enabled: Boolean) {
+        dataStore.edit { it[LOG_SKIPPED] = enabled }
+    }
 
     companion object {
         private val MASTER = booleanPreferencesKey("master_enabled")
