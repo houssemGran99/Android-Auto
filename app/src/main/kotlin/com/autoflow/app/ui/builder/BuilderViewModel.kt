@@ -9,6 +9,8 @@ import com.autoflow.app.data.InstalledApp
 import com.autoflow.app.data.TemplateCatalog
 import com.autoflow.app.ui.Routes
 import com.autoflow.core.engine.repository.AutomationRepository
+import com.autoflow.platform.triggers.Coordinates
+import com.autoflow.platform.triggers.CurrentLocation
 import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.Automation
 import com.autoflow.core.model.ConditionNode
@@ -56,6 +58,7 @@ class BuilderViewModel @Inject constructor(
     private val automations: AutomationRepository,
     private val templates: TemplateCatalog,
     private val appCatalog: AppCatalog,
+    private val location: CurrentLocation,
     private val runner: AutomationRunner,
 ) : ViewModel() {
 
@@ -110,6 +113,8 @@ class BuilderViewModel @Inject constructor(
         edit { it.copy(actions = ActionTree.replaceKeepingChildren(it.actions, ref, index, action)) }
     fun removeAction(ref: ActionListRef, index: Int) = edit { it.copy(actions = ActionTree.remove(it.actions, ref, index)) }
     fun moveAction(ref: ActionListRef, from: Int, to: Int) = edit { it.copy(actions = ActionTree.move(it.actions, ref, from, to)) }
+
+    suspend fun currentLocation(): Coordinates? = location.current()
 
     fun requestApps() {
         if (_apps.value != null) return

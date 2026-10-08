@@ -21,12 +21,12 @@
     <string name="capability_usage_access_denied">\"App opened\" triggers cannot work until usage access is granted.</string>
 
     <string name="capability_location_title">Location</string>
-    <string name="capability_location_rationale">Android only reveals the name of the Wi-Fi network you are connected to when location permission is granted. AutoFlow does not track or store your location.</string>
-    <string name="capability_location_denied">This automation cannot recognise specific Wi-Fi networks until location permission is granted.</string>
+    <string name="capability_location_rationale">Needed to detect the places you choose for \"arrive\" / \"leave\" triggers and, by an Android rule, to read the name of your Wi-Fi network. Location stays on the device: AutoFlow never uploads or records a location history.</string>
+    <string name="capability_location_denied">Place triggers and Wi-Fi network names cannot work until location permission is granted.</string>
 
     <string name="capability_background_location_title">Location all the time</string>
-    <string name="capability_background_location_rationale">Needed to read the Wi-Fi network name while AutoFlow is not on screen. Choose \"Allow all the time\" on the next screen.</string>
-    <string name="capability_background_location_denied">Specific Wi-Fi networks can only be recognised while AutoFlow is open.</string>
+    <string name="capability_background_location_rationale">Needed so place triggers and Wi-Fi names work while AutoFlow is not on screen. Choose \"Allow all the time\" on the next screen.</string>
+    <string name="capability_background_location_denied">Place triggers and specific Wi-Fi networks only work while AutoFlow is open.</string>
 
     <string name="capability_bluetooth_title">Nearby devices</string>
     <string name="capability_bluetooth_rationale">Needed to know which Bluetooth device connected or disconnected.</string>

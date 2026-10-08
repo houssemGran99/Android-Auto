@@ -42,6 +42,7 @@ when they grow. `widgets` and `ui` live in `app` because they share the Hilt gra
 
 ```
  AlarmManager ──► TimeTriggerReceiver ──► WorkManager (AutomationRunWorker) ─┐
+ Play services geofences ──► GeofenceReceiver ──► WorkManager ─────────────────┤
  Wi-Fi / BT / battery / charger / headphones / app usage                      │
    └─► TriggerSource (inside AutomationMonitorService, foreground) ───────────┤
  Widget button / Home quick action / Run now ─────────────────────────────────┤
@@ -90,7 +91,7 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
 | `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `VARIABLE` |
 | `ActionSpec` (sealed) | `NOTIFICATION`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
@@ -101,7 +102,7 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 
 ### Variables
 
-* `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
+* `%latitude%`, `%longitude%`, `%location%` (last known location, only with permission), `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
   `%headphones%`, `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
   `%automation%`, `%trigger%`, `%trigger_<detail>%` (e.g. `%trigger_ssid%`, `%trigger_package%`).
   The trailing `%` is optional (`%battery`).
@@ -169,6 +170,7 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 | Bluetooth device connected | `ACTION_ACL_CONNECTED/DISCONNECTED` | 🔐 | `BLUETOOTH_CONNECT` on Android 12+. |
 | Battery level / charger | `ACTION_BATTERY_CHANGED`, `ACTION_POWER_(DIS)CONNECTED` | ✅ | Registered-receiver-only broadcasts since Android 8 → foreground service. Threshold fires on crossing. |
 | Headphones | `AudioManager.registerAudioDeviceCallback` | ✅ | Wired, USB and Bluetooth (A2DP / LE) without permissions. |
+| Arrive at / leave a place | Play services `GeofencingClient` | 🔐 ⚠️ | Needs fine **and** background location ("Allow all the time"). Delivered to a broadcast receiver by the system — no monitoring service. Android detects transitions with low power, so they can be a few minutes late; radius ≥ 100 m. Geofences are re-registered after boot, app update, location toggling (`PROVIDERS_CHANGED`) and whenever the app opens; no initial trigger, so re-registering never fires "arrive" again. |
 | App opened | `UsageStatsManager.queryEvents` | 🔐 ⚠️ | Needs Usage access. No broadcast exists, so it polls every 2 s while the screen is on. AccessibilityService is deliberately **not** used. |
 
 **Background execution:** monitoring uses a `specialUse` foreground service with a visible,
@@ -208,7 +210,6 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 
 | Feature | Constraint |
 |---|---|
-| Geofences | Play Services `GeofencingClient`; background location; max 100 fences |
 | SMS / calls | `RECEIVE_SMS`, `SEND_SMS`, `READ_PHONE_STATE`, `READ_CALL_LOG` – restricted by Google Play policy unless the app is a default handler or qualifies for an exception |
 | Notification triggers | `NotificationListenerService` with explicit user enablement |
 | Calendar | `READ_CALENDAR` + `CalendarContract` |
@@ -218,6 +219,15 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Webhook trigger | Needs a reachable endpoint (push service or local server) – privacy review required |
 
 ---
+
+## 5b. Widgets
+
+* **Quick actions** (3×3): master switch (tap to toggle), Wi-Fi and Bluetooth status (tap opens the
+  system panel – apps cannot toggle them), refresh, and one button per automation marked
+  *quick action*. Refreshed when automations or the master switch change, and every 30 min.
+* **AutoFlow button** (1×1, resizable): bound to one automation chosen in a configuration screen
+  when the widget is placed (reconfigurable on Android 12+). The binding is stored in Glance
+  per-widget state. Taps run the automation through WorkManager.
 
 ## 6. Permissions
 

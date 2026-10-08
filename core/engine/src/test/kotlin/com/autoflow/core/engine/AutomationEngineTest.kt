@@ -164,6 +164,29 @@ class AutomationEngineTest {
     }
 
     @Test
+    fun `location transitions target one automation and the matching direction`() = runTest {
+        val home = com.autoflow.core.model.GeoPlace("Home", 48.8566, 2.3522, 200)
+        val arriveLeave = Automation(
+            id = "home",
+            name = "Home",
+            triggers = listOf(TriggerSpec.LocationEnter(home), TriggerSpec.LocationExit(home)),
+            actions = listOf(ActionSpec.ShowNotification("Home", "at %trigger_place% (%location%)")),
+        )
+        val h = harness(arriveLeave, musicMode, state = DeviceState(latitude = 48.85661, longitude = 2.35222))
+
+        val arrived = h.engine.handleEvent(TriggerEvent.LocationTransition("home", 0, entered = true, placeName = "Home"))
+        assertEquals(listOf("home"), arrived.map { it.automationId })
+        assertEquals(listOf("at Home (48.856610,2.352220)"), shownNotifications)
+
+        // Index 0 is an "enter" trigger: an exit transition addressed to it is ignored.
+        assertTrue(h.engine.handleEvent(TriggerEvent.LocationTransition("home", 0, entered = false, placeName = "Home")).isEmpty())
+        assertEquals(1, h.engine.handleEvent(TriggerEvent.LocationTransition("home", 1, entered = false, placeName = "Home")).size)
+        // Unknown index or automation is ignored.
+        assertTrue(h.engine.handleEvent(TriggerEvent.LocationTransition("home", 7, entered = true, placeName = "Home")).isEmpty())
+        assertTrue(h.engine.handleEvent(TriggerEvent.LocationTransition("missing", 0, entered = true, placeName = "Home")).isEmpty())
+    }
+
+    @Test
     fun `failures are reported and stopOnError aborts`() = runTest {
         val failing = registry {
             register<ActionSpec.SetBrightness> { _, _ -> throw SecurityException("WRITE_SETTINGS not granted") }

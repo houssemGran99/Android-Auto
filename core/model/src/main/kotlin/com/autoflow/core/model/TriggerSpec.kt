@@ -13,10 +13,37 @@ enum class TriggerFamily {
     POWER,
     APP,
     HEADPHONES,
+
+    /** Geofences registered with Google Play services; delivered by the system, no service needed. */
+    LOCATION,
     ;
 
     /** True when the family can only be observed while a monitoring service is running. */
-    val needsMonitoringService: Boolean get() = this != TIME
+    val needsMonitoringService: Boolean get() = this != TIME && this != LOCATION
+}
+
+/** A named circular area used by location triggers. */
+@Serializable
+data class GeoPlace(
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeters: Int = DEFAULT_RADIUS_METERS,
+) {
+    init {
+        require(latitude in -90.0..90.0) { "Latitude must be between -90 and 90" }
+        require(longitude in -180.0..180.0) { "Longitude must be between -180 and 180" }
+        require(radiusMeters in MIN_RADIUS_METERS..MAX_RADIUS_METERS) {
+            "Radius must be between $MIN_RADIUS_METERS and $MAX_RADIUS_METERS meters"
+        }
+    }
+
+    companion object {
+        /** Android recommends at least 100 m; smaller radii trigger unreliably. */
+        const val MIN_RADIUS_METERS = 100
+        const val MAX_RADIUS_METERS = 10_000
+        const val DEFAULT_RADIUS_METERS = 150
+    }
 }
 
 @Serializable
@@ -137,6 +164,22 @@ sealed interface TriggerSpec {
     @SerialName("HEADPHONES_DISCONNECTED")
     data class HeadphonesDisconnected(val kind: HeadphoneKind = HeadphoneKind.ANY) : TriggerSpec {
         override val family get() = TriggerFamily.HEADPHONES
+    }
+
+    /** Fires when the device enters (arrives at) [place]. */
+    @Serializable
+    @SerialName("LOCATION_ENTER")
+    data class LocationEnter(val place: GeoPlace) : TriggerSpec {
+        override val family get() = TriggerFamily.LOCATION
+        override val capabilities get() = setOf(Capability.LOCATION, Capability.BACKGROUND_LOCATION)
+    }
+
+    /** Fires when the device exits (leaves) [place]. */
+    @Serializable
+    @SerialName("LOCATION_EXIT")
+    data class LocationExit(val place: GeoPlace) : TriggerSpec {
+        override val family get() = TriggerFamily.LOCATION
+        override val capabilities get() = setOf(Capability.LOCATION, Capability.BACKGROUND_LOCATION)
     }
 }
 

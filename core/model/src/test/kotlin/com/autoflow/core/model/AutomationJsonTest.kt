@@ -56,6 +56,24 @@ class AutomationJsonTest {
         assertEquals(ActionSpec.SetVolume(AudioStream.MEDIA, 60), automation.actions.first())
     }
 
+    @Test
+    fun `location triggers round trip and are validated`() {
+        val place = GeoPlace("Office", 40.7128, -74.006, 300)
+        val automation = Automation(id = "o", name = "Office", triggers = listOf(TriggerSpec.LocationEnter(place), TriggerSpec.LocationExit(place)))
+        val decoded = AutomationJson.decodeBundle(AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation))))
+        assertEquals(automation, decoded.automations.single())
+        assertEquals(TriggerFamily.LOCATION, automation.triggers.first().family)
+        assertTrue(!TriggerFamily.LOCATION.needsMonitoringService)
+        assertTrue(Capability.BACKGROUND_LOCATION in automation.requiredCapabilities)
+    }
+
+    @Test(expected = InvalidAutomationFileException::class)
+    fun `out of range coordinates are rejected`() {
+        AutomationJson.decodeBundle(
+            """{"id":"x","name":"n","triggers":[{"type":"LOCATION_ENTER","place":{"name":"p","latitude":95,"longitude":0}}]}""",
+        )
+    }
+
     @Test(expected = InvalidAutomationFileException::class)
     fun `unknown action type is rejected`() {
         AutomationJson.decodeBundle("""{"automations":[{"id":"x","name":"n","actions":[{"type":"TELEPORT"}]}]}""")

@@ -10,6 +10,7 @@ import com.autoflow.core.model.Automation
 import com.autoflow.core.model.ExecutionRecord
 import com.autoflow.core.model.TriggerFamily
 import com.autoflow.data.storage.settings.SettingsRepository
+import com.autoflow.platform.triggers.GeofenceScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,7 @@ data class HomeUiState(
     val automations: List<Automation> = emptyList(),
     val recent: List<ExecutionRecord> = emptyList(),
     val monitoring: Set<TriggerFamily> = emptySet(),
+    val geofences: GeofenceScheduler.Status = GeofenceScheduler.Status.NOTHING_TO_REGISTER,
     val loading: Boolean = true,
 ) {
     val active: List<Automation> get() = automations.filter { it.enabled }
@@ -43,8 +45,9 @@ class HomeViewModel @Inject constructor(
         automations.observeAll(),
         executions.observeRecent(RECENT_COUNT),
         coordinator.monitoredFamilies,
-    ) { settings, all, recent, monitoring ->
-        HomeUiState(settings.masterEnabled, all, recent, monitoring, loading = false)
+        coordinator.geofenceStatus,
+    ) { settings, all, recent, monitoring, geofences ->
+        HomeUiState(settings.masterEnabled, all, recent, monitoring, geofences, loading = false)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
     fun setMasterEnabled(enabled: Boolean) {

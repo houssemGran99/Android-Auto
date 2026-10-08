@@ -120,6 +120,7 @@ class AutomationMonitorService : Service() {
             TriggerFamily.POWER -> R.string.family_power
             TriggerFamily.APP -> R.string.family_app
             TriggerFamily.HEADPHONES -> R.string.family_headphones
+            TriggerFamily.LOCATION -> R.string.family_location
         }
     }
 }

@@ -5,6 +5,7 @@ import com.autoflow.app.R
 import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
+import com.autoflow.core.model.GeoPlace
 import com.autoflow.core.model.HeadphoneKind
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
@@ -27,6 +28,9 @@ data class CatalogItem<T>(
 )
 
 object BuilderCatalog {
+    /** Placeholder until the user picks a location; the editor refuses to save it unchanged. */
+    val NEW_PLACE = GeoPlace(name = "", latitude = 0.0, longitude = 0.0)
+
     val triggers: List<CatalogItem<TriggerSpec>> = listOf(
         CatalogItem("TIME", R.string.category_time) { TriggerSpec.Time(TimeOfDay(8, 0)) },
         CatalogItem("INTERVAL", R.string.category_time) { TriggerSpec.Interval(30) },
@@ -40,6 +44,8 @@ object BuilderCatalog {
         CatalogItem("HEADPHONES_CONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesConnected(HeadphoneKind.ANY) },
         CatalogItem("HEADPHONES_DISCONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesDisconnected(HeadphoneKind.ANY) },
         CatalogItem("APP_OPENED", R.string.category_apps) { TriggerSpec.AppOpened(packageName = "") },
+        CatalogItem("LOCATION_ENTER", R.string.category_location) { TriggerSpec.LocationEnter(NEW_PLACE) },
+        CatalogItem("LOCATION_EXIT", R.string.category_location) { TriggerSpec.LocationExit(NEW_PLACE) },
     )
 
     const val GROUP_AND = "GROUP_AND"

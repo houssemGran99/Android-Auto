@@ -12,7 +12,7 @@ object BuiltInVariables {
     /** Built-in names shown in the variables screen (trigger_* names depend on the event). */
     val NAMES: List<String> = listOf(
         "battery", "charging", "wifi", "ssid", "bluetooth", "headphones", "volume", "brightness",
-        "time", "date", "datetime", "day", "timestamp", "device", "android", "automation", "trigger",
+        "latitude", "longitude", "location", "time", "date", "datetime", "day", "timestamp", "device", "android", "automation", "trigger",
     )
 
     private val TIME = DateTimeFormatter.ofPattern("HH:mm")
@@ -34,6 +34,13 @@ object BuiltInVariables {
         "headphones" -> state.headphonesConnected?.onOff()
         "volume" -> state.mediaVolumePercent?.toString()
         "brightness" -> state.brightnessPercent?.toString()
+        "latitude" -> state.latitude?.let(::coordinate)
+        "longitude" -> state.longitude?.let(::coordinate)
+        "location" -> if (state.latitude != null && state.longitude != null) {
+            "${coordinate(state.latitude)},${coordinate(state.longitude)}"
+        } else {
+            null
+        }
         "time" -> now.format(TIME)
         "date" -> now.format(DATE)
         "datetime" -> now.format(DATETIME)
@@ -47,6 +54,8 @@ object BuiltInVariables {
     }
 
     private const val TRIGGER_PREFIX = "trigger_"
+
+    private fun coordinate(value: Double): String = String.format(Locale.ROOT, "%.6f", value)
 
     private fun Boolean.onOff() = if (this) "on" else "off"
 }

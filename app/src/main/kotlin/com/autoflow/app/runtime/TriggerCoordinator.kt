@@ -10,6 +10,7 @@ import com.autoflow.core.engine.repository.AutomationRepository
 import com.autoflow.core.model.Automation
 import com.autoflow.core.model.TriggerFamily
 import com.autoflow.data.storage.settings.SettingsRepository
+import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ import javax.inject.Singleton
 /**
  * Keeps OS registrations in sync with the stored automations:
  *  - time triggers → AlarmManager (no service needed)
+ *  - location triggers → Play services geofences (no service needed)
  *  - Wi-Fi / Bluetooth / battery / charger / headphones / app triggers → foreground monitoring service,
  *    which runs only while at least one enabled automation needs it.
  */
@@ -41,11 +43,17 @@ class TriggerCoordinator @Inject constructor(
     private val automations: AutomationRepository,
     private val settings: SettingsRepository,
     private val timeScheduler: TimeTriggerScheduler,
+    private val geofenceScheduler: GeofenceScheduler,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
     private val started = AtomicBoolean(false)
     private val refreshLock = Mutex()
     private val _monitoredFamilies = MutableStateFlow<Set<TriggerFamily>>(emptySet())
+
+    private val _geofenceStatus = MutableStateFlow(GeofenceScheduler.Status.NOTHING_TO_REGISTER)
+
+    /** Whether location triggers are currently registered (shown in the UI when they are not). */
+    val geofenceStatus: StateFlow<GeofenceScheduler.Status> = _geofenceStatus.asStateFlow()
 
     /** Trigger families the monitoring service must observe. */
     val monitoredFamilies: StateFlow<Set<TriggerFamily>> = _monitoredFamilies.asStateFlow()
@@ -60,7 +68,9 @@ class TriggerCoordinator @Inject constructor(
                 .collect { active -> sync(active) }
         }
         scope.launch {
-            automations.observeAll().collect { runCatching { QuickActionsWidget.refresh(context) } }
+            // Widgets show automation names and the master switch.
+            combine(automations.observeAll(), settings.settings.map { it.masterEnabled }) { _, _ -> Unit }
+                .collect { runCatching { QuickActionsWidget.refresh(context) } }
         }
     }
 
@@ -81,6 +91,7 @@ class TriggerCoordinator @Inject constructor(
         } catch (e: SecurityException) {
             Log.w(TAG, "Could not schedule alarms", e)
         }
+        _geofenceStatus.value = geofenceScheduler.refresh(active)
         val families = active.flatMapTo(mutableSetOf()) { it.triggerFamilies }
             .filterTo(mutableSetOf()) { it.needsMonitoringService }
         val previous = _monitoredFamilies.getAndUpdate { families }

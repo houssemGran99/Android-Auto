@@ -10,12 +10,13 @@ THEN  set media volume to 70% · launch Spotify · show "Music mode activated"
 
 * Visual builder: triggers, an AND / OR / NOT condition tree, drag-and-drop action list
   with nested If/Else and Repeat
-* Triggers: time, interval, Wi-Fi, Bluetooth, battery level, charger, headphones, app opened
+* Triggers: time, interval, arrive at / leave a place (geofences), Wi-Fi, Bluetooth, battery level, charger, headphones, app opened
 * Actions: notification, launch app, open URL, settings panels, brightness, volume,
   Do Not Disturb, text-to-speech, sound, vibration, HTTP requests, wait, variables, if/else, repeat
 * Variables (`%battery%`, `$myVar`, JSON paths `$http.data.temp`), arithmetic
 * Execution history with a step-by-step log, templates, global search, JSON export / import,
-  home-screen widget, master switch, dark / light / dynamic theme
+  home-screen widgets (quick actions with master switch and Wi-Fi/Bluetooth status, and a one-tap
+  button per automation), master switch, dark / light / dynamic theme
 * Permissions are only requested when an automation needs them, with an explanation
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the architecture, the database schema

@@ -15,6 +15,8 @@ import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LocationOff
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Power
@@ -43,6 +45,8 @@ object SpecIcons {
         "CHARGER_DISCONNECTED" -> Icons.Outlined.PowerOff
         "APP_OPENED" -> Icons.Outlined.Apps
         "HEADPHONES_CONNECTED", "HEADPHONES_DISCONNECTED" -> Icons.Outlined.Headphones
+        "LOCATION_ENTER" -> Icons.Outlined.LocationOn
+        "LOCATION_EXIT" -> Icons.Outlined.LocationOff
         else -> Icons.AutoMirrored.Outlined.Rule
     }
 
