@@ -26,10 +26,16 @@ class BluetoothTriggerSource(
         addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
     }
 
+    // Device details may require BLUETOOTH_CONNECT; failures degrade to "unknown device".
+    @SuppressLint("MissingPermission")
     override fun toEvent(intent: Intent): TriggerEvent? {
         val device = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
         val name = device?.let(::safeName)
-        val address = device?.address
+        val address = try {
+            device?.address
+        } catch (e: SecurityException) {
+            null
+        }
         return when (intent.action) {
             BluetoothDevice.ACTION_ACL_CONNECTED -> TriggerEvent.BluetoothConnected(name, address)
             BluetoothDevice.ACTION_ACL_DISCONNECTED -> TriggerEvent.BluetoothDisconnected(name, address)
