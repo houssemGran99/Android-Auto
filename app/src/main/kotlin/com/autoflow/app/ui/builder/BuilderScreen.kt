@@ -136,7 +136,10 @@ fun BuilderScreen(
             return@Scaffold
         }
         val draft = state.draft
-        CompositionLocalProvider(LocalAppsSource provides AppsSource(apps, viewModel::requestApps)) {
+        CompositionLocalProvider(
+            LocalAppsSource provides AppsSource(apps, viewModel::requestApps),
+            LocalCurrentLocation provides viewModel::currentLocation,
+        ) {
             Column(
                 Modifier
                     .padding(padding)

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.CallSuper
+import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -50,11 +51,26 @@ class BootReceiver : InjectingReceiver() {
     private companion object {
         val HANDLED_ACTIONS = setOf(
             Intent.ACTION_BOOT_COMPLETED,
+            android.location.LocationManager.PROVIDERS_CHANGED_ACTION,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             // AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED (API 31)
             "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED",
         )
+    }
+}
+
+/** Receives geofence transitions from Google Play services and runs the matching location triggers. */
+@AndroidEntryPoint
+class GeofenceReceiver : InjectingReceiver() {
+    @Inject lateinit var geofenceScheduler: GeofenceScheduler
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action != GeofenceScheduler.ACTION_GEOFENCE) return
+        GeofenceScheduler.parse(intent, geofenceScheduler::placeName).forEach { event ->
+            AutomationRunWorker.enqueueLocationTransition(context, event)
+        }
     }
 }

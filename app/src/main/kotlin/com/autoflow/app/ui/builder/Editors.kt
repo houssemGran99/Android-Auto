@@ -68,6 +68,8 @@ fun <T> SpecEditorDialog(
 
 fun isValidTrigger(spec: TriggerSpec): Boolean = when (spec) {
     is TriggerSpec.AppOpened -> spec.packageName.isNotBlank()
+    is TriggerSpec.LocationEnter -> isValidPlace(spec.place)
+    is TriggerSpec.LocationExit -> isValidPlace(spec.place)
     else -> true
 }
 
@@ -104,6 +106,8 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
             SegmentedChoice(HeadphoneKind.entries, spec.kind, f::headphoneKind) { onChange(spec.copy(kind = it)) }
         is TriggerSpec.HeadphonesDisconnected ->
             SegmentedChoice(HeadphoneKind.entries, spec.kind, f::headphoneKind) { onChange(spec.copy(kind = it)) }
+        is TriggerSpec.LocationEnter -> PlaceEditor(spec.place) { onChange(spec.copy(place = it)) }
+        is TriggerSpec.LocationExit -> PlaceEditor(spec.place) { onChange(spec.copy(place = it)) }
     }
 }
 

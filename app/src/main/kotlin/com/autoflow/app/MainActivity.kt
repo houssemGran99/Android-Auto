@@ -43,5 +43,7 @@ class MainActivity : ComponentActivity() {
         // Starting a foreground service is always allowed while visible; recover if a
         // background start was refused earlier.
         coordinator.ensureMonitoring()
+        // Re-register geofences, e.g. after location permission was granted in Settings.
+        coordinator.refresh()
     }
 }

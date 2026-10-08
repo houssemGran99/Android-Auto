@@ -10,6 +10,9 @@ data class DeviceState(
     val headphonesConnected: Boolean? = null,
     val mediaVolumePercent: Int? = null,
     val brightnessPercent: Int? = null,
+    /** Last known location; only filled when location permission is granted. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val deviceModel: String = "",
     val osVersion: String = "",
 )

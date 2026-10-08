@@ -48,6 +48,7 @@ import com.autoflow.app.ui.components.ExecutionStatusIcon
 import com.autoflow.app.ui.components.SectionHeader
 import com.autoflow.app.ui.components.relativeTime
 import com.autoflow.app.ui.text.rememberSpecFormatter
+import com.autoflow.platform.triggers.GeofenceScheduler
 import java.time.LocalTime
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -98,6 +99,17 @@ fun HomeScreen(
                     monitoring = state.monitoring.sortedBy { it.ordinal }.map { familyName(it) }.joinToString(),
                     onToggle = viewModel::setMasterEnabled,
                 )
+            }
+
+            geofenceWarning(state.geofences)?.let { warning ->
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    ) {
+                        Text(stringResource(warning), modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
             }
 
             item { SectionHeader(stringResource(R.string.home_active_automations)) }
@@ -222,8 +234,16 @@ private fun familyName(family: com.autoflow.core.model.TriggerFamily): String = 
         com.autoflow.core.model.TriggerFamily.POWER -> R.string.family_power
         com.autoflow.core.model.TriggerFamily.APP -> R.string.family_app
         com.autoflow.core.model.TriggerFamily.HEADPHONES -> R.string.family_headphones
+        com.autoflow.core.model.TriggerFamily.LOCATION -> R.string.family_location
     },
 )
+
+private fun geofenceWarning(status: GeofenceScheduler.Status): Int? = when (status) {
+    GeofenceScheduler.Status.PERMISSION_MISSING -> R.string.geofence_permission_missing
+    GeofenceScheduler.Status.LOCATION_UNAVAILABLE -> R.string.geofence_location_off
+    GeofenceScheduler.Status.FAILED -> R.string.geofence_failed
+    GeofenceScheduler.Status.REGISTERED, GeofenceScheduler.Status.NOTHING_TO_REGISTER -> null
+}
 
 private fun greeting(): Int = when (LocalTime.now().hour) {
     in 5..11 -> R.string.greeting_morning

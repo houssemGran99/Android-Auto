@@ -66,6 +66,20 @@ sealed interface TriggerEvent {
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())
     }
 
+    /**
+     * A geofence transition for the location trigger at [triggerIndex] of one automation.
+     * [entered] is true for "arrive", false for "leave".
+     */
+    data class LocationTransition(
+        val automationId: String,
+        val triggerIndex: Int,
+        val entered: Boolean,
+        val placeName: String,
+    ) : TriggerEvent {
+        override val key get() = if (entered) "LOCATION_ENTER" else "LOCATION_EXIT"
+        override val details get() = mapOf("place" to placeName)
+    }
+
     data class HeadphonesDisconnected(val kind: HeadphoneKind, val name: String?) : TriggerEvent {
         override val key get() = "HEADPHONES_DISCONNECTED"
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())

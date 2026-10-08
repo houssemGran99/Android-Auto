@@ -3,6 +3,7 @@ package com.autoflow.app.di
 import android.content.Context
 import com.autoflow.app.runtime.AndroidEngineLogger
 import com.autoflow.app.runtime.AppForegroundTracker
+import com.autoflow.app.runtime.GeofenceReceiver
 import com.autoflow.app.runtime.TimeTriggerReceiver
 import com.autoflow.core.engine.AutomationEngine
 import com.autoflow.core.engine.DeviceStateProvider
@@ -24,6 +25,8 @@ import com.autoflow.platform.actions.OkHttpExecutor
 import com.autoflow.platform.actions.PlatformActions
 import com.autoflow.platform.permissions.PermissionManager
 import com.autoflow.platform.triggers.AndroidDeviceStateProvider
+import com.autoflow.platform.triggers.CurrentLocation
+import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import com.autoflow.platform.triggers.TriggerSourceFactory
 import dagger.Module
@@ -90,7 +93,8 @@ object AppModule {
     fun deviceStateProvider(
         @ApplicationContext context: Context,
         permissions: PermissionManager,
-    ): DeviceStateProvider = AndroidDeviceStateProvider(context, permissions)
+        location: CurrentLocation,
+    ): DeviceStateProvider = AndroidDeviceStateProvider(context, permissions, location)
 
     @Provides
     @Singleton
@@ -142,6 +146,20 @@ object AppModule {
     @Singleton
     fun timeTriggerScheduler(@ApplicationContext context: Context): TimeTriggerScheduler =
         TimeTriggerScheduler(context, TimeTriggerReceiver::class.java)
+
+    @Provides
+    @Singleton
+    fun geofenceScheduler(
+        @ApplicationContext context: Context,
+        permissions: PermissionManager,
+    ): GeofenceScheduler = GeofenceScheduler(context, GeofenceReceiver::class.java, permissions)
+
+    @Provides
+    @Singleton
+    fun currentLocation(
+        @ApplicationContext context: Context,
+        permissions: PermissionManager,
+    ): CurrentLocation = CurrentLocation(context, permissions)
 
     @Provides
     @Singleton

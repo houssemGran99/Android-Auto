@@ -54,7 +54,11 @@ class SpecFormatter(private val res: Resources) {
         is TriggerSpec.AppOpened -> spec.appLabel.ifBlank { spec.packageName }
         is TriggerSpec.HeadphonesConnected -> headphoneKind(spec.kind)
         is TriggerSpec.HeadphonesDisconnected -> headphoneKind(spec.kind)
+        is TriggerSpec.LocationEnter -> place(spec.place)
+        is TriggerSpec.LocationExit -> place(spec.place)
     }
+
+    fun place(place: com.autoflow.core.model.GeoPlace): String = s(R.string.place_detail, place.name, place.radiusMeters)
 
     fun triggerEvent(key: String): String = EVENT_TITLES[key]?.let(::s) ?: key
     // endregion
@@ -244,6 +248,8 @@ class SpecFormatter(private val res: Resources) {
             "APP_OPENED" to R.string.trigger_app_opened,
             "HEADPHONES_CONNECTED" to R.string.trigger_headphones_connected,
             "HEADPHONES_DISCONNECTED" to R.string.trigger_headphones_disconnected,
+            "LOCATION_ENTER" to R.string.trigger_location_enter,
+            "LOCATION_EXIT" to R.string.trigger_location_exit,
         )
 
         val EVENT_TITLES = TRIGGER_TITLES + mapOf(

@@ -9,8 +9,9 @@ import com.autoflow.core.model.TriggerSpec
 /** Decides whether a [TriggerEvent] satisfies a configured [TriggerSpec]. Pure and side-effect free. */
 class TriggerMatcher {
     fun matches(spec: TriggerSpec, event: TriggerEvent): Boolean = when (spec) {
-        // Time triggers are delivered as TimeAlarm events addressed to one automation.
+        // Time and location triggers are delivered as events addressed to one automation.
         is TriggerSpec.Time, is TriggerSpec.Interval -> false
+        is TriggerSpec.LocationEnter, is TriggerSpec.LocationExit -> false
         is TriggerSpec.WifiConnected -> event is TriggerEvent.WifiConnected && ssidMatches(spec.ssid, event.ssid)
         is TriggerSpec.WifiDisconnected -> event is TriggerEvent.WifiDisconnected && ssidMatches(spec.ssid, event.ssid)
         is TriggerSpec.BluetoothConnected ->
@@ -24,6 +25,13 @@ class TriggerMatcher {
         is TriggerSpec.HeadphonesConnected -> event is TriggerEvent.HeadphonesConnected && kindMatches(spec.kind, event.kind)
         is TriggerSpec.HeadphonesDisconnected ->
             event is TriggerEvent.HeadphonesDisconnected && kindMatches(spec.kind, event.kind)
+    }
+
+    /** Whether the location trigger [spec] corresponds to the transition direction of [event]. */
+    fun matchesTransition(spec: TriggerSpec, event: TriggerEvent.LocationTransition): Boolean = when (spec) {
+        is TriggerSpec.LocationEnter -> event.entered
+        is TriggerSpec.LocationExit -> !event.entered
+        else -> false
     }
 
     private fun ssidMatches(wanted: String?, actual: String?): Boolean {

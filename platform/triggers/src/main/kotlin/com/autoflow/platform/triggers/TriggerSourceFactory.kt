@@ -19,6 +19,7 @@ class TriggerSourceFactory(
 ) {
     fun create(family: TriggerFamily, scope: CoroutineScope): TriggerSource? = when (family) {
         TriggerFamily.TIME -> null // AlarmManager, see TimeTriggerScheduler
+        TriggerFamily.LOCATION -> null // Geofences, see GeofenceScheduler
         TriggerFamily.WIFI -> WifiTriggerSource(context)
         TriggerFamily.BLUETOOTH -> BluetoothTriggerSource(context, permissions)
         TriggerFamily.BATTERY -> BatteryTriggerSource(context)

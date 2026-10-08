@@ -76,6 +76,11 @@ class AutomationEngine(
     suspend fun findMatching(event: TriggerEvent): List<Automation> = when (event) {
         is TriggerEvent.TimeAlarm -> listOfNotNull(automations.get(event.automationId))
             .filter { it.enabled && TriggerFamily.TIME in it.triggerFamilies }
+        is TriggerEvent.LocationTransition -> listOfNotNull(automations.get(event.automationId))
+            .filter { automation ->
+                val trigger = automation.triggers.getOrNull(event.triggerIndex)
+                automation.enabled && trigger != null && triggerMatcher.matchesTransition(trigger, event)
+            }
         else -> automations.getEnabled().filter { automation ->
             automation.triggers.any { triggerMatcher.matches(it, event) }
         }

@@ -22,6 +22,7 @@ import com.autoflow.platform.triggers.source.WifiTriggerSource
 class AndroidDeviceStateProvider(
     context: Context,
     private val permissions: PermissionManager,
+    private val location: CurrentLocation = CurrentLocation(context, permissions),
 ) : DeviceStateProvider {
     private val context = context.applicationContext
 
@@ -30,6 +31,7 @@ class AndroidDeviceStateProvider(
         val batteryManager = context.getSystemService(BatteryManager::class.java)
         val audio = context.getSystemService(AudioManager::class.java)
         val wifiConnected = isWifiConnected()
+        val coordinates = location.lastKnown()
         return DeviceState(
             batteryLevel = battery?.let(BatteryTriggerSource::batteryPercent),
             charging = batteryManager?.isCharging,
@@ -47,6 +49,8 @@ class AndroidDeviceStateProvider(
             brightnessPercent = runCatching {
                 Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS) * 100 / MAX_BRIGHTNESS
             }.getOrNull(),
+            latitude = coordinates?.latitude,
+            longitude = coordinates?.longitude,
             deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
             osVersion = Build.VERSION.RELEASE,
         )

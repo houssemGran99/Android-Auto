@@ -37,6 +37,14 @@ class AutomationRunWorker(
             SOURCE_TIME -> engine.handleEvent(
                 TriggerEvent.TimeAlarm(automationId, inputData.getLong(KEY_SCHEDULED_AT, System.currentTimeMillis())),
             )
+            SOURCE_LOCATION -> engine.handleEvent(
+                TriggerEvent.LocationTransition(
+                    automationId = automationId,
+                    triggerIndex = inputData.getInt(KEY_TRIGGER_INDEX, -1),
+                    entered = inputData.getBoolean(KEY_ENTERED, true),
+                    placeName = inputData.getString(KEY_PLACE).orEmpty(),
+                ),
+            )
             else -> engine.runById(automationId, TriggerEvent.Manual(source ?: SOURCE_MANUAL))
         }
         return Result.success()
@@ -51,11 +59,26 @@ class AutomationRunWorker(
         private const val KEY_SOURCE = "source"
         private const val KEY_SCHEDULED_AT = "scheduled_at"
         private const val SOURCE_TIME = "time"
+        private const val SOURCE_LOCATION = "location"
+        private const val KEY_TRIGGER_INDEX = "trigger_index"
+        private const val KEY_ENTERED = "entered"
+        private const val KEY_PLACE = "place"
         private const val SOURCE_MANUAL = "manual"
         const val SOURCE_WIDGET = "widget"
 
         fun enqueueTimeTrigger(context: Context, automationId: String, scheduledAt: Long) =
             enqueue(context, workDataOf(KEY_AUTOMATION_ID to automationId, KEY_SOURCE to SOURCE_TIME, KEY_SCHEDULED_AT to scheduledAt))
+
+        fun enqueueLocationTransition(context: Context, event: TriggerEvent.LocationTransition) = enqueue(
+            context,
+            workDataOf(
+                KEY_AUTOMATION_ID to event.automationId,
+                KEY_SOURCE to SOURCE_LOCATION,
+                KEY_TRIGGER_INDEX to event.triggerIndex,
+                KEY_ENTERED to event.entered,
+                KEY_PLACE to event.placeName,
+            ),
+        )
 
         fun enqueueManual(context: Context, automationId: String, source: String) =
             enqueue(context, workDataOf(KEY_AUTOMATION_ID to automationId, KEY_SOURCE to source))

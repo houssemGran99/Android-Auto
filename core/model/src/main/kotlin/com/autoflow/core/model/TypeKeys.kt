@@ -15,6 +15,8 @@ val TriggerSpec.typeKey: String
         is TriggerSpec.AppOpened -> "APP_OPENED"
         is TriggerSpec.HeadphonesConnected -> "HEADPHONES_CONNECTED"
         is TriggerSpec.HeadphonesDisconnected -> "HEADPHONES_DISCONNECTED"
+        is TriggerSpec.LocationEnter -> "LOCATION_ENTER"
+        is TriggerSpec.LocationExit -> "LOCATION_EXIT"
     }
 
 val ConditionNode.typeKey: String
