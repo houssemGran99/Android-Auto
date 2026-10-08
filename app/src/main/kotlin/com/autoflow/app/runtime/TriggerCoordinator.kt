@@ -55,7 +55,7 @@ class TriggerCoordinator @Inject constructor(
                 automations.observeAll(),
                 settings.settings.map { it.masterEnabled }.distinctUntilChanged(),
             ) { all, master -> if (master) all.filter { it.enabled } else emptyList() }
-                .collect { active -> apply(active) }
+                .collect { active -> sync(active) }
         }
         scope.launch {
             automations.observeAll().collect { runCatching { QuickActionsWidget.refresh(context) } }
@@ -64,7 +64,7 @@ class TriggerCoordinator @Inject constructor(
 
     /** Recomputes alarms, e.g. after an alarm fired, a reboot or a time zone change. */
     fun refresh() {
-        scope.launch { apply(activeAutomations()) }
+        scope.launch { sync(activeAutomations()) }
     }
 
     /** Starts the monitoring service again if it should run (e.g. after Android refused a background start). */
@@ -75,7 +75,7 @@ class TriggerCoordinator @Inject constructor(
     private suspend fun activeAutomations(): List<Automation> =
         if (settings.settings.first().masterEnabled) automations.getEnabled() else emptyList()
 
-    private suspend fun apply(active: List<Automation>) = refreshLock.withLock {
+    private suspend fun sync(active: List<Automation>) = refreshLock.withLock {
         try {
             timeScheduler.refresh(active)
         } catch (e: SecurityException) {

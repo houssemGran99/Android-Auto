@@ -279,6 +279,8 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             Hint(stringResource(R.string.hint_delay))
         }
         is ActionSpec.SetVariable -> {
+            val globalLabel = stringResource(R.string.scope_global)
+            val localLabel = stringResource(R.string.scope_local)
             TextInput(
                 stringResource(R.string.field_name),
                 spec.name,
@@ -296,7 +298,7 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             SegmentedChoice(
                 VariableScope.entries,
                 spec.scope,
-                { stringResource(if (it == VariableScope.GLOBAL) R.string.scope_global else R.string.scope_local) },
+                { if (it == VariableScope.GLOBAL) globalLabel else localLabel },
             ) { onChange(spec.copy(scope = it)) }
         }
         is ActionSpec.IfElse -> {
@@ -359,19 +361,12 @@ private fun HttpForm(spec: ActionSpec.HttpRequest, onChange: (ActionSpec) -> Uni
         is HttpAuth.Bearer -> AuthType.BEARER
         null -> AuthType.NONE
     }
-    SegmentedChoice(
-        AuthType.entries,
-        authType,
-        {
-            stringResource(
-                when (it) {
-                    AuthType.NONE -> R.string.auth_none
-                    AuthType.BASIC -> R.string.auth_basic
-                    AuthType.BEARER -> R.string.auth_bearer
-                },
-            )
-        },
-    ) {
+    val authLabels = mapOf(
+        AuthType.NONE to stringResource(R.string.auth_none),
+        AuthType.BASIC to stringResource(R.string.auth_basic),
+        AuthType.BEARER to stringResource(R.string.auth_bearer),
+    )
+    SegmentedChoice(AuthType.entries, authType, { authLabels.getValue(it) }) {
         onChange(
             spec.copy(
                 auth = when (it) {

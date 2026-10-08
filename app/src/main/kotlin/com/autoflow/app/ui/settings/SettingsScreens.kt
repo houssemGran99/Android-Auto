@@ -110,20 +110,12 @@ fun SettingsScreen(onBack: () -> Unit, onOpenPermissions: () -> Unit, viewModel:
             }
 
             SectionHeader(stringResource(R.string.settings_appearance))
-            SegmentedChoice(
-                ThemeMode.entries,
-                settings.themeMode,
-                {
-                    stringResource(
-                        when (it) {
-                            ThemeMode.SYSTEM -> R.string.theme_system
-                            ThemeMode.LIGHT -> R.string.theme_light
-                            ThemeMode.DARK -> R.string.theme_dark
-                        },
-                    )
-                },
-                viewModel::setTheme,
+            val themeLabels = mapOf(
+                ThemeMode.SYSTEM to stringResource(R.string.theme_system),
+                ThemeMode.LIGHT to stringResource(R.string.theme_light),
+                ThemeMode.DARK to stringResource(R.string.theme_dark),
             )
+            SegmentedChoice(ThemeMode.entries, settings.themeMode, { themeLabels.getValue(it) }, viewModel::setTheme)
             LabeledSwitch(stringResource(R.string.settings_dynamic_color), settings.dynamicColor, viewModel::setDynamicColor)
 
             SectionHeader(stringResource(R.string.settings_data))

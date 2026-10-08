@@ -36,7 +36,7 @@ class AutomationMonitorService : Service() {
     @Inject lateinit var sourceFactory: TriggerSourceFactory
 
     @Inject
-    @ApplicationScope
+    @field:ApplicationScope
     lateinit var appScope: CoroutineScope
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)

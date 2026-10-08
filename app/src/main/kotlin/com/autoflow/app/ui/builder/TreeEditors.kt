@@ -120,7 +120,11 @@ fun ConditionTreeEditor(root: ConditionNode, onChange: (ConditionNode) -> Unit, 
             onPick = { item ->
                 addTo = null
                 val node = item.create()
-                if (item.needsConfiguration) creating = groupPath to node else onChange(ConditionTree.addChild(root, groupPath, node))
+                if (item.needsConfiguration) {
+                    creating = groupPath to node
+                } else {
+                    onChange(ConditionTree.addChild(root, groupPath, node))
+                }
             },
             onDismiss = { addTo = null },
         )

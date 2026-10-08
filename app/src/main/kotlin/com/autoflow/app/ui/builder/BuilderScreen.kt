@@ -96,7 +96,13 @@ fun BuilderScreen(
         }
     }
 
-    val requestBack = { if (state.hasChanges && state.loaded) confirmDiscard = true else onBack() }
+    val requestBack: () -> Unit = {
+        if (state.hasChanges && state.loaded) {
+            confirmDiscard = true
+        } else {
+            onBack()
+        }
+    }
     BackHandler(onBack = requestBack)
 
     Scaffold(
