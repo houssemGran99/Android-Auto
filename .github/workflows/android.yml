@@ -26,17 +26,22 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Engine unit tests (pure Kotlin)
-        run: ./gradlew --stacktrace :core:model:test :core:engine:test
+      - name: Build, test and lint
+        # One invocation with --continue so every module's errors are reported in a single run.
+        run: |
+          set -o pipefail
+          ./gradlew --continue \
+            :core:model:test :core:engine:test \
+            assembleDebug testDebugUnitTest lintDebug 2>&1 | tee build.log
 
-      - name: Assemble debug APK
-        run: ./gradlew --stacktrace assembleDebug
-
-      - name: Android unit + Robolectric integration tests
-        run: ./gradlew --stacktrace testDebugUnitTest
-
-      - name: Lint
-        run: ./gradlew --stacktrace lintDebug
+      - name: Error summary
+        if: failure()
+        run: |
+          echo "::group::Compiler, test and lint errors"
+          grep -nE "^e: |error:|Error:|FAILED|What went wrong|Execution failed|Lint found|tests completed" build.log | grep -v "^\s*at " | head -200 || true
+          echo "::endgroup::"
+          for f in $(find . -path "*/build/reports/lint-results-debug.txt"); do echo "== $f"; head -100 "$f"; done
+          for f in $(find . -path "*/build/test-results/*" -name "*.xml"); do grep -l "<failure" "$f" >/dev/null 2>&1 && { echo "== $f"; grep -A8 "<failure" "$f" | head -40; }; done || true
 
       - name: Upload debug APK
         if: always()
