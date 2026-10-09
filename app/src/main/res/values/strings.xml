@@ -109,6 +109,7 @@
     <string name="category_device">Device</string>
     <string name="category_audio">Audio</string>
     <string name="category_web">Web</string>
+    <string name="category_variables">Variables</string>
     <string name="category_calendar">Calendar</string>
     <string name="category_location">Location</string>
     <string name="category_restricted">Not allowed by Android</string>
@@ -124,6 +125,7 @@
 
     <!-- Triggers -->
     <string name="trigger_time">At a time</string>
+    <string name="trigger_sun">Sunrise / sunset</string>
     <string name="trigger_interval">Every X minutes</string>
     <string name="trigger_wifi_connected">Wi-Fi connected</string>
     <string name="trigger_wifi_disconnected">Wi-Fi disconnected</string>
@@ -192,6 +194,53 @@
     <string name="action_set_variable">Set variable</string>
     <string name="action_if_else">If / Else</string>
     <string name="action_repeat">Repeat</string>
+    <string name="action_while">While</string>
+    <string name="action_wait_until">Wait until</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_variable_operation">Variable operation</string>
+    <string name="action_parse_json">Read JSON value</string>
+    <string name="branch_while">While true, repeat</string>
+    <string name="sun_sunrise">Sunrise</string>
+    <string name="sun_sunset">Sunset</string>
+    <string name="offset_format">%1$+d min</string>
+    <string name="timeout_format">max %1$d s</string>
+    <string name="op_increment">Increment</string>
+    <string name="op_decrement">Decrement</string>
+    <string name="op_append">Append text</string>
+    <string name="op_replace">Replace</string>
+    <string name="op_uppercase">UPPERCASE</string>
+    <string name="op_lowercase">lowercase</string>
+    <string name="op_trim">Trim spaces</string>
+    <string name="op_substring">Substring</string>
+    <string name="op_split">Split and pick</string>
+    <string name="op_regex">Regex extract</string>
+    <string name="op_length">Length</string>
+    <string name="op_url_encode">URL-encode</string>
+    <string name="arg_amount">Amount (default 1)</string>
+    <string name="arg_text">Text</string>
+    <string name="arg_find">Find</string>
+    <string name="arg_replace_with">Replace with</string>
+    <string name="arg_start">Start index (0 = first)</string>
+    <string name="arg_end">End index (optional)</string>
+    <string name="arg_separator">Separator</string>
+    <string name="arg_index">Part index (0 = first)</string>
+    <string name="arg_regex">Regular expression</string>
+    <string name="arg_group">Group (optional)</string>
+    <string name="field_operation">Operation</string>
+    <string name="field_target_optional">Store result in (optional)</string>
+    <string name="hint_target_optional">Leave empty to overwrite the same variable.</string>
+    <string name="field_store_in">Store in variable</string>
+    <string name="field_json_source">JSON text</string>
+    <string name="hint_json_source" formatted="false">Usually a variable, e.g. $http (response of an HTTP request).</string>
+    <string name="field_json_path">Path</string>
+    <string name="hint_json_path">Dot notation, e.g. data.items.0.name</string>
+    <string name="field_max_iterations">Maximum repetitions</string>
+    <string name="field_check_interval">Check every (seconds)</string>
+    <string name="field_offset">Offset</string>
+    <string name="hint_while" formatted="false">Repeats the nested actions while the condition is true. The maximum stops endless loops. $loop holds the current round.</string>
+    <string name="hint_wait_until">Pauses the automation until the condition is true. If it is still false after the timeout, this step fails.</string>
+    <string name="hint_stop">Ends the run here. Remaining actions are skipped; the run still counts as successful.</string>
+    <string name="hint_sun_event">Calculated on the device from the coordinates (no internet, no ongoing location use). A negative offset runs before sunrise/sunset.</string>
     <string name="action_dismiss_notifications">Dismiss notifications</string>
     <string name="stream_media">Media</string>
     <string name="stream_ring">Ringtone</string>

@@ -27,35 +27,52 @@ import com.autoflow.platform.triggers.Coordinates
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-/** Supplies a one-shot location fix to the place editor (provided by the builder screen). */
+/** Supplies a one-shot location fix to coordinate editors (provided by the builder screen). */
 val LocalCurrentLocation = compositionLocalOf<suspend () -> Coordinates?> { { null } }
 
-fun isValidPlace(place: GeoPlace): Boolean =
-    place.name.isNotBlank() && !(place.latitude == 0.0 && place.longitude == 0.0)
+/** (0, 0) is the "not chosen yet" placeholder used by new location and sun triggers. */
+fun hasCoordinates(latitude: Double, longitude: Double): Boolean = !(latitude == 0.0 && longitude == 0.0)
 
-/**
- * Edits a geofence: name, coordinates (typed or taken from the current location) and radius.
- * Coordinates are kept as text while typing so partial input like "48." is not lost.
- */
+fun isValidPlace(place: GeoPlace): Boolean = place.name.isNotBlank() && hasCoordinates(place.latitude, place.longitude)
+
+/** Edits a geofence: name, coordinates and radius. */
 @Composable
 fun PlaceEditor(place: GeoPlace, onChange: (GeoPlace) -> Unit) {
+    TextInput(stringResource(R.string.field_place_name), place.name, { onChange(place.copy(name = it)) })
+    PermissionPanel(setOf(Capability.LOCATION, Capability.BACKGROUND_LOCATION))
+    CoordinatesEditor(place.latitude, place.longitude) { la, lo -> onChange(place.copy(latitude = la, longitude = lo)) }
+    PercentSlider(
+        stringResource(R.string.field_radius),
+        place.radiusMeters,
+        { onChange(place.copy(radiusMeters = it)) },
+        GeoPlace.MIN_RADIUS_METERS..2_000,
+        suffix = " m",
+    )
+    Hint(stringResource(R.string.hint_geofence))
+}
+
+/**
+ * Latitude / longitude typed by hand or taken from a one-shot current location fix.
+ * Text is kept locally while typing so partial input like "48." is not lost.
+ */
+@Composable
+fun CoordinatesEditor(latitude: Double, longitude: Double, onChange: (Double, Double) -> Unit) {
     val currentLocation = LocalCurrentLocation.current
     val scope = rememberCoroutineScope()
-    var latitude by remember { mutableStateOf(if (isValidPlace(place)) format(place.latitude) else "") }
-    var longitude by remember { mutableStateOf(if (isValidPlace(place)) format(place.longitude) else "") }
+    val chosen = hasCoordinates(latitude, longitude)
+    var latText by remember { mutableStateOf(if (chosen) format(latitude) else "") }
+    var lngText by remember { mutableStateOf(if (chosen) format(longitude) else "") }
     var locating by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
 
-    fun update(lat: String = latitude, lng: String = longitude) {
-        latitude = lat
-        longitude = lng
+    fun update(lat: String = latText, lng: String = lngText) {
+        latText = lat
+        lngText = lng
         val la = lat.trim().toDoubleOrNull()?.takeIf { it in -90.0..90.0 }
         val lo = lng.trim().toDoubleOrNull()?.takeIf { it in -180.0..180.0 }
-        if (la != null && lo != null) onChange(place.copy(latitude = la, longitude = lo))
+        if (la != null && lo != null) onChange(la, lo)
     }
 
-    TextInput(stringResource(R.string.field_place_name), place.name, { onChange(place.copy(name = it)) })
-    PermissionPanel(setOf(Capability.LOCATION, Capability.BACKGROUND_LOCATION))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         OutlinedButton(
             onClick = {
@@ -74,26 +91,18 @@ fun PlaceEditor(place: GeoPlace, onChange: (GeoPlace) -> Unit) {
     if (failed) Hint(stringResource(R.string.current_location_unknown))
     TextInput(
         stringResource(R.string.field_latitude),
-        latitude,
+        latText,
         { update(lat = it) },
-        isError = latitude.isNotEmpty() && latitude.trim().toDoubleOrNull()?.takeIf { it in -90.0..90.0 } == null,
+        isError = latText.isNotEmpty() && latText.trim().toDoubleOrNull()?.takeIf { it in -90.0..90.0 } == null,
         keyboardType = KeyboardType.Decimal,
     )
     TextInput(
         stringResource(R.string.field_longitude),
-        longitude,
+        lngText,
         { update(lng = it) },
-        isError = longitude.isNotEmpty() && longitude.trim().toDoubleOrNull()?.takeIf { it in -180.0..180.0 } == null,
+        isError = lngText.isNotEmpty() && lngText.trim().toDoubleOrNull()?.takeIf { it in -180.0..180.0 } == null,
         keyboardType = KeyboardType.Decimal,
     )
-    PercentSlider(
-        stringResource(R.string.field_radius),
-        place.radiusMeters,
-        { onChange(place.copy(radiusMeters = it)) },
-        GeoPlace.MIN_RADIUS_METERS..2_000,
-        suffix = " m",
-    )
-    Hint(stringResource(R.string.hint_geofence))
 }
 
 private fun format(value: Double) = String.format(Locale.ROOT, "%.6f", value)

@@ -10,7 +10,7 @@ import com.autoflow.core.model.TriggerSpec
 class TriggerMatcher {
     fun matches(spec: TriggerSpec, event: TriggerEvent): Boolean = when (spec) {
         // Time and location triggers are delivered as events addressed to one automation.
-        is TriggerSpec.Time, is TriggerSpec.Interval -> false
+        is TriggerSpec.Time, is TriggerSpec.Interval, is TriggerSpec.SunEvent -> false
         is TriggerSpec.LocationEnter, is TriggerSpec.LocationExit -> false
         is TriggerSpec.CalendarEventStart, is TriggerSpec.CalendarEventEnd -> false
         is TriggerSpec.NotificationReceived -> event is TriggerEvent.NotificationPosted && notificationMatches(spec, event)

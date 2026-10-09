@@ -9,6 +9,8 @@ import com.autoflow.core.model.GeoPlace
 import com.autoflow.core.model.HeadphoneKind
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
+import com.autoflow.core.model.SunEventType
+import com.autoflow.core.model.VariableOp
 import com.autoflow.core.model.ThresholdDirection
 import com.autoflow.core.model.TimeOfDay
 import com.autoflow.core.model.TriggerSpec
@@ -34,6 +36,7 @@ object BuilderCatalog {
     val triggers: List<CatalogItem<TriggerSpec>> = listOf(
         CatalogItem("TIME", R.string.category_time) { TriggerSpec.Time(TimeOfDay(8, 0)) },
         CatalogItem("INTERVAL", R.string.category_time) { TriggerSpec.Interval(30) },
+        CatalogItem("SUN_EVENT", R.string.category_time) { TriggerSpec.SunEvent(SunEventType.SUNSET, 0.0, 0.0) },
         CatalogItem("WIFI_CONNECTED", R.string.category_connectivity) { TriggerSpec.WifiConnected() },
         CatalogItem("WIFI_DISCONNECTED", R.string.category_connectivity) { TriggerSpec.WifiDisconnected() },
         CatalogItem("BLUETOOTH_CONNECTED", R.string.category_connectivity) { TriggerSpec.BluetoothConnected() },
@@ -85,9 +88,14 @@ object BuilderCatalog {
         CatalogItem("PLAY_SOUND", R.string.category_audio) { ActionSpec.PlaySound(SoundType.NOTIFICATION) },
         CatalogItem("HTTP_REQUEST", R.string.category_web) { ActionSpec.HttpRequest(url = "https://") },
         CatalogItem("DELAY", R.string.category_logic) { ActionSpec.Delay(5_000) },
-        CatalogItem("SET_VARIABLE", R.string.category_logic) { ActionSpec.SetVariable("", "") },
+        CatalogItem("SET_VARIABLE", R.string.category_variables) { ActionSpec.SetVariable("", "") },
         CatalogItem("IF_ELSE", R.string.category_logic) { ActionSpec.IfElse(ConditionNode.And(emptyList()), emptyList()) },
         CatalogItem("REPEAT", R.string.category_logic) { ActionSpec.Repeat(3, emptyList()) },
+        CatalogItem("WHILE", R.string.category_logic) { ActionSpec.While(ConditionNode.And(emptyList()), emptyList()) },
+        CatalogItem("WAIT_UNTIL", R.string.category_logic) { ActionSpec.WaitUntil(ConditionNode.And(emptyList())) },
+        CatalogItem("STOP", R.string.category_logic, needsConfiguration = false) { ActionSpec.Stop },
+        CatalogItem("VARIABLE_OPERATION", R.string.category_variables) { ActionSpec.VariableOperation("", VariableOp.INCREMENT) },
+        CatalogItem("PARSE_JSON", R.string.category_variables) { ActionSpec.ParseJson("\$http", "", "") },
         // Not allowed by Android for regular apps: offer the settings panel instead.
         CatalogItem("TOGGLE_WIFI", R.string.category_restricted, R.string.restricted_wifi_title, R.string.restricted_wifi) {
             ActionSpec.OpenSettings(SettingsPanel.WIFI)

@@ -276,6 +276,51 @@ class AutomationEngineTest {
     }
 
     @Test
+    fun `while, wait until, stop, variable operation and json parsing`() = runTest {
+        val vars = FakeVariableRepository(Variable("count", "0"), Variable("payload", """{"alarm":{"level":"high"}}"""))
+        val automation = Automation(
+            id = "flow",
+            name = "Flow",
+            actions = listOf(
+                ActionSpec.While(
+                    condition = ConditionNode.VariableCompare("count", Comparison.LESS_THAN, "3"),
+                    actions = listOf(ActionSpec.VariableOperation("count", com.autoflow.core.model.VariableOp.INCREMENT)),
+                ),
+                ActionSpec.WaitUntil(ConditionNode.VariableCompare("count", Comparison.EQUALS, "3"), timeoutSeconds = 5),
+                ActionSpec.ParseJson("\$payload", "alarm.level", "level"),
+                ActionSpec.ShowNotification("t", "count=\$count level=\$level"),
+                ActionSpec.IfElse(ConditionNode.VariableCompare("level", Comparison.EQUALS, "high"), listOf(ActionSpec.Stop)),
+                ActionSpec.ShowNotification("t", "never shown"),
+            ),
+        )
+        val h = harness(automation, variables = vars)
+        val record = h.engine.runById("flow")!!
+        assertEquals(listOf("count=3 level=high"), shownNotifications)
+        assertEquals("3", vars.get("count")?.value)
+        assertNull("parse_json defaults to a local variable", vars.get("level"))
+        assertEquals(ExecutionStatus.SUCCESS, record.status)
+        assertTrue(record.steps.any { it.key == "STOP" })
+    }
+
+    @Test
+    fun `while is capped and wait until times out with virtual time`() = runTest {
+        val automation = Automation(
+            id = "cap",
+            name = "Cap",
+            actions = listOf(
+                ActionSpec.While(ConditionNode.And(emptyList()), listOf(ActionSpec.SetVolume(percent = 1)), maxIterations = 5),
+                ActionSpec.WaitUntil(ConditionNode.Charging(true), timeoutSeconds = 600, checkIntervalSeconds = 60),
+            ),
+        )
+        val h = harness(automation)
+        val record = h.engine.runById("cap")!!
+        assertEquals(5, executed.size)
+        val wait = record.steps.last { it.key == "WAIT_UNTIL" }
+        assertEquals(FailureKind.TIMEOUT, wait.failureKind)
+        assertEquals(ExecutionStatus.PARTIAL, record.status)
+    }
+
+    @Test
     fun `delay uses virtual time`() = runTest {
         val automation = Automation(id = "d", name = "D", actions = listOf(ActionSpec.Delay(60_000), ActionSpec.SetVolume(percent = 5)))
         val h = harness(automation)

@@ -51,7 +51,7 @@ class TimeTriggerScheduler(
             editor.remove(stale)
         }
 
-        val result = wanted.map { (key, value) ->
+        val result = wanted.mapNotNull { (key, value) ->
             val (automation, index) = value
             val trigger = automation.triggers[index]
             val signature = trigger.hashCode()
@@ -62,7 +62,9 @@ class TimeTriggerScheduler(
                 storedTime
             } else {
                 val after = ZonedDateTime.ofInstant(Instant.ofEpochMilli(now), zone())
-                TimeScheduleCalculator.nextFireTime(trigger, after)!!.toInstant().toEpochMilli()
+                // Null only for sun events with no sunrise/sunset within a year (polar regions).
+                TimeScheduleCalculator.nextFireTime(trigger, after)?.toInstant()?.toEpochMilli()
+                    ?: return@mapNotNull null.also { cancel(key); editor.remove(key) }
             }
             editor.putString(key, "$fireAt$SEPARATOR$signature")
             val exact = setAlarm(key, automation.id, fireAt)

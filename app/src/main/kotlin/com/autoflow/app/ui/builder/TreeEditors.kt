@@ -322,6 +322,8 @@ fun ActionListEditor(actions: List<ActionSpec>, ref: ActionListRef, callbacks: A
                         NestedBranch(stringResource(R.string.branch_then), action.thenActions, ref.child(index, Branch.THEN), callbacks, f)
                         NestedBranch(stringResource(R.string.branch_else), action.elseActions, ref.child(index, Branch.ELSE), callbacks, f)
                     }
+                    is ActionSpec.While ->
+                        NestedBranch(stringResource(R.string.branch_while), action.actions, ref.child(index, Branch.BODY), callbacks, f)
                     is ActionSpec.Repeat ->
                         NestedBranch(stringResource(R.string.branch_repeat), action.actions, ref.child(index, Branch.BODY), callbacks, f)
                     else -> Unit

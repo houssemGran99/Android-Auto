@@ -41,6 +41,10 @@ class SpecFormatter(private val res: Resources) {
 
     fun triggerDetail(spec: TriggerSpec): String = when (spec) {
         is TriggerSpec.Time -> listOf(spec.at.toString(), days(spec.days)).joinToString(" · ")
+        is TriggerSpec.SunEvent -> listOf(
+            sunType(spec.type) + if (spec.offsetMinutes != 0) " " + s(R.string.offset_format, spec.offsetMinutes) else "",
+            days(spec.days),
+        ).joinToString(" · ")
         is TriggerSpec.Interval -> res.getQuantityString(R.plurals.every_minutes, spec.everyMinutes, spec.everyMinutes)
         is TriggerSpec.WifiConnected -> spec.ssid?.takeIf { it.isNotBlank() } ?: s(R.string.any_network)
         is TriggerSpec.WifiDisconnected -> spec.ssid?.takeIf { it.isNotBlank() } ?: s(R.string.any_network)
@@ -120,6 +124,12 @@ class SpecFormatter(private val res: Resources) {
             (if (spec.scope == VariableScope.LOCAL) " (${s(R.string.scope_local)})" else "")
         is ActionSpec.IfElse -> conditionSummary(spec.condition)
         is ActionSpec.Repeat -> res.getQuantityString(R.plurals.repeat_times, spec.times, spec.times)
+        is ActionSpec.While -> conditionSummary(spec.condition)
+        is ActionSpec.WaitUntil -> conditionSummary(spec.condition) + " · " + s(R.string.timeout_format, spec.timeoutSeconds)
+        ActionSpec.Stop -> ""
+        is ActionSpec.VariableOperation -> "\$${spec.name} · ${variableOp(spec.operation)}" +
+            (spec.target?.takeIf { it.isNotBlank() }?.let { " → \$$it" } ?: "")
+        is ActionSpec.ParseJson -> "${spec.source} › ${spec.path} → \$${spec.target}"
         is ActionSpec.DismissNotifications -> listOfNotNull(
             spec.appLabel.ifBlank { spec.packageName } ?: s(R.string.any_app),
             spec.textContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) },
@@ -240,6 +250,30 @@ class SpecFormatter(private val res: Resources) {
         },
     )
 
+    fun sunType(type: com.autoflow.core.model.SunEventType): String = s(
+        when (type) {
+            com.autoflow.core.model.SunEventType.SUNRISE -> R.string.sun_sunrise
+            com.autoflow.core.model.SunEventType.SUNSET -> R.string.sun_sunset
+        },
+    )
+
+    fun variableOp(op: com.autoflow.core.model.VariableOp): String = s(
+        when (op) {
+            com.autoflow.core.model.VariableOp.INCREMENT -> R.string.op_increment
+            com.autoflow.core.model.VariableOp.DECREMENT -> R.string.op_decrement
+            com.autoflow.core.model.VariableOp.APPEND -> R.string.op_append
+            com.autoflow.core.model.VariableOp.REPLACE -> R.string.op_replace
+            com.autoflow.core.model.VariableOp.UPPERCASE -> R.string.op_uppercase
+            com.autoflow.core.model.VariableOp.LOWERCASE -> R.string.op_lowercase
+            com.autoflow.core.model.VariableOp.TRIM -> R.string.op_trim
+            com.autoflow.core.model.VariableOp.SUBSTRING -> R.string.op_substring
+            com.autoflow.core.model.VariableOp.SPLIT -> R.string.op_split
+            com.autoflow.core.model.VariableOp.REGEX_EXTRACT -> R.string.op_regex
+            com.autoflow.core.model.VariableOp.LENGTH -> R.string.op_length
+            com.autoflow.core.model.VariableOp.URL_ENCODE -> R.string.op_url_encode
+        },
+    )
+
     fun duration(ms: Long): String = when {
         ms >= 3_600_000 && ms % 3_600_000 == 0L -> s(R.string.duration_hours, ms / 3_600_000)
         ms >= 60_000 && ms % 60_000 == 0L -> s(R.string.duration_minutes, ms / 60_000)
@@ -251,6 +285,7 @@ class SpecFormatter(private val res: Resources) {
         val TRIGGER_TITLES = mapOf(
             "TIME" to R.string.trigger_time,
             "INTERVAL" to R.string.trigger_interval,
+            "SUN_EVENT" to R.string.trigger_sun,
             "WIFI_CONNECTED" to R.string.trigger_wifi_connected,
             "WIFI_DISCONNECTED" to R.string.trigger_wifi_disconnected,
             "BLUETOOTH_CONNECTED" to R.string.trigger_bluetooth_connected,
@@ -286,6 +321,7 @@ class SpecFormatter(private val res: Resources) {
             "HEADPHONES_STATE" to R.string.condition_headphones,
             "VARIABLE" to R.string.condition_variable,
             "IF_ELSE" to R.string.action_if_else,
+            "WHILE" to R.string.action_while,
         )
 
         val ACTION_TITLES = mapOf(
@@ -305,6 +341,11 @@ class SpecFormatter(private val res: Resources) {
             "IF_ELSE" to R.string.action_if_else,
             "REPEAT" to R.string.action_repeat,
             "DISMISS_NOTIFICATIONS" to R.string.action_dismiss_notifications,
+            "WHILE" to R.string.action_while,
+            "WAIT_UNTIL" to R.string.action_wait_until,
+            "STOP" to R.string.action_stop,
+            "VARIABLE_OPERATION" to R.string.action_variable_operation,
+            "PARSE_JSON" to R.string.action_parse_json,
         )
 
         val INFO_TITLES = mapOf(

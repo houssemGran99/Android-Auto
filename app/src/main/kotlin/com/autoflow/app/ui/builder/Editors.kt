@@ -34,7 +34,9 @@ import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
 import com.autoflow.core.model.ThresholdDirection
 import com.autoflow.core.model.TriggerSpec
+import com.autoflow.core.model.SunEventType
 import com.autoflow.core.model.Variable
+import com.autoflow.core.model.VariableOp
 import com.autoflow.core.model.VariableScope
 import com.autoflow.platform.triggers.source.WifiTriggerSource
 
@@ -68,6 +70,7 @@ fun <T> SpecEditorDialog(
 
 fun isValidTrigger(spec: TriggerSpec): Boolean = when (spec) {
     is TriggerSpec.AppOpened -> spec.packageName.isNotBlank()
+    is TriggerSpec.SunEvent -> hasCoordinates(spec.latitude, spec.longitude)
     is TriggerSpec.LocationEnter -> isValidPlace(spec.place)
     is TriggerSpec.LocationExit -> isValidPlace(spec.place)
     else -> true
@@ -81,6 +84,19 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
             TimeField(stringResource(R.string.field_at), spec.at) { onChange(spec.copy(at = it)) }
             DaysSelector(spec.days, f) { onChange(spec.copy(days = it)) }
             Hint(stringResource(R.string.hint_exact_alarm))
+        }
+        is TriggerSpec.SunEvent -> {
+            SegmentedChoice(SunEventType.entries, spec.type, f::sunType) { onChange(spec.copy(type = it)) }
+            PercentSlider(
+                stringResource(R.string.field_offset),
+                spec.offsetMinutes,
+                { onChange(spec.copy(offsetMinutes = it)) },
+                -TriggerSpec.SunEvent.MAX_OFFSET_MINUTES..TriggerSpec.SunEvent.MAX_OFFSET_MINUTES,
+                suffix = " min",
+            )
+            DaysSelector(spec.days, f) { onChange(spec.copy(days = it)) }
+            CoordinatesEditor(spec.latitude, spec.longitude) { la, lo -> onChange(spec.copy(latitude = la, longitude = lo)) }
+            Hint(stringResource(R.string.hint_sun_event))
         }
         is TriggerSpec.Interval -> {
             NumberField(stringResource(R.string.field_every_minutes), spec.everyMinutes.toLong(), { onChange(TriggerSpec.Interval(it.toInt())) }, 1L..1440L)
@@ -219,6 +235,9 @@ fun isValidAction(spec: ActionSpec): Boolean = when (spec) {
     is ActionSpec.HttpRequest -> spec.url.startsWith("http://") || spec.url.startsWith("https://")
     is ActionSpec.Speak -> spec.text.isNotBlank()
     is ActionSpec.SetVariable -> Variable.isValidName(spec.name)
+    is ActionSpec.VariableOperation -> Variable.isValidName(spec.name) &&
+        (spec.target.isNullOrBlank() || Variable.isValidName(spec.target.orEmpty()))
+    is ActionSpec.ParseJson -> Variable.isValidName(spec.target) && spec.path.isNotBlank() && spec.source.isNotBlank()
     else -> true
 }
 
@@ -329,6 +348,55 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             { onChange(spec.copy(times = it.toInt())) },
             1L..ActionSpec.Repeat.MAX_REPEAT.toLong(),
         )
+        is ActionSpec.While -> {
+            Hint(stringResource(R.string.hint_while))
+            ConditionTreeEditor(
+                root = ConditionTree.asEditableRoot(spec.condition),
+                onChange = { onChange(spec.copy(condition = it)) },
+            )
+            NumberField(
+                stringResource(R.string.field_max_iterations),
+                spec.maxIterations.toLong(),
+                { onChange(spec.copy(maxIterations = it.toInt())) },
+                1L..ActionSpec.Repeat.MAX_REPEAT.toLong(),
+            )
+        }
+        is ActionSpec.WaitUntil -> {
+            Hint(stringResource(R.string.hint_wait_until))
+            ConditionTreeEditor(
+                root = ConditionTree.asEditableRoot(spec.condition),
+                onChange = { onChange(spec.copy(condition = it)) },
+            )
+            NumberField(
+                stringResource(R.string.field_timeout),
+                spec.timeoutSeconds.toLong(),
+                { onChange(spec.copy(timeoutSeconds = it.toInt())) },
+                1L..ActionSpec.WaitUntil.MAX_TIMEOUT_SECONDS.toLong(),
+            )
+            NumberField(
+                stringResource(R.string.field_check_interval),
+                spec.checkIntervalSeconds.toLong(),
+                { onChange(spec.copy(checkIntervalSeconds = it.toInt())) },
+                1L..3600L,
+            )
+        }
+        ActionSpec.Stop -> Hint(stringResource(R.string.hint_stop))
+        is ActionSpec.VariableOperation -> VariableOperationForm(spec, onChange)
+        is ActionSpec.ParseJson -> {
+            TextInput(
+                stringResource(R.string.field_json_source),
+                spec.source,
+                { onChange(spec.copy(source = it)) },
+                supporting = stringResource(R.string.hint_json_source),
+            )
+            TextInput(
+                stringResource(R.string.field_json_path),
+                spec.path,
+                { onChange(spec.copy(path = it.trim())) },
+                supporting = stringResource(R.string.hint_json_path),
+            )
+            TargetFields(spec.target, spec.scope, { onChange(spec.copy(target = it)) }) { onChange(spec.copy(scope = it)) }
+        }
         is ActionSpec.DismissNotifications -> {
             OptionalAppField(spec.packageName, spec.appLabel) { pkg, label -> onChange(spec.copy(packageName = pkg, appLabel = label)) }
             TextInput(
@@ -339,6 +407,65 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun VariableOperationForm(spec: ActionSpec.VariableOperation, onChange: (ActionSpec) -> Unit) {
+    val f = rememberSpecFormatter()
+    TextInput(
+        stringResource(R.string.field_name),
+        spec.name,
+        { onChange(spec.copy(name = it.trim().removePrefix("$"))) },
+        isError = spec.name.isNotEmpty() && !Variable.isValidName(spec.name),
+        supporting = stringResource(R.string.hint_variable_name),
+    )
+    DropdownField(stringResource(R.string.field_operation), VariableOp.entries, spec.operation, f::variableOp) {
+        onChange(spec.copy(operation = it))
+    }
+    val (label1, label2) = operationArguments(spec.operation)
+    label1?.let {
+        TextInput(stringResource(it), spec.argument1, { value -> onChange(spec.copy(argument1 = value)) })
+    }
+    label2?.let {
+        TextInput(stringResource(it), spec.argument2, { value -> onChange(spec.copy(argument2 = value)) })
+    }
+    TextInput(
+        stringResource(R.string.field_target_optional),
+        spec.target.orEmpty(),
+        { onChange(spec.copy(target = it.trim().removePrefix("$").ifEmpty { null })) },
+        supporting = stringResource(R.string.hint_target_optional),
+    )
+    ScopeChoice(spec.scope) { onChange(spec.copy(scope = it)) }
+}
+
+/** String resources labelling argument 1 and 2 of each operation (null = not used). */
+private fun operationArguments(op: VariableOp): Pair<Int?, Int?> = when (op) {
+    VariableOp.INCREMENT, VariableOp.DECREMENT -> R.string.arg_amount to null
+    VariableOp.APPEND -> R.string.arg_text to null
+    VariableOp.REPLACE -> R.string.arg_find to R.string.arg_replace_with
+    VariableOp.SUBSTRING -> R.string.arg_start to R.string.arg_end
+    VariableOp.SPLIT -> R.string.arg_separator to R.string.arg_index
+    VariableOp.REGEX_EXTRACT -> R.string.arg_regex to R.string.arg_group
+    VariableOp.UPPERCASE, VariableOp.LOWERCASE, VariableOp.TRIM, VariableOp.LENGTH, VariableOp.URL_ENCODE -> null to null
+}
+
+@Composable
+private fun TargetFields(target: String, scope: VariableScope, onTarget: (String) -> Unit, onScope: (VariableScope) -> Unit) {
+    TextInput(
+        stringResource(R.string.field_store_in),
+        target,
+        { onTarget(it.trim().removePrefix("$")) },
+        isError = target.isNotEmpty() && !Variable.isValidName(target),
+        supporting = stringResource(R.string.hint_variable_name),
+    )
+    ScopeChoice(scope, onScope)
+}
+
+@Composable
+private fun ScopeChoice(scope: VariableScope, onScope: (VariableScope) -> Unit) {
+    val globalLabel = stringResource(R.string.scope_global)
+    val localLabel = stringResource(R.string.scope_local)
+    SegmentedChoice(VariableScope.entries, scope, { if (it == VariableScope.GLOBAL) globalLabel else localLabel }, onScope)
 }
 
 /** App picker with an "any app" option (null package). */
