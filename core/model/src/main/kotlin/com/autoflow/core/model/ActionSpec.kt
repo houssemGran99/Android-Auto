@@ -32,6 +32,36 @@ enum class VariableScope {
 @Serializable
 enum class SettingsPanel { WIFI, BLUETOOTH, INTERNET, VOLUME, DISPLAY, BATTERY_SAVER, AIRPLANE_MODE, LOCATION }
 
+/** Operations of the "Variable operation" action. Arguments are placeholders-resolved text. */
+@Serializable
+enum class VariableOp {
+    /** value + argument1 (default 1). */
+    INCREMENT,
+
+    /** value - argument1 (default 1). */
+    DECREMENT,
+
+    /** value followed by argument1. */
+    APPEND,
+
+    /** Replaces every argument1 with argument2. */
+    REPLACE,
+    UPPERCASE,
+    LOWERCASE,
+    TRIM,
+
+    /** Characters from argument1 (0-based, inclusive) to argument2 (exclusive, optional). */
+    SUBSTRING,
+
+    /** Splits by argument1 and keeps the part at index argument2 (0-based). */
+    SPLIT,
+
+    /** First match of regex argument1; group argument2 (default 1 if the regex has groups, else 0). */
+    REGEX_EXTRACT,
+    LENGTH,
+    URL_ENCODE,
+}
+
 @Serializable
 sealed interface HttpAuth {
     @Serializable
@@ -183,6 +213,75 @@ sealed interface ActionSpec {
 
         override val children get() = thenActions + elseActions
     }
+
+    /** Repeats [actions] while [condition] is true, at most [maxIterations] times (protects against endless loops). */
+    @Serializable
+    @SerialName("WHILE")
+    data class While(
+        val condition: ConditionNode,
+        val actions: List<ActionSpec>,
+        val maxIterations: Int = DEFAULT_MAX_ITERATIONS,
+    ) : ActionSpec {
+        init {
+            require(maxIterations in 1..Repeat.MAX_REPEAT) { "Max iterations must be in 1..${Repeat.MAX_REPEAT}" }
+        }
+
+        override val capabilities: Set<Capability>
+            get() = condition.capabilities + actions.flatMap { it.capabilities }
+
+        override val children get() = actions
+
+        companion object {
+            const val DEFAULT_MAX_ITERATIONS = 100
+        }
+    }
+
+    /** Pauses until [condition] is true, re-checking every [checkIntervalSeconds]; fails after [timeoutSeconds]. */
+    @Serializable
+    @SerialName("WAIT_UNTIL")
+    data class WaitUntil(
+        val condition: ConditionNode,
+        val timeoutSeconds: Int = 300,
+        val checkIntervalSeconds: Int = 10,
+    ) : ActionSpec {
+        init {
+            require(timeoutSeconds in 1..MAX_TIMEOUT_SECONDS) { "Timeout must be in 1..$MAX_TIMEOUT_SECONDS seconds" }
+            require(checkIntervalSeconds in 1..3600) { "Check interval must be in 1..3600 seconds" }
+        }
+
+        override val capabilities get() = condition.capabilities
+
+        companion object {
+            const val MAX_TIMEOUT_SECONDS = 24 * 3600
+        }
+    }
+
+    /** Ends the run here; remaining actions are skipped and the run still counts as successful. */
+    @Serializable
+    @SerialName("STOP")
+    data object Stop : ActionSpec
+
+    /** Applies [operation] to variable [name] and stores the result in [target] (default: [name]). */
+    @Serializable
+    @SerialName("VARIABLE_OPERATION")
+    data class VariableOperation(
+        val name: String,
+        val operation: VariableOp,
+        val argument1: String = "",
+        val argument2: String = "",
+        val target: String? = null,
+        val scope: VariableScope = VariableScope.GLOBAL,
+    ) : ActionSpec
+
+    /** Reads [path] (dot notation, e.g. `data.items.0.name`) from the JSON in [source] into [target]. */
+    @Serializable
+    @SerialName("PARSE_JSON")
+    data class ParseJson(
+        val source: String,
+        val path: String,
+        val target: String,
+        val scope: VariableScope = VariableScope.LOCAL,
+    ) : ActionSpec
 
     @Serializable
     @SerialName("REPEAT")

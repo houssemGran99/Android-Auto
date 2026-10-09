@@ -91,9 +91,9 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
 | `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `VARIABLE` |
-| `ActionSpec` (sealed) | `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
+| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
 | `Variable` | `$name` user variable, optionally secret (encrypted, never exported) |
 | `ExecutionRecord` / `ExecutionStep` | History: status (SUCCESS / PARTIAL / FAILED / SKIPPED) and per-step log |
@@ -165,6 +165,7 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 
 | Trigger | API | Status | Notes |
 |---|---|---|---|
+| Sunrise / sunset (± offset, days) | NOAA solar equations (engine) + `AlarmManager` | ✅ | Computed offline from coordinates stored with the trigger (picked once with "use current location" or typed). Polar day/night skips to the next real sunrise/sunset. Accuracy ≈ 1 min. |
 | Time / days / interval | `AlarmManager.setExactAndAllowWhileIdle` | ✅ / 🔐 | Exact needs "Alarms & reminders" (`SCHEDULE_EXACT_ALARM`, denied by default on 14+). Falls back to inexact `setAndAllowWhileIdle`. Alarms are re-created after boot, update, time/zone change. |
 | Wi-Fi connected/disconnected | `ConnectivityManager.registerNetworkCallback` | ✅ / 🔐 | Requires a running process → foreground service. SSID needs `ACCESS_FINE_LOCATION` (+ background location to read it while not visible) – an Android rule. |
 | Bluetooth device connected | `ACTION_ACL_CONNECTED/DISCONNECTED` | 🔐 | `BLUETOOTH_CONNECT` on Android 12+. |
@@ -195,7 +196,7 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Vibrate | `Vibrator` / `VibratorManager` | ✅ | |
 | Dismiss notifications | `NotificationListenerService.cancelNotification` | 🔐 | Only clearable notifications of other apps, optional app / text filter. |
 | HTTP request | OkHttp | ✅ | GET/POST/PUT/PATCH/DELETE, headers, query, body, Basic/Bearer, timeout, response → variables, 1 MB cap. Cleartext HTTP is blocked by Android's default network policy. |
-| Delay, variables, If/Else, Repeat | engine | ✅ | |
+| Delay, variables, If/Else, Repeat, While (iteration cap), Wait until (timeout), Stop, variable operations (increment/decrement, append, replace, case, trim, substring, split, regex extract, length, URL-encode), Read JSON value | engine | ✅ | |
 
 ### Not possible for regular apps on modern Android (alternatives offered in the UI)
 

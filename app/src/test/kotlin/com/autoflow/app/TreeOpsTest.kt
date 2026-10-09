@@ -57,4 +57,14 @@ class TreeOpsTest {
         actions = ActionTree.move(actions, ActionListRef(), 2, 0)
         assertEquals(ActionSpec.Repeat::class, actions[0]::class)
     }
+
+    @Test
+    fun whileBodiesAreEditableAndKeptWhenTheConditionChanges() {
+        val loop = ActionSpec.While(charging, emptyList())
+        val body = ActionListRef().child(0, Branch.BODY)
+        var actions: List<ActionSpec> = ActionTree.add(listOf(loop), body, ActionSpec.Stop)
+        actions = ActionTree.replaceKeepingChildren(actions, ActionListRef(), 0, loop.copy(condition = battery, maxIterations = 7))
+        assertEquals(listOf(ActionSpec.Stop), ActionTree.list(actions, body))
+        assertEquals(7, (actions[0] as ActionSpec.While).maxIterations)
+    }
 }

@@ -6,6 +6,9 @@ import com.autoflow.core.engine.condition.ConditionEvaluator
 import com.autoflow.core.engine.condition.ConditionTrace
 import com.autoflow.core.engine.variable.ExpressionEvaluator
 import com.autoflow.core.engine.variable.ExpressionException
+import com.autoflow.core.engine.variable.JsonPath
+import com.autoflow.core.engine.variable.VariableOperations
+import com.autoflow.core.model.VariableScope
 import com.autoflow.core.model.ActionResult
 import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.FailureKind
@@ -26,12 +29,18 @@ data class PipelineResult(
     val warnings: Int = 0,
     val failed: Int = 0,
     val aborted: Boolean = false,
+    /** A Stop action ended the run (not an error). */
+    val stopped: Boolean = false,
 ) {
+    /** Remaining actions must not run. */
+    val halted: Boolean get() = aborted || stopped
+
     operator fun plus(other: PipelineResult) = PipelineResult(
         succeeded + other.succeeded,
         warnings + other.warnings,
         failed + other.failed,
         aborted || other.aborted,
+        stopped || other.stopped,
     )
 }
 
@@ -57,6 +66,7 @@ class ActionPipeline(
             coroutineContext.ensureActive()
             val result = runAction(action, context, recorder, stopOnError, depth)
             total += result
+            if (result.stopped) return total
             if (result.aborted || (stopOnError && result.failed > 0)) {
                 recorder.add(StepKind.INFO, "ABORTED", StepStatus.INFO, "Stopped after failing action")
                 return total.copy(aborted = true)
@@ -97,15 +107,77 @@ class ActionPipeline(
             is ActionSpec.Repeat -> {
                 var total = PipelineResult()
                 for (index in 0 until action.times) {
-                    context.setVariable(LOOP_VARIABLE, (index + 1).toString(), com.autoflow.core.model.VariableScope.LOCAL)
+                    context.setVariable(LOOP_VARIABLE, (index + 1).toString(), VariableScope.LOCAL)
                     val iteration = run(action.actions, context, recorder, stopOnError, depth + 1)
                     total += iteration
-                    if (iteration.aborted) break
+                    if (iteration.halted) break
                 }
                 total
             }
+            is ActionSpec.While -> runWhile(action, context, recorder, stopOnError, depth)
+            is ActionSpec.WaitUntil -> record(recorder, action, waitUntil(action, context))
+            ActionSpec.Stop -> {
+                recorder.add(StepKind.ACTION, action.typeKey, StepStatus.INFO, "Remaining actions skipped")
+                PipelineResult(stopped = true)
+            }
+            is ActionSpec.VariableOperation -> record(recorder, action, VariableOperations.apply(action, context))
+            is ActionSpec.ParseJson -> record(recorder, action, parseJson(action, context))
             else -> record(recorder, action, dispatch(action, context))
         }
+    }
+
+    private suspend fun runWhile(
+        action: ActionSpec.While,
+        context: AutomationContext,
+        recorder: StepRecorder,
+        stopOnError: Boolean,
+        depth: Int,
+    ): PipelineResult {
+        var total = PipelineResult()
+        var iterations = 0
+        while (true) {
+            context.refreshDeviceStateSafely()
+            if (!conditionEvaluator.evaluate(action.condition, context)) break
+            if (iterations == action.maxIterations) {
+                recorder.add(StepKind.ACTION, action.typeKey, StepStatus.WARNING, "Stopped after ${action.maxIterations} iterations")
+                return total + PipelineResult(warnings = 1)
+            }
+            iterations++
+            context.setVariable(LOOP_VARIABLE, iterations.toString(), VariableScope.LOCAL)
+            val iteration = run(action.actions, context, recorder, stopOnError, depth + 1)
+            total += iteration
+            if (iteration.halted) return total
+        }
+        recorder.add(StepKind.CONDITION, action.typeKey, StepStatus.INFO, "$iterations iteration(s)")
+        return total
+    }
+
+    private suspend fun waitUntil(action: ActionSpec.WaitUntil, context: AutomationContext): ActionResult {
+        val intervalMs = action.checkIntervalSeconds * 1000L
+        val timeoutMs = action.timeoutSeconds * 1000L
+        var waitedMs = 0L
+        while (true) {
+            context.refreshDeviceStateSafely()
+            if (conditionEvaluator.evaluate(action.condition, context)) return ActionResult.Success("after ${waitedMs / 1000} s")
+            if (waitedMs >= timeoutMs) {
+                return ActionResult.Failure(FailureKind.TIMEOUT, "Condition still false after ${action.timeoutSeconds} s")
+            }
+            val step = minOf(intervalMs, timeoutMs - waitedMs)
+            delay(step)
+            waitedMs += step
+        }
+    }
+
+    private suspend fun parseJson(action: ActionSpec.ParseJson, context: AutomationContext): ActionResult {
+        if (!Variable.isValidName(action.target)) {
+            return ActionResult.Failure(FailureKind.INVALID_CONFIGURATION, "Invalid variable name '${action.target}'")
+        }
+        val json = context.resolve(action.source)
+        val path = context.resolve(action.path).split('.').filter { it.isNotBlank() }
+        val value = JsonPath.extract(json, path)
+            ?: return ActionResult.Failure(FailureKind.ERROR, "Path '${path.joinToString(".")}' not found or not JSON")
+        context.setVariable(action.target, value, action.scope)
+        return ActionResult.Success("${action.target} = ${value.take(PREVIEW_LENGTH)}")
     }
 
     private suspend fun dispatch(action: ActionSpec, context: AutomationContext): ActionResult {
@@ -168,5 +240,6 @@ class ActionPipeline(
         const val DEFAULT_ACTION_TIMEOUT_MS = 120_000L
         const val MAX_DEPTH = 16
         const val LOOP_VARIABLE = "loop"
+        private const val PREVIEW_LENGTH = 80
     }
 }

@@ -81,7 +81,7 @@ object ConditionTree {
 
 enum class Branch { THEN, ELSE, BODY }
 
-/** Identifies an action list: the root list or a nested branch of an If/Else or Repeat. */
+/** Identifies an action list: the root list or a nested branch of an If/Else, Repeat or While. */
 data class ActionListRef(val steps: List<Pair<Int, Branch>> = emptyList()) {
     fun child(index: Int, branch: Branch) = ActionListRef(steps + (index to branch))
 }
@@ -107,6 +107,7 @@ object ActionTree {
                 Branch.BODY -> parent
             }
             is ActionSpec.Repeat -> if (branch == Branch.BODY) parent.copy(actions = update(parent.actions, rest, transform)) else parent
+            is ActionSpec.While -> if (branch == Branch.BODY) parent.copy(actions = update(parent.actions, rest, transform)) else parent
             else -> parent
         }
         return root.toMutableList().also { it[index] = updated }
@@ -124,6 +125,7 @@ object ActionTree {
             existing is ActionSpec.IfElse && action is ActionSpec.IfElse ->
                 action.copy(thenActions = existing.thenActions, elseActions = existing.elseActions)
             existing is ActionSpec.Repeat && action is ActionSpec.Repeat -> action.copy(actions = existing.actions)
+            existing is ActionSpec.While && action is ActionSpec.While -> action.copy(actions = existing.actions)
             else -> action
         }
         return replace(root, ref, index, merged)
@@ -139,6 +141,7 @@ object ActionTree {
     private fun branchOf(action: ActionSpec, branch: Branch): List<ActionSpec> = when (action) {
         is ActionSpec.IfElse -> if (branch == Branch.ELSE) action.elseActions else action.thenActions
         is ActionSpec.Repeat -> action.actions
+        is ActionSpec.While -> action.actions
         else -> emptyList()
     }
 }

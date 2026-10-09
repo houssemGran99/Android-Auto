@@ -57,6 +57,9 @@ data class GeoPlace(
 enum class ThresholdDirection { BELOW, ABOVE }
 
 @Serializable
+enum class SunEventType { SUNRISE, SUNSET }
+
+@Serializable
 enum class HeadphoneKind { ANY, WIRED, BLUETOOTH }
 
 /**
@@ -77,6 +80,33 @@ sealed interface TriggerSpec {
     ) : TriggerSpec {
         override val family get() = TriggerFamily.TIME
         override val capabilities get() = setOf(Capability.EXACT_ALARMS)
+    }
+
+    /**
+     * Fires at sunrise or sunset (plus [offsetMinutes], may be negative) for the given coordinates.
+     * Computed offline; the coordinates are saved with the trigger so no location access is needed later.
+     */
+    @Serializable
+    @SerialName("SUN_EVENT")
+    data class SunEvent(
+        val type: SunEventType,
+        val latitude: Double,
+        val longitude: Double,
+        val offsetMinutes: Int = 0,
+        val days: Set<Weekday> = emptySet(),
+    ) : TriggerSpec {
+        init {
+            require(latitude in -90.0..90.0) { "Latitude must be between -90 and 90" }
+            require(longitude in -180.0..180.0) { "Longitude must be between -180 and 180" }
+            require(offsetMinutes in -MAX_OFFSET_MINUTES..MAX_OFFSET_MINUTES) { "Offset must be within ±$MAX_OFFSET_MINUTES minutes" }
+        }
+
+        override val family get() = TriggerFamily.TIME
+        override val capabilities get() = setOf(Capability.EXACT_ALARMS)
+
+        companion object {
+            const val MAX_OFFSET_MINUTES = 180
+        }
     }
 
     /** Fires repeatedly every [everyMinutes] minutes. */

@@ -20,6 +20,7 @@ val TriggerSpec.typeKey: String
         is TriggerSpec.NotificationReceived -> "NOTIFICATION_RECEIVED"
         is TriggerSpec.CalendarEventStart -> "CALENDAR_EVENT_START"
         is TriggerSpec.CalendarEventEnd -> "CALENDAR_EVENT_END"
+        is TriggerSpec.SunEvent -> "SUN_EVENT"
     }
 
 val ConditionNode.typeKey: String
@@ -55,4 +56,9 @@ val ActionSpec.typeKey: String
         is ActionSpec.IfElse -> "IF_ELSE"
         is ActionSpec.Repeat -> "REPEAT"
         is ActionSpec.DismissNotifications -> "DISMISS_NOTIFICATIONS"
+        is ActionSpec.While -> "WHILE"
+        is ActionSpec.WaitUntil -> "WAIT_UNTIL"
+        ActionSpec.Stop -> "STOP"
+        is ActionSpec.VariableOperation -> "VARIABLE_OPERATION"
+        is ActionSpec.ParseJson -> "PARSE_JSON"
     }

@@ -17,6 +17,12 @@ import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.ClearAll
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.EventAvailable
+import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.material.icons.outlined.DataArray
+import androidx.compose.material.icons.outlined.Loop
+import androidx.compose.material.icons.outlined.PauseCircle
+import androidx.compose.material.icons.outlined.StopCircle
+import androidx.compose.material.icons.outlined.WbTwilight
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.LocationOff
@@ -41,6 +47,7 @@ object SpecIcons {
     fun trigger(typeKey: String): ImageVector = when (typeKey) {
         "TIME" -> Icons.Outlined.Schedule
         "INTERVAL" -> Icons.Outlined.Timer
+        "SUN_EVENT" -> Icons.Outlined.WbTwilight
         "WIFI_CONNECTED" -> Icons.Outlined.Wifi
         "WIFI_DISCONNECTED" -> Icons.Outlined.WifiOff
         "BLUETOOTH_CONNECTED", "BLUETOOTH_DISCONNECTED" -> Icons.Outlined.Bluetooth
@@ -86,6 +93,11 @@ object SpecIcons {
         "IF_ELSE" -> Icons.Outlined.AccountTree
         "REPEAT" -> Icons.Outlined.Repeat
         "DISMISS_NOTIFICATIONS" -> Icons.Outlined.ClearAll
+        "WHILE" -> Icons.Outlined.Loop
+        "WAIT_UNTIL" -> Icons.Outlined.PauseCircle
+        "STOP" -> Icons.Outlined.StopCircle
+        "VARIABLE_OPERATION" -> Icons.Outlined.Calculate
+        "PARSE_JSON" -> Icons.Outlined.DataArray
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

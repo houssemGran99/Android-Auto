@@ -218,7 +218,14 @@ fun BuilderScreen(
                 }
             }
 
-            AddDialogs(adding, onDismiss = { adding = null }) { picked ->
+            AddDialogs(
+                adding,
+                onDismiss = { adding = null },
+                onAddDirectly = { ref, action ->
+                    adding = null
+                    viewModel.addAction(ref, action)
+                },
+            ) { picked ->
                 adding = null
                 editing = picked
             }
@@ -251,7 +258,12 @@ fun BuilderScreen(
 }
 
 @Composable
-private fun AddDialogs(adding: Adding?, onDismiss: () -> Unit, onPicked: (Editing) -> Unit) {
+private fun AddDialogs(
+    adding: Adding?,
+    onDismiss: () -> Unit,
+    onAddDirectly: (ActionListRef, ActionSpec) -> Unit,
+    onPicked: (Editing) -> Unit,
+) {
     val f = rememberSpecFormatter()
     when (adding) {
         Adding.Trigger -> AddItemDialog(
@@ -267,7 +279,9 @@ private fun AddDialogs(adding: Adding?, onDismiss: () -> Unit, onPicked: (Editin
             items = BuilderCatalog.actions,
             itemTitle = { it.title?.let(f::res) ?: f.actionTypeTitle(it.typeKey) },
             itemIcon = { SpecIcons.action(it.typeKey) },
-            onPick = { onPicked(Editing.NewAction(adding.ref, it.create())) },
+            onPick = { item ->
+                if (item.needsConfiguration) onPicked(Editing.NewAction(adding.ref, item.create())) else onAddDirectly(adding.ref, item.create())
+            },
             onDismiss = onDismiss,
         )
         null -> Unit
