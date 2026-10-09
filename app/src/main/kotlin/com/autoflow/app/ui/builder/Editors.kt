@@ -106,6 +106,17 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
             SegmentedChoice(HeadphoneKind.entries, spec.kind, f::headphoneKind) { onChange(spec.copy(kind = it)) }
         is TriggerSpec.HeadphonesDisconnected ->
             SegmentedChoice(HeadphoneKind.entries, spec.kind, f::headphoneKind) { onChange(spec.copy(kind = it)) }
+        is TriggerSpec.NotificationReceived -> {
+            OptionalAppField(spec.packageName, spec.appLabel) { pkg, label -> onChange(spec.copy(packageName = pkg, appLabel = label)) }
+            TextInput(
+                stringResource(R.string.field_text_contains),
+                spec.textContains.orEmpty(),
+                { onChange(spec.copy(textContains = it.ifEmpty { null })) },
+                supporting = stringResource(R.string.hint_notification_trigger),
+            )
+        }
+        is TriggerSpec.CalendarEventStart -> CalendarFilterField(spec.titleContains) { onChange(spec.copy(titleContains = it)) }
+        is TriggerSpec.CalendarEventEnd -> CalendarFilterField(spec.titleContains) { onChange(spec.copy(titleContains = it)) }
         is TriggerSpec.LocationEnter -> PlaceEditor(spec.place) { onChange(spec.copy(place = it)) }
         is TriggerSpec.LocationExit -> PlaceEditor(spec.place) { onChange(spec.copy(place = it)) }
     }
@@ -318,7 +329,39 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             { onChange(spec.copy(times = it.toInt())) },
             1L..ActionSpec.Repeat.MAX_REPEAT.toLong(),
         )
+        is ActionSpec.DismissNotifications -> {
+            OptionalAppField(spec.packageName, spec.appLabel) { pkg, label -> onChange(spec.copy(packageName = pkg, appLabel = label)) }
+            TextInput(
+                stringResource(R.string.field_text_contains),
+                spec.textContains.orEmpty(),
+                { onChange(spec.copy(textContains = it.ifEmpty { null })) },
+                supporting = stringResource(R.string.hint_dismiss_notifications),
+            )
+        }
     }
+}
+
+/** App picker with an "any app" option (null package). */
+@Composable
+private fun OptionalAppField(packageName: String?, label: String, onChange: (String?, String) -> Unit) {
+    AppPickerField(packageName.orEmpty(), label.ifBlank { stringResource(R.string.any_app) }) {
+        onChange(it.packageName, it.label)
+    }
+    if (!packageName.isNullOrBlank()) {
+        TextButton(onClick = { onChange(null, "") }) { Text(stringResource(R.string.use_any_app)) }
+    } else {
+        Hint(stringResource(R.string.any_app_selected))
+    }
+}
+
+@Composable
+private fun CalendarFilterField(titleContains: String?, onChange: (String?) -> Unit) {
+    TextInput(
+        stringResource(R.string.field_title_contains),
+        titleContains.orEmpty(),
+        { onChange(it.ifEmpty { null }) },
+        supporting = stringResource(R.string.hint_calendar_trigger),
+    )
 }
 
 private enum class AuthType { NONE, BASIC, BEARER }

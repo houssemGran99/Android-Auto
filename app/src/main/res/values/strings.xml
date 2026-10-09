@@ -109,6 +109,7 @@
     <string name="category_device">Device</string>
     <string name="category_audio">Audio</string>
     <string name="category_web">Web</string>
+    <string name="category_calendar">Calendar</string>
     <string name="category_location">Location</string>
     <string name="category_restricted">Not allowed by Android</string>
 
@@ -134,6 +135,9 @@
     <string name="trigger_app_opened">App opened</string>
     <string name="trigger_headphones_connected">Headphones connected</string>
     <string name="trigger_headphones_disconnected">Headphones disconnected</string>
+    <string name="trigger_notification">Notification received</string>
+    <string name="trigger_calendar_start">Calendar event starts</string>
+    <string name="trigger_calendar_end">Calendar event ends</string>
     <string name="trigger_location_enter">Arrive at a place</string>
     <string name="trigger_location_exit">Leave a place</string>
     <string name="place_detail">%1$s · %2$d m</string>
@@ -188,6 +192,7 @@
     <string name="action_set_variable">Set variable</string>
     <string name="action_if_else">If / Else</string>
     <string name="action_repeat">Repeat</string>
+    <string name="action_dismiss_notifications">Dismiss notifications</string>
     <string name="stream_media">Media</string>
     <string name="stream_ring">Ringtone</string>
     <string name="stream_notification">Notifications</string>
@@ -249,6 +254,16 @@
     <string name="use_current_location">Use current location</string>
     <string name="current_location_unknown">Could not get your location. Turn on location, grant permission, or type the coordinates.</string>
     <string name="hint_geofence">Android checks places in the background with low power, so arrival may be detected a few minutes late. Use a radius of at least 100 m. Location is only used on the device to detect these places.</string>
+    <string name="field_text_contains">Text contains (optional)</string>
+    <string name="field_title_contains">Event title contains (optional)</string>
+    <string name="any_app">Any app</string>
+    <string name="use_any_app">Use any app</string>
+    <string name="any_app_selected">Matches every app. Pick one to narrow it down.</string>
+    <string name="any_event">Any event</string>
+    <string name="contains_format">contains \"%1$s\"</string>
+    <string name="hint_notification_trigger" formatted="false">Searched in the notification title and text, ignoring case. Use %notification_title%, %notification_text% and %notification_app% in actions. Ongoing notifications (music, downloads) are ignored.</string>
+    <string name="hint_dismiss_notifications">Only notifications that can be swiped away are dismissed.</string>
+    <string name="hint_calendar_trigger" formatted="false">Runs at the exact start or end time (allow \"Alarms &amp; reminders\"). New events are picked up within an hour. Use %event_title% and %event_location% in actions.</string>
     <string name="field_device_name">Device name or address</string>
     <string name="field_threshold">Threshold</string>
     <string name="field_level">Level</string>
@@ -320,6 +335,11 @@
     <string name="template_battery_notification" formatted="false">Battery is at %battery%%. Brightness reduced.</string>
     <string name="template_charging_title">Charging at night</string>
     <string name="template_charging_description">Charger connected between 22:00 and 07:00 → Do Not Disturb and minimum brightness.</string>
+    <string name="template_meeting_title">Silent meetings</string>
+    <string name="template_meeting_description">When a calendar event starts → Do Not Disturb on; when it ends → off again.</string>
+    <string name="template_read_messages_title">Read messages aloud</string>
+    <string name="template_read_messages_description">A WhatsApp notification arrives while headphones are connected → speak who wrote and what.</string>
+    <string name="template_read_messages_speech" formatted="false">Message from %notification_title%: %notification_text%</string>
     <string name="template_http_title">Report to a web service</string>
     <string name="template_http_description">Every hour → POST battery status as JSON to your own endpoint (edit the URL first).</string>
 
@@ -417,6 +437,8 @@
     <string name="family_app">apps</string>
     <string name="family_headphones">headphones</string>
     <string name="family_location">places</string>
+    <string name="family_notification">notifications</string>
+    <string name="family_calendar">calendar</string>
     <string name="geofence_permission_missing">Place triggers are paused: allow location \"All the time\" in Settings › Permissions.</string>
     <string name="geofence_location_off">Place triggers are paused because location is turned off on this device.</string>
     <string name="geofence_failed">Place triggers could not be registered. Google Play services may be missing or outdated.</string>

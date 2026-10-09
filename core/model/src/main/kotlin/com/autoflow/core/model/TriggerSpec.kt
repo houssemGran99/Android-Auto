@@ -16,10 +16,17 @@ enum class TriggerFamily {
 
     /** Geofences registered with Google Play services; delivered by the system, no service needed. */
     LOCATION,
+
+    /** Delivered to a NotificationListenerService that the system keeps bound. */
+    NOTIFICATION,
+
+    /** Event start/end times scheduled with AlarmManager. */
+    CALENDAR,
     ;
 
     /** True when the family can only be observed while a monitoring service is running. */
-    val needsMonitoringService: Boolean get() = this != TIME && this != LOCATION
+    val needsMonitoringService: Boolean
+        get() = this != TIME && this != LOCATION && this != NOTIFICATION && this != CALENDAR
 }
 
 /** A named circular area used by location triggers. */
@@ -164,6 +171,37 @@ sealed interface TriggerSpec {
     @SerialName("HEADPHONES_DISCONNECTED")
     data class HeadphonesDisconnected(val kind: HeadphoneKind = HeadphoneKind.ANY) : TriggerSpec {
         override val family get() = TriggerFamily.HEADPHONES
+    }
+
+    /**
+     * A notification was posted. [packageName] = null matches any app; [textContains]
+     * (case-insensitive) is searched in the title and the text.
+     */
+    @Serializable
+    @SerialName("NOTIFICATION_RECEIVED")
+    data class NotificationReceived(
+        val packageName: String? = null,
+        val appLabel: String = "",
+        val textContains: String? = null,
+    ) : TriggerSpec {
+        override val family get() = TriggerFamily.NOTIFICATION
+        override val capabilities get() = setOf(Capability.NOTIFICATION_LISTENER)
+    }
+
+    /** A calendar event starts; [titleContains] (case-insensitive) filters by event title. */
+    @Serializable
+    @SerialName("CALENDAR_EVENT_START")
+    data class CalendarEventStart(val titleContains: String? = null) : TriggerSpec {
+        override val family get() = TriggerFamily.CALENDAR
+        override val capabilities get() = setOf(Capability.CALENDAR, Capability.EXACT_ALARMS)
+    }
+
+    /** A calendar event ends; [titleContains] (case-insensitive) filters by event title. */
+    @Serializable
+    @SerialName("CALENDAR_EVENT_END")
+    data class CalendarEventEnd(val titleContains: String? = null) : TriggerSpec {
+        override val family get() = TriggerFamily.CALENDAR
+        override val capabilities get() = setOf(Capability.CALENDAR, Capability.EXACT_ALARMS)
     }
 
     /** Fires when the device enters (arrives at) [place]. */

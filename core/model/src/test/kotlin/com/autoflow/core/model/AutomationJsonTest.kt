@@ -67,6 +67,27 @@ class AutomationJsonTest {
         assertTrue(Capability.BACKGROUND_LOCATION in automation.requiredCapabilities)
     }
 
+    @Test
+    fun `notification and calendar specs round trip`() {
+        val automation = Automation(
+            id = "n",
+            name = "N",
+            triggers = listOf(
+                TriggerSpec.NotificationReceived("com.whatsapp", "WhatsApp", "urgent"),
+                TriggerSpec.CalendarEventStart("meeting"),
+                TriggerSpec.CalendarEventEnd(),
+            ),
+            actions = listOf(ActionSpec.DismissNotifications("com.whatsapp")),
+        )
+        val decoded = AutomationJson.decodeBundle(AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation))))
+        assertEquals(automation, decoded.automations.single())
+        assertTrue(automation.triggerFamilies.none { it.needsMonitoringService })
+        assertEquals(
+            setOf(Capability.NOTIFICATION_LISTENER, Capability.CALENDAR, Capability.EXACT_ALARMS),
+            automation.requiredCapabilities,
+        )
+    }
+
     @Test(expected = InvalidAutomationFileException::class)
     fun `out of range coordinates are rejected`() {
         AutomationJson.decodeBundle(

@@ -13,6 +13,7 @@ object BuiltInVariables {
     val NAMES: List<String> = listOf(
         "battery", "charging", "wifi", "ssid", "bluetooth", "headphones", "volume", "brightness",
         "latitude", "longitude", "location", "time", "date", "datetime", "day", "timestamp", "device", "android", "automation", "trigger",
+        "notification_app", "notification_title", "notification_text", "event_title", "event_location",
     )
 
     private val TIME = DateTimeFormatter.ofPattern("HH:mm")
@@ -50,6 +51,11 @@ object BuiltInVariables {
         "android" -> state.osVersion
         "automation" -> automationName
         "trigger" -> event.key
+        "notification_app" -> (event as? TriggerEvent.NotificationPosted)?.let { it.appLabel.ifBlank { it.packageName } }
+        "notification_title" -> (event as? TriggerEvent.NotificationPosted)?.title
+        "notification_text" -> (event as? TriggerEvent.NotificationPosted)?.text
+        "event_title" -> (event as? TriggerEvent.CalendarEvent)?.title
+        "event_location" -> (event as? TriggerEvent.CalendarEvent)?.location
         else -> if (name.startsWith(TRIGGER_PREFIX)) event.details[name.removePrefix(TRIGGER_PREFIX)] else null
     }
 

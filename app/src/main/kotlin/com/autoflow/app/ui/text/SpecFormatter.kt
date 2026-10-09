@@ -54,11 +54,20 @@ class SpecFormatter(private val res: Resources) {
         is TriggerSpec.AppOpened -> spec.appLabel.ifBlank { spec.packageName }
         is TriggerSpec.HeadphonesConnected -> headphoneKind(spec.kind)
         is TriggerSpec.HeadphonesDisconnected -> headphoneKind(spec.kind)
+        is TriggerSpec.NotificationReceived -> listOfNotNull(
+            spec.appLabel.ifBlank { spec.packageName } ?: s(R.string.any_app),
+            spec.textContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) },
+        ).joinToString(" · ")
+        is TriggerSpec.CalendarEventStart -> calendarFilter(spec.titleContains)
+        is TriggerSpec.CalendarEventEnd -> calendarFilter(spec.titleContains)
         is TriggerSpec.LocationEnter -> place(spec.place)
         is TriggerSpec.LocationExit -> place(spec.place)
     }
 
     fun place(place: com.autoflow.core.model.GeoPlace): String = s(R.string.place_detail, place.name, place.radiusMeters)
+
+    private fun calendarFilter(titleContains: String?): String =
+        titleContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) } ?: s(R.string.any_event)
 
     fun triggerEvent(key: String): String = EVENT_TITLES[key]?.let(::s) ?: key
     // endregion
@@ -111,6 +120,10 @@ class SpecFormatter(private val res: Resources) {
             (if (spec.scope == VariableScope.LOCAL) " (${s(R.string.scope_local)})" else "")
         is ActionSpec.IfElse -> conditionSummary(spec.condition)
         is ActionSpec.Repeat -> res.getQuantityString(R.plurals.repeat_times, spec.times, spec.times)
+        is ActionSpec.DismissNotifications -> listOfNotNull(
+            spec.appLabel.ifBlank { spec.packageName } ?: s(R.string.any_app),
+            spec.textContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) },
+        ).joinToString(" · ")
     }
     // endregion
 
@@ -250,6 +263,9 @@ class SpecFormatter(private val res: Resources) {
             "HEADPHONES_DISCONNECTED" to R.string.trigger_headphones_disconnected,
             "LOCATION_ENTER" to R.string.trigger_location_enter,
             "LOCATION_EXIT" to R.string.trigger_location_exit,
+            "NOTIFICATION_RECEIVED" to R.string.trigger_notification,
+            "CALENDAR_EVENT_START" to R.string.trigger_calendar_start,
+            "CALENDAR_EVENT_END" to R.string.trigger_calendar_end,
         )
 
         val EVENT_TITLES = TRIGGER_TITLES + mapOf(
@@ -288,6 +304,7 @@ class SpecFormatter(private val res: Resources) {
             "SET_VARIABLE" to R.string.action_set_variable,
             "IF_ELSE" to R.string.action_if_else,
             "REPEAT" to R.string.action_repeat,
+            "DISMISS_NOTIFICATIONS" to R.string.action_dismiss_notifications,
         )
 
         val INFO_TITLES = mapOf(

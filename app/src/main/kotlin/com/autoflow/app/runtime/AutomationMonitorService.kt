@@ -121,6 +121,8 @@ class AutomationMonitorService : Service() {
             TriggerFamily.APP -> R.string.family_app
             TriggerFamily.HEADPHONES -> R.string.family_headphones
             TriggerFamily.LOCATION -> R.string.family_location
+            TriggerFamily.NOTIFICATION -> R.string.family_notification
+            TriggerFamily.CALENDAR -> R.string.family_calendar
         }
     }
 }

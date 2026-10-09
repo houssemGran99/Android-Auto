@@ -187,6 +187,46 @@ class AutomationEngineTest {
     }
 
     @Test
+    fun `notification trigger filters by app and text, never logs content`() = runTest {
+        val readOut = Automation(
+            id = "wa",
+            name = "Read WhatsApp",
+            triggers = listOf(TriggerSpec.NotificationReceived(packageName = "com.whatsapp", textContains = "urgent")),
+            actions = listOf(ActionSpec.ShowNotification("Echo", "%notification_app%: %notification_title% - %notification_text%")),
+        )
+        val h = harness(readOut)
+        val other = TriggerEvent.NotificationPosted("com.other", "Other", "URGENT", "x")
+        assertTrue(h.engine.handleEvent(other).isEmpty())
+        assertTrue(h.engine.handleEvent(TriggerEvent.NotificationPosted("com.whatsapp", "WhatsApp", "Mom", "hello")).isEmpty())
+
+        val record = h.engine.handleEvent(TriggerEvent.NotificationPosted("com.whatsapp", "WhatsApp", "Mom", "Urgent: call me")).single()
+        assertEquals(listOf("WhatsApp: Mom - Urgent: call me"), shownNotifications)
+        // Notification content stays out of the history.
+        assertEquals("package=com.whatsapp", record.triggerDetail)
+        assertTrue(record.steps.none { it.message.contains("call me") })
+    }
+
+    @Test
+    fun `calendar events target one automation and filter by direction and title`() = runTest {
+        val meetings = Automation(
+            id = "meet",
+            name = "Meetings",
+            triggers = listOf(TriggerSpec.CalendarEventStart("meeting"), TriggerSpec.CalendarEventEnd()),
+            actions = listOf(ActionSpec.ShowNotification("Cal", "%event_title% @ %event_location%")),
+        )
+        val h = harness(meetings)
+        fun event(index: Int, started: Boolean, title: String) =
+            TriggerEvent.CalendarEvent("meet", index, started, title, "Room 1")
+
+        assertEquals(1, h.engine.handleEvent(event(0, true, "Team Meeting")).size)
+        assertTrue(h.engine.handleEvent(event(0, true, "Lunch")).isEmpty())
+        assertTrue(h.engine.handleEvent(event(0, false, "Team Meeting")).isEmpty())
+        assertEquals(1, h.engine.handleEvent(event(1, false, "Lunch")).size)
+        assertEquals(listOf("Team Meeting @ Room 1", "Lunch @ Room 1"), shownNotifications)
+        assertTrue(h.executions.records.value.all { it.triggerDetail.isEmpty() })
+    }
+
+    @Test
     fun `failures are reported and stopOnError aborts`() = runTest {
         val failing = registry {
             register<ActionSpec.SetBrightness> { _, _ -> throw SecurityException("WRITE_SETTINGS not granted") }

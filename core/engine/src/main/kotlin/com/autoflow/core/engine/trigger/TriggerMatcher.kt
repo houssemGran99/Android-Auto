@@ -12,6 +12,8 @@ class TriggerMatcher {
         // Time and location triggers are delivered as events addressed to one automation.
         is TriggerSpec.Time, is TriggerSpec.Interval -> false
         is TriggerSpec.LocationEnter, is TriggerSpec.LocationExit -> false
+        is TriggerSpec.CalendarEventStart, is TriggerSpec.CalendarEventEnd -> false
+        is TriggerSpec.NotificationReceived -> event is TriggerEvent.NotificationPosted && notificationMatches(spec, event)
         is TriggerSpec.WifiConnected -> event is TriggerEvent.WifiConnected && ssidMatches(spec.ssid, event.ssid)
         is TriggerSpec.WifiDisconnected -> event is TriggerEvent.WifiDisconnected && ssidMatches(spec.ssid, event.ssid)
         is TriggerSpec.BluetoothConnected ->
@@ -33,6 +35,24 @@ class TriggerMatcher {
         is TriggerSpec.LocationExit -> !event.entered
         else -> false
     }
+
+    fun matchesCalendar(spec: TriggerSpec, event: TriggerEvent.CalendarEvent): Boolean = when (spec) {
+        is TriggerSpec.CalendarEventStart -> event.started && containsOrBlank(event.title, spec.titleContains)
+        is TriggerSpec.CalendarEventEnd -> !event.started && containsOrBlank(event.title, spec.titleContains)
+        else -> false
+    }
+
+    private fun notificationMatches(spec: TriggerSpec.NotificationReceived, event: TriggerEvent.NotificationPosted): Boolean {
+        val packageOk = spec.packageName.isNullOrBlank() || spec.packageName == event.packageName
+        val needle = spec.textContains?.trim().orEmpty()
+        val textOk = needle.isEmpty() ||
+            event.title.contains(needle, ignoreCase = true) ||
+            event.text.contains(needle, ignoreCase = true)
+        return packageOk && textOk
+    }
+
+    private fun containsOrBlank(value: String, needle: String?): Boolean =
+        needle.isNullOrBlank() || value.contains(needle.trim(), ignoreCase = true)
 
     private fun ssidMatches(wanted: String?, actual: String?): Boolean {
         val expected = normalizeSsid(wanted) ?: return true
