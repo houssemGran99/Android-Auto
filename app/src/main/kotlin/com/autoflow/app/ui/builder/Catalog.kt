@@ -44,6 +44,9 @@ object BuilderCatalog {
         CatalogItem("HEADPHONES_CONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesConnected(HeadphoneKind.ANY) },
         CatalogItem("HEADPHONES_DISCONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesDisconnected(HeadphoneKind.ANY) },
         CatalogItem("APP_OPENED", R.string.category_apps) { TriggerSpec.AppOpened(packageName = "") },
+        CatalogItem("NOTIFICATION_RECEIVED", R.string.category_notifications) { TriggerSpec.NotificationReceived() },
+        CatalogItem("CALENDAR_EVENT_START", R.string.category_calendar) { TriggerSpec.CalendarEventStart() },
+        CatalogItem("CALENDAR_EVENT_END", R.string.category_calendar) { TriggerSpec.CalendarEventEnd() },
         CatalogItem("LOCATION_ENTER", R.string.category_location) { TriggerSpec.LocationEnter(NEW_PLACE) },
         CatalogItem("LOCATION_EXIT", R.string.category_location) { TriggerSpec.LocationExit(NEW_PLACE) },
     )
@@ -70,6 +73,7 @@ object BuilderCatalog {
 
     val actions: List<CatalogItem<ActionSpec>> = listOf(
         CatalogItem("NOTIFICATION", R.string.category_notifications) { ActionSpec.ShowNotification("", "") },
+        CatalogItem("DISMISS_NOTIFICATIONS", R.string.category_notifications) { ActionSpec.DismissNotifications() },
         CatalogItem("LAUNCH_APP", R.string.category_apps) { ActionSpec.LaunchApp(packageName = "") },
         CatalogItem("OPEN_URL", R.string.category_apps) { ActionSpec.OpenUrl("https://") },
         CatalogItem("OPEN_SETTINGS", R.string.category_apps) { ActionSpec.OpenSettings(SettingsPanel.WIFI) },

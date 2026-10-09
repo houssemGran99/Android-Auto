@@ -37,6 +37,15 @@ class AutomationRunWorker(
             SOURCE_TIME -> engine.handleEvent(
                 TriggerEvent.TimeAlarm(automationId, inputData.getLong(KEY_SCHEDULED_AT, System.currentTimeMillis())),
             )
+            SOURCE_CALENDAR -> engine.handleEvent(
+                TriggerEvent.CalendarEvent(
+                    automationId = automationId,
+                    triggerIndex = inputData.getInt(KEY_TRIGGER_INDEX, -1),
+                    started = inputData.getBoolean(KEY_STARTED, true),
+                    title = inputData.getString(KEY_TITLE).orEmpty(),
+                    location = inputData.getString(KEY_LOCATION).orEmpty(),
+                ),
+            )
             SOURCE_LOCATION -> engine.handleEvent(
                 TriggerEvent.LocationTransition(
                     automationId = automationId,
@@ -60,6 +69,10 @@ class AutomationRunWorker(
         private const val KEY_SCHEDULED_AT = "scheduled_at"
         private const val SOURCE_TIME = "time"
         private const val SOURCE_LOCATION = "location"
+        private const val SOURCE_CALENDAR = "calendar"
+        private const val KEY_STARTED = "started"
+        private const val KEY_TITLE = "title"
+        private const val KEY_LOCATION = "event_location"
         private const val KEY_TRIGGER_INDEX = "trigger_index"
         private const val KEY_ENTERED = "entered"
         private const val KEY_PLACE = "place"
@@ -77,6 +90,18 @@ class AutomationRunWorker(
                 KEY_TRIGGER_INDEX to event.triggerIndex,
                 KEY_ENTERED to event.entered,
                 KEY_PLACE to event.placeName,
+            ),
+        )
+
+        fun enqueueCalendarEvent(context: Context, event: TriggerEvent.CalendarEvent) = enqueue(
+            context,
+            workDataOf(
+                KEY_AUTOMATION_ID to event.automationId,
+                KEY_SOURCE to SOURCE_CALENDAR,
+                KEY_TRIGGER_INDEX to event.triggerIndex,
+                KEY_STARTED to event.started,
+                KEY_TITLE to event.title,
+                KEY_LOCATION to event.location,
             ),
         )
 

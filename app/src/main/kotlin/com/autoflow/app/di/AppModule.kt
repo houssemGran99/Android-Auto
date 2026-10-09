@@ -3,7 +3,9 @@ package com.autoflow.app.di
 import android.content.Context
 import com.autoflow.app.runtime.AndroidEngineLogger
 import com.autoflow.app.runtime.AppForegroundTracker
+import com.autoflow.app.runtime.CalendarAlarmReceiver
 import com.autoflow.app.runtime.GeofenceReceiver
+import com.autoflow.app.runtime.NotificationListenerBridge
 import com.autoflow.app.runtime.TimeTriggerReceiver
 import com.autoflow.core.engine.AutomationEngine
 import com.autoflow.core.engine.DeviceStateProvider
@@ -25,6 +27,7 @@ import com.autoflow.platform.actions.OkHttpExecutor
 import com.autoflow.platform.actions.PlatformActions
 import com.autoflow.platform.permissions.PermissionManager
 import com.autoflow.platform.triggers.AndroidDeviceStateProvider
+import com.autoflow.platform.triggers.CalendarScheduler
 import com.autoflow.platform.triggers.CurrentLocation
 import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
@@ -106,7 +109,9 @@ object AppModule {
         @ApplicationContext context: Context,
         permissions: PermissionManager,
         foregroundTracker: AppForegroundTracker,
-    ): ActionRegistry = PlatformActions.registry(context, permissions, OkHttpExecutor(), foregroundTracker::isInForeground)
+        notifications: NotificationListenerBridge,
+    ): ActionRegistry =
+        PlatformActions.registry(context, permissions, OkHttpExecutor(), notifications, foregroundTracker::isInForeground)
 
     @Provides
     @Singleton
@@ -153,6 +158,13 @@ object AppModule {
         @ApplicationContext context: Context,
         permissions: PermissionManager,
     ): GeofenceScheduler = GeofenceScheduler(context, GeofenceReceiver::class.java, permissions)
+
+    @Provides
+    @Singleton
+    fun calendarScheduler(
+        @ApplicationContext context: Context,
+        permissions: PermissionManager,
+    ): CalendarScheduler = CalendarScheduler(context, CalendarAlarmReceiver::class.java, permissions)
 
     @Provides
     @Singleton

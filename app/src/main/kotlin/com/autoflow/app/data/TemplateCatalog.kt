@@ -6,6 +6,7 @@ import com.autoflow.app.R
 import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.AudioStream
 import com.autoflow.core.model.Automation
+import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.HeadphoneKind
 import com.autoflow.core.model.HttpMethod
@@ -126,6 +127,32 @@ class TemplateCatalog @Inject constructor(@ApplicationContext private val contex
                 ),
             )
         },
+        AutomationTemplate("meeting_silence", R.string.template_meeting_title, R.string.template_meeting_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_meeting_title,
+                R.string.template_meeting_description,
+                triggers = listOf(TriggerSpec.CalendarEventStart(), TriggerSpec.CalendarEventEnd()),
+                actions = listOf(
+                    // One automation for both edges: %trigger% tells whether the event started or ended.
+                    ActionSpec.IfElse(
+                        condition = ConditionNode.VariableCompare("trigger", Comparison.EQUALS, "CALENDAR_EVENT_START"),
+                        thenActions = listOf(ActionSpec.SetDoNotDisturb(true)),
+                        elseActions = listOf(ActionSpec.SetDoNotDisturb(false)),
+                    ),
+                ),
+            )
+        },
+        AutomationTemplate("read_messages", R.string.template_read_messages_title, R.string.template_read_messages_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_read_messages_title,
+                R.string.template_read_messages_description,
+                triggers = listOf(TriggerSpec.NotificationReceived(WHATSAPP, "WhatsApp")),
+                condition = ConditionNode.And(listOf(ConditionNode.HeadphonesState(connected = true))),
+                actions = listOf(ActionSpec.Speak(ctx.getString(R.string.template_read_messages_speech))),
+            )
+        },
         AutomationTemplate("http_report", R.string.template_http_title, R.string.template_http_description) { ctx ->
             automation(
                 ctx,
@@ -166,5 +193,6 @@ class TemplateCatalog @Inject constructor(@ApplicationContext private val contex
     private companion object {
         const val SPOTIFY = "com.spotify.music"
         const val TEAMS = "com.microsoft.teams"
+        const val WHATSAPP = "com.whatsapp"
     }
 }

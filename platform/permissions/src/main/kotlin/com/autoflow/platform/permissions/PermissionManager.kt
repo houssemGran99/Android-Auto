@@ -84,6 +84,9 @@ class PermissionManager(context: Context) {
         } else {
             CapabilityStatus.UNAVAILABLE
         }
+        Capability.NOTIFICATION_LISTENER ->
+            (context.packageName in NotificationManagerCompat.getEnabledListenerPackages(context)).toStatus()
+        Capability.CALENDAR -> granted(Manifest.permission.READ_CALENDAR).toStatus()
     }
 
     fun isSatisfied(capability: Capability): Boolean =
@@ -130,6 +133,8 @@ class PermissionManager(context: Context) {
         } else {
             null
         }
+        Capability.NOTIFICATION_LISTENER -> GrantRequest.SettingsScreen(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        Capability.CALENDAR -> GrantRequest.Runtime(listOf(Manifest.permission.READ_CALENDAR))
     }
 
     /** App details page: fallback when a runtime permission was permanently denied. */
@@ -185,6 +190,20 @@ class PermissionManager(context: Context) {
             },
             R.string.capability_background_start_denied,
         )
+        Capability.NOTIFICATION_LISTENER -> CapabilityInfo(
+            R.string.capability_notification_listener_title,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                R.string.capability_notification_listener_rationale_restricted
+            } else {
+                R.string.capability_notification_listener_rationale
+            },
+            R.string.capability_notification_listener_denied,
+        )
+        Capability.CALENDAR -> CapabilityInfo(
+            R.string.capability_calendar_title,
+            R.string.capability_calendar_rationale,
+            R.string.capability_calendar_denied,
+        )
     }
 
     /** Battery optimizations can delay or stop the monitoring service on some devices. */
@@ -202,6 +221,11 @@ class PermissionManager(context: Context) {
 
     fun canStartActivitiesFromBackground(): Boolean =
         backgroundActivityStartSupported() && Settings.canDrawOverlays(context)
+
+    private companion object {
+        /** Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS (public since API 22, constant hidden in older SDK stubs). */
+        const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+    }
 
     private fun hasUsageAccess(): Boolean {
         val appOps = context.getSystemService(AppOpsManager::class.java)

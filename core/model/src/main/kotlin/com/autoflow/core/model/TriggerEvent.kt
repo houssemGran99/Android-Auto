@@ -11,6 +11,9 @@ sealed interface TriggerEvent {
     /** Event details exposed as `%trigger_<name>%` variables. */
     val details: Map<String, String> get() = emptyMap()
 
+    /** Details safe to persist in the execution history (private content excluded). */
+    val loggedDetails: Map<String, String> get() = details
+
     /** Run requested explicitly by the user (button, widget, quick action). */
     data class Manual(val source: String) : TriggerEvent {
         override val key get() = "MANUAL"
@@ -64,6 +67,31 @@ sealed interface TriggerEvent {
     data class HeadphonesConnected(val kind: HeadphoneKind, val name: String?) : TriggerEvent {
         override val key get() = "HEADPHONES_CONNECTED"
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())
+    }
+
+    /** Another app posted a notification. Its content is available to actions but never written to history. */
+    data class NotificationPosted(
+        val packageName: String,
+        val appLabel: String,
+        val title: String,
+        val text: String,
+    ) : TriggerEvent {
+        override val key get() = "NOTIFICATION_RECEIVED"
+        override val details get() = mapOf("package" to packageName, "app" to appLabel, "title" to title, "text" to text)
+        override val loggedDetails get() = mapOf("package" to packageName)
+    }
+
+    /** A calendar event started (or ended) for the trigger at [triggerIndex] of one automation. */
+    data class CalendarEvent(
+        val automationId: String,
+        val triggerIndex: Int,
+        val started: Boolean,
+        val title: String,
+        val location: String,
+    ) : TriggerEvent {
+        override val key get() = if (started) "CALENDAR_EVENT_START" else "CALENDAR_EVENT_END"
+        override val details get() = mapOf("title" to title, "location" to location)
+        override val loggedDetails get() = emptyMap<String, String>()
     }
 
     /**

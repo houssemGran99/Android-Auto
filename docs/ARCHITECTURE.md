@@ -91,9 +91,9 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
 | `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `VARIABLE` |
-| `ActionSpec` (sealed) | `NOTIFICATION`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
+| `ActionSpec` (sealed) | `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
 | `Variable` | `$name` user variable, optionally secret (encrypted, never exported) |
 | `ExecutionRecord` / `ExecutionStep` | History: status (SUCCESS / PARTIAL / FAILED / SKIPPED) and per-step log |
@@ -102,7 +102,7 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 
 ### Variables
 
-* `%latitude%`, `%longitude%`, `%location%` (last known location, only with permission), `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
+* `%notification_app%`, `%notification_title%`, `%notification_text%`, `%event_title%`, `%event_location%` (from the triggering event), `%latitude%`, `%longitude%`, `%location%` (last known location, only with permission), `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
   `%headphones%`, `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
   `%automation%`, `%trigger%`, `%trigger_<detail>%` (e.g. `%trigger_ssid%`, `%trigger_package%`).
   The trailing `%` is optional (`%battery`).
@@ -171,6 +171,8 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 | Battery level / charger | `ACTION_BATTERY_CHANGED`, `ACTION_POWER_(DIS)CONNECTED` | ✅ | Registered-receiver-only broadcasts since Android 8 → foreground service. Threshold fires on crossing. |
 | Headphones | `AudioManager.registerAudioDeviceCallback` | ✅ | Wired, USB and Bluetooth (A2DP / LE) without permissions. |
 | Arrive at / leave a place | Play services `GeofencingClient` | 🔐 ⚠️ | Needs fine **and** background location ("Allow all the time"). Delivered to a broadcast receiver by the system — no monitoring service. Android detects transitions with low power, so they can be a few minutes late; radius ≥ 100 m. Geofences are re-registered after boot, app update, location toggling (`PROVIDERS_CHANGED`) and whenever the app opens; no initial trigger, so re-registering never fires "arrive" again. |
+| Notification received (any app / specific app / text) | `NotificationListenerService` | 🔐 | User enables "Notification access". The system binds the listener itself (no foreground service). Android 13+ blocks this for sideloaded apps until "Allow restricted settings" is enabled in App info — the permission card explains it. Ongoing notifications, group summaries and silent updates are ignored; content is available to actions as variables but **never written to history**. |
+| Calendar event starts / ends (title filter) | `CalendarContract.Instances` + `AlarmManager` | 🔐 | `READ_CALENDAR`. Exact alarm at the next matching start/end (recurring events expanded by the provider, 8-day look-ahead); re-scheduled after each alarm, hourly via WorkManager, on boot and when the app opens. |
 | App opened | `UsageStatsManager.queryEvents` | 🔐 ⚠️ | Needs Usage access. No broadcast exists, so it polls every 2 s while the screen is on. AccessibilityService is deliberately **not** used. |
 
 **Background execution:** monitoring uses a `specialUse` foreground service with a visible,
@@ -191,6 +193,7 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Text-to-speech | `TextToSpeech` | ✅ | Waits until speech finishes. |
 | Play sound | `MediaPlayer` + `RingtoneManager` default sounds | ✅ | Max duration enforced. |
 | Vibrate | `Vibrator` / `VibratorManager` | ✅ | |
+| Dismiss notifications | `NotificationListenerService.cancelNotification` | 🔐 | Only clearable notifications of other apps, optional app / text filter. |
 | HTTP request | OkHttp | ✅ | GET/POST/PUT/PATCH/DELETE, headers, query, body, Basic/Bearer, timeout, response → variables, 1 MB cap. Cleartext HTTP is blocked by Android's default network policy. |
 | Delay, variables, If/Else, Repeat | engine | ✅ | |
 
@@ -211,8 +214,6 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Feature | Constraint |
 |---|---|
 | SMS / calls | `RECEIVE_SMS`, `SEND_SMS`, `READ_PHONE_STATE`, `READ_CALL_LOG` – restricted by Google Play policy unless the app is a default handler or qualifies for an exception |
-| Notification triggers | `NotificationListenerService` with explicit user enablement |
-| Calendar | `READ_CALENDAR` + `CalendarContract` |
 | Camera / microphone | Only from a visible activity or a `camera`/`microphone` foreground service with a visible notification; never hidden |
 | Files | Storage Access Framework (user-picked folders) |
 | Sunrise / sunset | Computable offline from coarse location |

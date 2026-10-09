@@ -14,7 +14,11 @@ import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.ClearAll
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.EventAvailable
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.LocationOff
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.MusicNote
@@ -45,6 +49,9 @@ object SpecIcons {
         "CHARGER_DISCONNECTED" -> Icons.Outlined.PowerOff
         "APP_OPENED" -> Icons.Outlined.Apps
         "HEADPHONES_CONNECTED", "HEADPHONES_DISCONNECTED" -> Icons.Outlined.Headphones
+        "NOTIFICATION_RECEIVED" -> Icons.Outlined.NotificationsActive
+        "CALENDAR_EVENT_START" -> Icons.Outlined.Event
+        "CALENDAR_EVENT_END" -> Icons.Outlined.EventAvailable
         "LOCATION_ENTER" -> Icons.Outlined.LocationOn
         "LOCATION_EXIT" -> Icons.Outlined.LocationOff
         else -> Icons.AutoMirrored.Outlined.Rule
@@ -78,6 +85,7 @@ object SpecIcons {
         "SET_VARIABLE" -> Icons.Outlined.DataObject
         "IF_ELSE" -> Icons.Outlined.AccountTree
         "REPEAT" -> Icons.Outlined.Repeat
+        "DISMISS_NOTIFICATIONS" -> Icons.Outlined.ClearAll
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

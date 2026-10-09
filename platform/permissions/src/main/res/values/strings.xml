@@ -36,4 +36,13 @@
     <string name="capability_background_start_rationale">Android blocks apps from opening other apps or screens while in the background. With this permission AutoFlow can open them directly; without it you get a tap-to-open notification instead.</string>
     <string name="capability_background_start_unavailable">This Android version does not let automation apps open other apps from the background. AutoFlow shows a tap-to-open notification instead.</string>
     <string name="capability_background_start_denied">Apps and links will open through a notification you tap.</string>
+
+    <string name="capability_notification_listener_title">Notification access</string>
+    <string name="capability_notification_listener_rationale">Lets AutoFlow see notifications from other apps so they can trigger automations, and dismiss them when an automation asks to. Notification content stays on the device and is never saved in the history.</string>
+    <string name="capability_notification_listener_rationale_restricted">Lets AutoFlow see notifications from other apps so they can trigger automations, and dismiss them when an automation asks to. Content stays on the device and is never saved in the history. If Android shows \"Restricted setting\", open App info › ⋮ › Allow restricted settings first (required for apps installed outside the Play Store).</string>
+    <string name="capability_notification_listener_denied">Notification triggers and \"Dismiss notifications\" cannot work until notification access is enabled.</string>
+
+    <string name="capability_calendar_title">Calendar</string>
+    <string name="capability_calendar_rationale">Needed to read the start and end times and titles of your calendar events for calendar triggers. AutoFlow only reads; it never changes or uploads your calendar.</string>
+    <string name="capability_calendar_denied">Calendar triggers cannot work until calendar permission is granted.</string>
 </resources>

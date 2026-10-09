@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.CallSuper
+import com.autoflow.platform.triggers.CalendarScheduler
 import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,5 +73,19 @@ class GeofenceReceiver : InjectingReceiver() {
         GeofenceScheduler.parse(intent, geofenceScheduler::placeName).forEach { event ->
             AutomationRunWorker.enqueueLocationTransition(context, event)
         }
+    }
+}
+
+/** Receives calendar start/end alarms, runs the trigger and schedules the next occurrence. */
+@AndroidEntryPoint
+class CalendarAlarmReceiver : InjectingReceiver() {
+    @Inject lateinit var coordinator: TriggerCoordinator
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        val event = CalendarScheduler.parse(intent) ?: return
+        AutomationRunWorker.enqueueCalendarEvent(context, event)
+        val pending = goAsync()
+        coordinator.refresh().invokeOnCompletion { pending.finish() }
     }
 }

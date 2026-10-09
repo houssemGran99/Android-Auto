@@ -5,6 +5,7 @@ import com.autoflow.core.engine.action.ActionRegistry
 import com.autoflow.core.engine.http.HttpExecutor
 import com.autoflow.core.engine.http.HttpRequestActionHandler
 import com.autoflow.core.model.ActionSpec
+import com.autoflow.platform.actions.handler.DismissNotificationsActionHandler
 import com.autoflow.platform.actions.handler.LaunchAppActionHandler
 import com.autoflow.platform.actions.handler.OpenSettingsActionHandler
 import com.autoflow.platform.actions.handler.OpenUrlActionHandler
@@ -23,6 +24,7 @@ object PlatformActions {
         context: Context,
         permissions: PermissionManager,
         httpExecutor: HttpExecutor,
+        notifications: NotificationController,
         isAppInForeground: () -> Boolean,
     ): ActionRegistry {
         val appContext = context.applicationContext
@@ -39,6 +41,7 @@ object PlatformActions {
             .register<ActionSpec.PlaySound>(PlaySoundActionHandler(appContext))
             .register<ActionSpec.Vibrate>(VibrateActionHandler(appContext))
             .register<ActionSpec.HttpRequest>(HttpRequestActionHandler(httpExecutor))
+            .register<ActionSpec.DismissNotifications>(DismissNotificationsActionHandler(notifications, appContext.packageName))
             .build()
     }
 }

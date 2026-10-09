@@ -17,6 +17,9 @@ val TriggerSpec.typeKey: String
         is TriggerSpec.HeadphonesDisconnected -> "HEADPHONES_DISCONNECTED"
         is TriggerSpec.LocationEnter -> "LOCATION_ENTER"
         is TriggerSpec.LocationExit -> "LOCATION_EXIT"
+        is TriggerSpec.NotificationReceived -> "NOTIFICATION_RECEIVED"
+        is TriggerSpec.CalendarEventStart -> "CALENDAR_EVENT_START"
+        is TriggerSpec.CalendarEventEnd -> "CALENDAR_EVENT_END"
     }
 
 val ConditionNode.typeKey: String
@@ -51,4 +54,5 @@ val ActionSpec.typeKey: String
         is ActionSpec.SetVariable -> "SET_VARIABLE"
         is ActionSpec.IfElse -> "IF_ELSE"
         is ActionSpec.Repeat -> "REPEAT"
+        is ActionSpec.DismissNotifications -> "DISMISS_NOTIFICATIONS"
     }

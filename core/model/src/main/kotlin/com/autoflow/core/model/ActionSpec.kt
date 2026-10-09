@@ -85,6 +85,17 @@ sealed interface ActionSpec {
         override val capabilities get() = setOf(Capability.BACKGROUND_ACTIVITY_START, Capability.NOTIFICATIONS)
     }
 
+    /** Dismisses other apps' notifications; null filters match everything that can be dismissed. */
+    @Serializable
+    @SerialName("DISMISS_NOTIFICATIONS")
+    data class DismissNotifications(
+        val packageName: String? = null,
+        val appLabel: String = "",
+        val textContains: String? = null,
+    ) : ActionSpec {
+        override val capabilities get() = setOf(Capability.NOTIFICATION_LISTENER)
+    }
+
     @Serializable
     @SerialName("SET_BRIGHTNESS")
     data class SetBrightness(val percent: Int) : ActionSpec {

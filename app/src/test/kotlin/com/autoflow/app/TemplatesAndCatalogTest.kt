@@ -27,12 +27,24 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34], application = Application::class)
 class TemplatesAndCatalogTest {
+    private object NoNotifications : com.autoflow.platform.actions.NotificationController {
+        override val isConnected = false
+        override fun activeNotifications() = emptyList<com.autoflow.platform.actions.ActiveNotification>()
+        override fun dismiss(key: String) = Unit
+    }
+
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun everyTemplateIsValidRunnableAndRoundTrips() {
         val catalog = TemplateCatalog(context)
-        val registry = PlatformActions.registry(context, PermissionManager(context), HttpExecutor { HttpResponse(200, "") }, { false })
+        val registry = PlatformActions.registry(
+            context,
+            PermissionManager(context),
+            HttpExecutor { HttpResponse(200, "") },
+            NoNotifications,
+            { false },
+        )
         val engineHandled = setOf(ActionSpec.Delay::class, ActionSpec.SetVariable::class, ActionSpec.IfElse::class, ActionSpec.Repeat::class)
 
         catalog.templates.forEach { template ->

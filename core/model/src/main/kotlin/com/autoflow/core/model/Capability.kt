@@ -38,4 +38,10 @@ enum class Capability(val optional: Boolean) {
      * the background; without it, a tap-to-open notification is shown instead.
      */
     BACKGROUND_ACTIVITY_START(optional = true),
+
+    /** Notification access (NotificationListenerService), needed to see and dismiss other apps' notifications. */
+    NOTIFICATION_LISTENER(optional = false),
+
+    /** READ_CALENDAR, needed for calendar event triggers. */
+    CALENDAR(optional = false),
 }

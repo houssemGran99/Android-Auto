@@ -76,6 +76,11 @@ class AutomationEngine(
     suspend fun findMatching(event: TriggerEvent): List<Automation> = when (event) {
         is TriggerEvent.TimeAlarm -> listOfNotNull(automations.get(event.automationId))
             .filter { it.enabled && TriggerFamily.TIME in it.triggerFamilies }
+        is TriggerEvent.CalendarEvent -> listOfNotNull(automations.get(event.automationId))
+            .filter { automation ->
+                val trigger = automation.triggers.getOrNull(event.triggerIndex)
+                automation.enabled && trigger != null && triggerMatcher.matchesCalendar(trigger, event)
+            }
         is TriggerEvent.LocationTransition -> listOfNotNull(automations.get(event.automationId))
             .filter { automation ->
                 val trigger = automation.triggers.getOrNull(event.triggerIndex)
@@ -188,6 +193,6 @@ class AutomationEngine(
         }
 
         fun describe(event: TriggerEvent): String =
-            event.details.filterValues { it.isNotEmpty() }.entries.joinToString { "${it.key}=${it.value}" }
+            event.loggedDetails.filterValues { it.isNotEmpty() }.entries.joinToString { "${it.key}=${it.value}" }
     }
 }

@@ -8,8 +8,9 @@ import com.autoflow.app.di.ApplicationScope
 import com.autoflow.app.widget.QuickActionsWidget
 import com.autoflow.core.engine.repository.AutomationRepository
 import com.autoflow.core.model.Automation
-import com.autoflow.core.model.TriggerFamily
 import com.autoflow.data.storage.settings.SettingsRepository
+import com.autoflow.core.model.TriggerFamily
+import com.autoflow.platform.triggers.CalendarScheduler
 import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,6 +35,8 @@ import javax.inject.Singleton
  * Keeps OS registrations in sync with the stored automations:
  *  - time triggers → AlarmManager (no service needed)
  *  - location triggers → Play services geofences (no service needed)
+ *  - calendar triggers → AlarmManager at the next event start/end, refreshed hourly
+ *  - notification triggers → system-bound NotificationListenerService (nothing to register)
  *  - Wi-Fi / Bluetooth / battery / charger / headphones / app triggers → foreground monitoring service,
  *    which runs only while at least one enabled automation needs it.
  */
@@ -44,6 +47,7 @@ class TriggerCoordinator @Inject constructor(
     private val settings: SettingsRepository,
     private val timeScheduler: TimeTriggerScheduler,
     private val geofenceScheduler: GeofenceScheduler,
+    private val calendarScheduler: CalendarScheduler,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
     private val started = AtomicBoolean(false)
@@ -92,6 +96,8 @@ class TriggerCoordinator @Inject constructor(
             Log.w(TAG, "Could not schedule alarms", e)
         }
         _geofenceStatus.value = geofenceScheduler.refresh(active)
+        calendarScheduler.refresh(active)
+        CalendarRefreshWorker.schedule(context, active.any { TriggerFamily.CALENDAR in it.triggerFamilies })
         val families = active.flatMapTo(mutableSetOf()) { it.triggerFamilies }
             .filterTo(mutableSetOf()) { it.needsMonitoringService }
         val previous = _monitoredFamilies.getAndUpdate { families }
