@@ -56,6 +56,9 @@ class SpecFormatter(private val res: Resources) {
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> ""
         TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> ""
+        TriggerSpec.ScreenOn, TriggerSpec.ScreenOff, TriggerSpec.DeviceUnlocked -> ""
+        is TriggerSpec.Shake -> shakeSensitivity(spec.sensitivity)
+        is TriggerSpec.Flip -> flipPosition(spec.position)
         is TriggerSpec.FileAdded -> listOfNotNull(
             folder(spec.folderLabel),
             spec.nameContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) },
@@ -102,6 +105,8 @@ class SpecFormatter(private val res: Resources) {
         }
         is ConditionNode.BluetoothState -> s(if (node.enabled) R.string.state_on else R.string.state_off)
         is ConditionNode.HeadphonesState -> s(if (node.connected) R.string.state_connected else R.string.state_disconnected)
+        is ConditionNode.ScreenState -> s(if (node.on) R.string.state_on else R.string.state_off)
+        is ConditionNode.DeviceLocked -> s(if (node.locked) R.string.state_locked else R.string.state_unlocked)
         is ConditionNode.FileExists ->
             "${folder(node.folderLabel)}/${node.fileName} " + s(if (node.exists) R.string.state_exists else R.string.state_missing)
         is ConditionNode.MusicPlaying -> s(if (node.playing) R.string.state_playing else R.string.state_not_playing)
@@ -131,6 +136,9 @@ class SpecFormatter(private val res: Resources) {
             spec.maxMinutes.takeIf { it > 0 }?.let { duration(it * 60_000L) },
         ).joinToString(" · ")
         ActionSpec.StopMusic -> ""
+        is ActionSpec.SetScreenTimeout -> duration(spec.seconds * 1000L)
+        ActionSpec.LockScreen -> ""
+        is ActionSpec.Flashlight -> flashlightMode(spec.mode)
         is ActionSpec.WriteFile -> "${folder(spec.folderLabel)}/${spec.fileName}" +
             (if (spec.append) " (${s(R.string.field_append_short)})" else "")
         is ActionSpec.ReadFile -> "${folder(spec.folderLabel)}/${spec.fileName} → \$${spec.target}"
@@ -269,6 +277,29 @@ class SpecFormatter(private val res: Resources) {
         },
     )
 
+    fun shakeSensitivity(value: com.autoflow.core.model.ShakeSensitivity): String = s(
+        when (value) {
+            com.autoflow.core.model.ShakeSensitivity.LOW -> R.string.sensitivity_low
+            com.autoflow.core.model.ShakeSensitivity.MEDIUM -> R.string.sensitivity_medium
+            com.autoflow.core.model.ShakeSensitivity.HIGH -> R.string.sensitivity_high
+        },
+    )
+
+    fun flipPosition(value: com.autoflow.core.model.FlipPosition): String = s(
+        when (value) {
+            com.autoflow.core.model.FlipPosition.FACE_DOWN -> R.string.flip_face_down
+            com.autoflow.core.model.FlipPosition.FACE_UP -> R.string.flip_face_up
+        },
+    )
+
+    fun flashlightMode(value: com.autoflow.core.model.FlashlightMode): String = s(
+        when (value) {
+            com.autoflow.core.model.FlashlightMode.ON -> R.string.state_on
+            com.autoflow.core.model.FlashlightMode.OFF -> R.string.state_off
+            com.autoflow.core.model.FlashlightMode.TOGGLE -> R.string.flashlight_toggle
+        },
+    )
+
     fun priority(priority: NotificationPriority): String = s(
         when (priority) {
             NotificationPriority.LOW -> R.string.priority_low
@@ -339,6 +370,11 @@ class SpecFormatter(private val res: Resources) {
             "MEDIA_STARTED" to R.string.trigger_media_started,
             "MEDIA_STOPPED" to R.string.trigger_media_stopped,
             "FILE_ADDED" to R.string.trigger_file_added,
+            "SCREEN_ON" to R.string.trigger_screen_on,
+            "SCREEN_OFF" to R.string.trigger_screen_off,
+            "DEVICE_UNLOCKED" to R.string.trigger_device_unlocked,
+            "SHAKE" to R.string.trigger_shake,
+            "FLIP" to R.string.trigger_flip,
         )
 
         val EVENT_TITLES = TRIGGER_TITLES + mapOf(
@@ -359,6 +395,8 @@ class SpecFormatter(private val res: Resources) {
             "HEADPHONES_STATE" to R.string.condition_headphones,
             "MUSIC_PLAYING" to R.string.condition_music_playing,
             "FILE_EXISTS" to R.string.condition_file_exists,
+            "SCREEN_STATE" to R.string.condition_screen,
+            "DEVICE_LOCKED" to R.string.condition_locked,
             "VARIABLE" to R.string.condition_variable,
             "IF_ELSE" to R.string.action_if_else,
             "WHILE" to R.string.action_while,
@@ -394,6 +432,9 @@ class SpecFormatter(private val res: Resources) {
             "LIST_FILES" to R.string.action_list_files,
             "COPY_FILE" to R.string.action_copy_file,
             "DELETE_FILE" to R.string.action_delete_file,
+            "SCREEN_TIMEOUT" to R.string.action_screen_timeout,
+            "LOCK_SCREEN" to R.string.action_lock_screen,
+            "FLASHLIGHT" to R.string.action_flashlight,
         )
 
         val INFO_TITLES = mapOf(

@@ -158,4 +158,24 @@ class AutomationJsonTest {
         val text = AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation)))
         assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
     }
+
+    @Test
+    fun `device extras round trip`() {
+        val automation = Automation(
+            id = "device",
+            name = "Device",
+            triggers = listOf(
+                TriggerSpec.ScreenOn,
+                TriggerSpec.ScreenOff,
+                TriggerSpec.DeviceUnlocked,
+                TriggerSpec.Shake(ShakeSensitivity.HIGH),
+                TriggerSpec.Flip(FlipPosition.FACE_UP),
+            ),
+            condition = ConditionNode.And(listOf(ConditionNode.ScreenState(false), ConditionNode.DeviceLocked(true))),
+            actions = listOf(ActionSpec.SetScreenTimeout(60), ActionSpec.LockScreen, ActionSpec.Flashlight(FlashlightMode.TOGGLE)),
+        )
+        val text = AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation)))
+        assertTrue(text.contains("\"type\": \"LOCK_SCREEN\""))
+        assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
+    }
 }

@@ -50,6 +50,12 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.FileCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.Bedtime
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.ScreenRotation
+import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
@@ -76,6 +82,11 @@ object SpecIcons {
         "MEDIA_STARTED" -> Icons.Outlined.PlayCircle
         "MEDIA_STOPPED" -> Icons.Outlined.MusicOff
         "FILE_ADDED" -> Icons.Outlined.CreateNewFolder
+        "SCREEN_ON" -> Icons.Outlined.LightMode
+        "SCREEN_OFF" -> Icons.Outlined.Bedtime
+        "DEVICE_UNLOCKED" -> Icons.Outlined.LockOpen
+        "SHAKE" -> Icons.Outlined.Vibration
+        "FLIP" -> Icons.Outlined.ScreenRotation
         else -> Icons.AutoMirrored.Outlined.Rule
     }
 
@@ -89,6 +100,8 @@ object SpecIcons {
         "HEADPHONES_STATE" -> Icons.Outlined.Headphones
         "MUSIC_PLAYING" -> Icons.Outlined.GraphicEq
         "FILE_EXISTS" -> Icons.Outlined.FindInPage
+        "SCREEN_STATE" -> Icons.Outlined.LightMode
+        "DEVICE_LOCKED" -> Icons.Outlined.Lock
         "VARIABLE" -> Icons.Outlined.DataObject
         else -> Icons.AutoMirrored.Outlined.Rule
     }
@@ -123,6 +136,9 @@ object SpecIcons {
         "LIST_FILES" -> Icons.Outlined.FolderOpen
         "COPY_FILE" -> Icons.Outlined.FileCopy
         "DELETE_FILE" -> Icons.Outlined.DeleteOutline
+        "SCREEN_TIMEOUT" -> Icons.Outlined.Timer
+        "LOCK_SCREEN" -> Icons.Outlined.Lock
+        "FLASHLIGHT" -> Icons.Outlined.FlashlightOn
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

@@ -37,7 +37,13 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val backup: BackupManager,
     private val executions: ExecutionRepository,
+    automations: com.autoflow.core.engine.repository.AutomationRepository,
 ) : ViewModel() {
+    val automations: StateFlow<List<com.autoflow.core.model.Automation>> = automations.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun setQuickTile(slot: Int, automationId: String?) = launch { settingsRepository.setQuickTile(slot, automationId) }
+
     val settings: StateFlow<AppSettings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
 

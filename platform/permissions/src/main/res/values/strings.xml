@@ -44,5 +44,9 @@
 
     <string name="capability_calendar_title">Calendar</string>
     <string name="capability_calendar_rationale">Needed to read the start and end times and titles of your calendar events for calendar triggers. AutoFlow only reads; it never changes or uploads your calendar.</string>
+    <string name="capability_device_admin_title">Lock screen access</string>
+    <string name="capability_device_admin_rationale">Android only lets apps lock the screen as a "device admin app". AutoFlow asks for the single "lock the screen" policy: it cannot wipe, reset, change passwords or read anything. You can remove this access at any time in AutoFlow settings (needed before uninstalling).</string>
+    <string name="capability_device_admin_denied">The lock screen action cannot work until lock screen access is activated.</string>
+    <string name="capability_device_admin_explanation">AutoFlow only uses this to lock the screen when one of your automations asks for it. No other device admin power is requested.</string>
     <string name="capability_calendar_denied">Calendar triggers cannot work until calendar permission is granted.</string>
 </resources>

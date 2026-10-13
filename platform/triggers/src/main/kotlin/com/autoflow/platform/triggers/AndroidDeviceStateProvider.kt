@@ -1,5 +1,6 @@
 package com.autoflow.platform.triggers
 
+import android.app.KeyguardManager
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import com.autoflow.core.engine.DeviceState
 import com.autoflow.core.engine.DeviceStateProvider
@@ -47,6 +49,8 @@ class AndroidDeviceStateProvider(
             headphonesConnected = HeadphonesTriggerSource.isHeadphoneConnected(audio),
             mediaVolumePercent = volumePercent(audio, AudioManager.STREAM_MUSIC),
             musicPlaying = audio.isMusicActive,
+            screenOn = context.getSystemService(PowerManager::class.java)?.isInteractive,
+            deviceLocked = context.getSystemService(KeyguardManager::class.java)?.isKeyguardLocked,
             brightnessPercent = runCatching {
                 Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS) * 100 / MAX_BRIGHTNESS
             }.getOrNull(),

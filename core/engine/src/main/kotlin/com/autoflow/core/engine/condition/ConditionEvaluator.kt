@@ -91,6 +91,10 @@ class ConditionEvaluator(
             is ConditionNode.MusicPlaying ->
                 (state.musicPlaying != null && state.musicPlaying == node.playing) to
                     "music=${state.musicPlaying ?: "unknown"}"
+            is ConditionNode.ScreenState ->
+                (state.screenOn != null && state.screenOn == node.on) to "screen=${state.screenOn ?: "unknown"}"
+            is ConditionNode.DeviceLocked ->
+                (state.deviceLocked != null && state.deviceLocked == node.locked) to "locked=${state.deviceLocked ?: "unknown"}"
             // Needs platform file access: provided as a custom evaluator by the app.
             is ConditionNode.FileExists -> false to "file access unavailable"
             is ConditionNode.VariableCompare -> {

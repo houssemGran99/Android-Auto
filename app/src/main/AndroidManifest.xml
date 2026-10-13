@@ -100,6 +100,51 @@
             </intent-filter>
         </service>
 
+        <!-- Quick Settings tiles: run an assigned automation, or toggle the master switch. -->
+        <service
+            android:name=".runtime.AutomationTile1Service"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_autoflow"
+            android:label="@string/tile_label_1"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".runtime.AutomationTile2Service"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_autoflow"
+            android:label="@string/tile_label_2"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".runtime.AutomationTile3Service"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_autoflow"
+            android:label="@string/tile_label_3"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".runtime.MasterSwitchTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_autoflow"
+            android:label="@string/tile_master"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
         <receiver
             android:name=".runtime.CalendarAlarmReceiver"
             android:exported="false" />

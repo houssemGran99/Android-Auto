@@ -17,6 +17,9 @@ enum class SoundType { NOTIFICATION, ALARM, RINGTONE }
 enum class MediaCommand { PLAY_PAUSE, PLAY, PAUSE, NEXT, PREVIOUS, STOP }
 
 @Serializable
+enum class FlashlightMode { ON, OFF, TOGGLE }
+
+@Serializable
 enum class HttpMethod { GET, POST, PUT, DELETE, PATCH }
 
 @Serializable
@@ -259,6 +262,34 @@ sealed interface ActionSpec {
         val folderLabel: String = "",
         val fileName: String,
     ) : ActionSpec
+
+    /** Sets the screen timeout (Settings.System.SCREEN_OFF_TIMEOUT). */
+    @Serializable
+    @SerialName("SCREEN_TIMEOUT")
+    data class SetScreenTimeout(val seconds: Int) : ActionSpec {
+        init {
+            require(seconds in MIN_SECONDS..MAX_SECONDS) { "Screen timeout must be in $MIN_SECONDS..$MAX_SECONDS seconds" }
+        }
+
+        override val capabilities get() = setOf(Capability.WRITE_SETTINGS)
+
+        companion object {
+            const val MIN_SECONDS = 10
+            const val MAX_SECONDS = 30 * 60
+        }
+    }
+
+    /** Locks the screen now (DevicePolicyManager.lockNow, device admin opt-in). */
+    @Serializable
+    @SerialName("LOCK_SCREEN")
+    data object LockScreen : ActionSpec {
+        override val capabilities get() = setOf(Capability.DEVICE_ADMIN)
+    }
+
+    /** Turns the camera flash used as a torch on / off. No permission needed. */
+    @Serializable
+    @SerialName("FLASHLIGHT")
+    data class Flashlight(val mode: FlashlightMode) : ActionSpec
 
     @Serializable
     @SerialName("VIBRATE")

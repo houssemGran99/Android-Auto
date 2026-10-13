@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.AlarmManager
 import android.app.AppOpsManager
 import android.app.NotificationManager
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -87,6 +89,7 @@ class PermissionManager(context: Context) {
         Capability.NOTIFICATION_LISTENER ->
             (context.packageName in NotificationManagerCompat.getEnabledListenerPackages(context)).toStatus()
         Capability.CALENDAR -> granted(Manifest.permission.READ_CALENDAR).toStatus()
+        Capability.DEVICE_ADMIN -> isDeviceAdminActive().toStatus()
     }
 
     fun isSatisfied(capability: Capability): Boolean =
@@ -135,6 +138,11 @@ class PermissionManager(context: Context) {
         }
         Capability.NOTIFICATION_LISTENER -> GrantRequest.SettingsScreen(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS))
         Capability.CALENDAR -> GrantRequest.Runtime(listOf(Manifest.permission.READ_CALENDAR))
+        Capability.DEVICE_ADMIN -> GrantRequest.SettingsScreen(
+            Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+                .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdminComponent())
+                .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.capability_device_admin_explanation)),
+        )
     }
 
     /** App details page: fallback when a runtime permission was permanently denied. */
@@ -204,6 +212,25 @@ class PermissionManager(context: Context) {
             R.string.capability_calendar_rationale,
             R.string.capability_calendar_denied,
         )
+        Capability.DEVICE_ADMIN -> CapabilityInfo(
+            R.string.capability_device_admin_title,
+            R.string.capability_device_admin_rationale,
+            R.string.capability_device_admin_denied,
+        )
+    }
+
+    /**
+     * The device admin receiver (declared in platform:actions). It only requests the
+     * "force-lock" policy: AutoFlow can lock the screen and nothing else.
+     */
+    fun deviceAdminComponent(): ComponentName = ComponentName(context.packageName, DEVICE_ADMIN_RECEIVER)
+
+    fun isDeviceAdminActive(): Boolean =
+        context.getSystemService(DevicePolicyManager::class.java)?.isAdminActive(deviceAdminComponent()) == true
+
+    /** Gives up device admin (needed before AutoFlow can be uninstalled). */
+    fun removeDeviceAdmin() {
+        context.getSystemService(DevicePolicyManager::class.java)?.removeActiveAdmin(deviceAdminComponent())
     }
 
     /** Battery optimizations can delay or stop the monitoring service on some devices. */
@@ -225,6 +252,7 @@ class PermissionManager(context: Context) {
     private companion object {
         /** Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS (public since API 22, constant hidden in older SDK stubs). */
         const val ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+        const val DEVICE_ADMIN_RECEIVER = "com.autoflow.platform.actions.device.LockScreenAdminReceiver"
     }
 
     private fun hasUsageAccess(): Boolean {
