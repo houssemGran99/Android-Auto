@@ -8,7 +8,10 @@ import com.autoflow.core.model.AudioStream
 import com.autoflow.core.model.Automation
 import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
+import com.autoflow.core.model.FlashlightMode
+import com.autoflow.core.model.FlipPosition
 import com.autoflow.core.model.HeadphoneKind
+import com.autoflow.core.model.ShakeSensitivity
 import com.autoflow.core.model.HttpMethod
 import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.NotificationPriority
@@ -202,6 +205,24 @@ class TemplateCatalog @Inject constructor(@ApplicationContext private val contex
                         "%trigger_file%",
                     ),
                 ),
+            )
+        },
+        AutomationTemplate("face_down_silence", R.string.template_face_down_title, R.string.template_face_down_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_face_down_title,
+                R.string.template_face_down_description,
+                triggers = listOf(TriggerSpec.Flip(FlipPosition.FACE_DOWN)),
+                actions = listOf(ActionSpec.SetDoNotDisturb(true)),
+            )
+        },
+        AutomationTemplate("shake_flashlight", R.string.template_shake_title, R.string.template_shake_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_shake_title,
+                R.string.template_shake_description,
+                triggers = listOf(TriggerSpec.Shake(ShakeSensitivity.MEDIUM)),
+                actions = listOf(ActionSpec.Flashlight(FlashlightMode.TOGGLE)),
             )
         },
         AutomationTemplate("http_report", R.string.template_http_title, R.string.template_http_description) { ctx ->

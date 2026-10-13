@@ -6,7 +6,10 @@ import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.GeoPlace
+import com.autoflow.core.model.FlashlightMode
+import com.autoflow.core.model.FlipPosition
 import com.autoflow.core.model.HeadphoneKind
+import com.autoflow.core.model.ShakeSensitivity
 import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
@@ -50,6 +53,11 @@ object BuilderCatalog {
         CatalogItem("MEDIA_STARTED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStarted },
         CatalogItem("MEDIA_STOPPED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStopped },
         CatalogItem("FILE_ADDED", R.string.category_files) { TriggerSpec.FileAdded(folderUri = "") },
+        CatalogItem("SCREEN_ON", R.string.category_device, needsConfiguration = false) { TriggerSpec.ScreenOn },
+        CatalogItem("SCREEN_OFF", R.string.category_device, needsConfiguration = false) { TriggerSpec.ScreenOff },
+        CatalogItem("DEVICE_UNLOCKED", R.string.category_device, needsConfiguration = false) { TriggerSpec.DeviceUnlocked },
+        CatalogItem("SHAKE", R.string.category_sensors) { TriggerSpec.Shake(ShakeSensitivity.MEDIUM) },
+        CatalogItem("FLIP", R.string.category_sensors) { TriggerSpec.Flip(FlipPosition.FACE_DOWN) },
         CatalogItem("APP_OPENED", R.string.category_apps) { TriggerSpec.AppOpened(packageName = "") },
         CatalogItem("NOTIFICATION_RECEIVED", R.string.category_notifications) { TriggerSpec.NotificationReceived() },
         CatalogItem("CALENDAR_EVENT_START", R.string.category_calendar) { TriggerSpec.CalendarEventStart() },
@@ -70,6 +78,8 @@ object BuilderCatalog {
         CatalogItem("BLUETOOTH_STATE", R.string.category_connectivity) { ConditionNode.BluetoothState(enabled = true) },
         CatalogItem("HEADPHONES_STATE", R.string.category_hardware) { ConditionNode.HeadphonesState(connected = true) },
         CatalogItem("MUSIC_PLAYING", R.string.category_audio) { ConditionNode.MusicPlaying(playing = true) },
+        CatalogItem("SCREEN_STATE", R.string.category_device) { ConditionNode.ScreenState(on = true) },
+        CatalogItem("DEVICE_LOCKED", R.string.category_device) { ConditionNode.DeviceLocked(locked = false) },
         CatalogItem("FILE_EXISTS", R.string.category_files) { ConditionNode.FileExists(folderUri = "", fileName = "") },
         CatalogItem("VARIABLE", R.string.category_logic) { ConditionNode.VariableCompare("", Comparison.EQUALS, "") },
         CatalogItem(GROUP_AND, R.string.category_logic, title = R.string.group_and, needsConfiguration = false) {
@@ -89,6 +99,9 @@ object BuilderCatalog {
         CatalogItem("SET_BRIGHTNESS", R.string.category_device) { ActionSpec.SetBrightness(50) },
         CatalogItem("SET_VOLUME", R.string.category_device) { ActionSpec.SetVolume(percent = 50) },
         CatalogItem("DO_NOT_DISTURB", R.string.category_device) { ActionSpec.SetDoNotDisturb(true) },
+        CatalogItem("SCREEN_TIMEOUT", R.string.category_device) { ActionSpec.SetScreenTimeout(60) },
+        CatalogItem("LOCK_SCREEN", R.string.category_device, needsConfiguration = false) { ActionSpec.LockScreen },
+        CatalogItem("FLASHLIGHT", R.string.category_device) { ActionSpec.Flashlight(FlashlightMode.TOGGLE) },
         CatalogItem("VIBRATE", R.string.category_device) { ActionSpec.Vibrate(500) },
         CatalogItem("SPEAK", R.string.category_audio) { ActionSpec.Speak("") },
         CatalogItem("PLAY_SOUND", R.string.category_audio) { ActionSpec.PlaySound(SoundType.NOTIFICATION) },

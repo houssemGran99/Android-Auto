@@ -8,8 +8,10 @@ import com.autoflow.core.model.ActionSpec
 import com.autoflow.platform.actions.handler.CopyFileActionHandler
 import com.autoflow.platform.actions.handler.DeleteFileActionHandler
 import com.autoflow.platform.actions.handler.DismissNotificationsActionHandler
+import com.autoflow.platform.actions.handler.FlashlightActionHandler
 import com.autoflow.platform.actions.handler.LaunchAppActionHandler
 import com.autoflow.platform.actions.handler.ListFilesActionHandler
+import com.autoflow.platform.actions.handler.LockScreenActionHandler
 import com.autoflow.platform.actions.handler.MediaControlActionHandler
 import com.autoflow.platform.actions.handler.OpenSettingsActionHandler
 import com.autoflow.platform.actions.handler.OpenUrlActionHandler
@@ -18,6 +20,7 @@ import com.autoflow.platform.actions.handler.PlaySoundActionHandler
 import com.autoflow.platform.actions.handler.ReadFileActionHandler
 import com.autoflow.platform.actions.handler.SetBrightnessActionHandler
 import com.autoflow.platform.actions.handler.SetDoNotDisturbActionHandler
+import com.autoflow.platform.actions.handler.SetScreenTimeoutActionHandler
 import com.autoflow.platform.actions.handler.SetVolumeActionHandler
 import com.autoflow.platform.actions.handler.ShowNotificationActionHandler
 import com.autoflow.platform.actions.handler.SpeakActionHandler
@@ -55,6 +58,9 @@ object PlatformActions {
             .register<ActionSpec.ListFiles>(ListFilesActionHandler(appContext))
             .register<ActionSpec.CopyFile>(CopyFileActionHandler(appContext))
             .register<ActionSpec.DeleteFile>(DeleteFileActionHandler(appContext))
+            .register<ActionSpec.SetScreenTimeout>(SetScreenTimeoutActionHandler(appContext))
+            .register<ActionSpec.LockScreen>(LockScreenActionHandler(appContext, permissions))
+            .register<ActionSpec.Flashlight>(FlashlightActionHandler(appContext))
             .register<ActionSpec.Vibrate>(VibrateActionHandler(appContext))
             .register<ActionSpec.HttpRequest>(HttpRequestActionHandler(httpExecutor))
             .register<ActionSpec.DismissNotifications>(DismissNotificationsActionHandler(notifications, appContext.packageName))

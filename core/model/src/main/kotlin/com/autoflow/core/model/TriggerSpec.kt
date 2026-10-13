@@ -28,6 +28,12 @@ enum class TriggerFamily {
 
     /** New files in user-picked folders; Android has no folder events for apps, so the monitor polls. */
     FILES,
+
+    /** Screen on / off and unlock broadcasts (registered-receiver only, needs the monitor). */
+    SCREEN,
+
+    /** Accelerometer gestures (shake, face down / up), needs the monitor. */
+    SENSORS,
     ;
 
     /** True when the family can only be observed while a monitoring service is running. */
@@ -64,6 +70,12 @@ enum class ThresholdDirection { BELOW, ABOVE }
 
 @Serializable
 enum class SunEventType { SUNRISE, SUNSET }
+
+@Serializable
+enum class ShakeSensitivity(val thresholdG: Float) { LOW(2.9f), MEDIUM(2.3f), HIGH(1.8f) }
+
+@Serializable
+enum class FlipPosition { FACE_DOWN, FACE_UP }
 
 @Serializable
 enum class HeadphoneKind { ANY, WIRED, BLUETOOTH }
@@ -266,6 +278,39 @@ sealed interface TriggerSpec {
         val nameContains: String? = null,
     ) : TriggerSpec {
         override val family get() = TriggerFamily.FILES
+    }
+
+    @Serializable
+    @SerialName("SCREEN_ON")
+    data object ScreenOn : TriggerSpec {
+        override val family get() = TriggerFamily.SCREEN
+    }
+
+    @Serializable
+    @SerialName("SCREEN_OFF")
+    data object ScreenOff : TriggerSpec {
+        override val family get() = TriggerFamily.SCREEN
+    }
+
+    /** The user unlocked the device (passed the lock screen). */
+    @Serializable
+    @SerialName("DEVICE_UNLOCKED")
+    data object DeviceUnlocked : TriggerSpec {
+        override val family get() = TriggerFamily.SCREEN
+    }
+
+    /** The phone was shaken; [sensitivity] HIGH reacts to gentler shakes. */
+    @Serializable
+    @SerialName("SHAKE")
+    data class Shake(val sensitivity: ShakeSensitivity = ShakeSensitivity.MEDIUM) : TriggerSpec {
+        override val family get() = TriggerFamily.SENSORS
+    }
+
+    /** The phone was laid face down (or turned face up again). */
+    @Serializable
+    @SerialName("FLIP")
+    data class Flip(val position: FlipPosition = FlipPosition.FACE_DOWN) : TriggerSpec {
+        override val family get() = TriggerFamily.SENSORS
     }
 
     /** Fires when the device enters (arrives at) [place]. */

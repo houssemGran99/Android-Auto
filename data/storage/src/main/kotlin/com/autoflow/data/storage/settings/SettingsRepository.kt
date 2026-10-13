@@ -20,7 +20,11 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = true,
     val logSkippedRuns: Boolean = true,
+    /** Automation ids run by the Quick Settings tiles 1..[QUICK_TILE_COUNT] (null = not set up). */
+    val quickTiles: List<String?> = List(QUICK_TILE_COUNT) { null },
 )
+
+const val QUICK_TILE_COUNT = 3
 
 /** User settings persisted with DataStore (small key/value data, observed reactively). */
 class SettingsRepository(private val dataStore: DataStore<Preferences>) : EngineSettings {
@@ -31,6 +35,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) : Engine
             themeMode = prefs[THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
             dynamicColor = prefs[DYNAMIC_COLOR] ?: true,
             logSkippedRuns = prefs[LOG_SKIPPED] ?: true,
+            quickTiles = QUICK_TILES.map { prefs[it]?.takeIf(String::isNotBlank) },
         )
     }
 
@@ -54,7 +59,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) : Engine
         dataStore.edit { it[LOG_SKIPPED] = enabled }
     }
 
+    /** Assigns an automation to Quick Settings tile [slot] (0-based); null clears it. */
+    suspend fun setQuickTile(slot: Int, automationId: String?) {
+        require(slot in 0 until QUICK_TILE_COUNT) { "No tile slot $slot" }
+        dataStore.edit { prefs ->
+            if (automationId == null) prefs.remove(QUICK_TILES[slot]) else prefs[QUICK_TILES[slot]] = automationId
+        }
+    }
+
     companion object {
+        private val QUICK_TILES = List(QUICK_TILE_COUNT) { stringPreferencesKey("quick_tile_${it + 1}") }
         private val MASTER = booleanPreferencesKey("master_enabled")
         private val THEME = stringPreferencesKey("theme_mode")
         private val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")

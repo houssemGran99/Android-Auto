@@ -94,9 +94,9 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED`, `MEDIA_STARTED`, `MEDIA_STOPPED`, `FILE_ADDED` |
-| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `MUSIC_PLAYING`, `FILE_EXISTS` (custom evaluator in `platform:triggers`), `VARIABLE` |
-| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT`, `MEDIA_CONTROL`, `PLAY_MUSIC_FOLDER` (SAF folder URI, shuffle, max minutes), `STOP_MUSIC`, `WRITE_FILE`, `READ_FILE`, `LIST_FILES`, `COPY_FILE`, `DELETE_FILE` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED`, `MEDIA_STARTED`, `MEDIA_STOPPED`, `FILE_ADDED`, `SCREEN_ON`, `SCREEN_OFF`, `DEVICE_UNLOCKED`, `SHAKE`, `FLIP` |
+| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `MUSIC_PLAYING`, `SCREEN_STATE`, `DEVICE_LOCKED`, `FILE_EXISTS` (custom evaluator in `platform:triggers`), `VARIABLE` |
+| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT`, `MEDIA_CONTROL`, `PLAY_MUSIC_FOLDER` (SAF folder URI, shuffle, max minutes), `STOP_MUSIC`, `WRITE_FILE`, `READ_FILE`, `LIST_FILES`, `COPY_FILE`, `DELETE_FILE`, `SCREEN_TIMEOUT`, `LOCK_SCREEN`, `FLASHLIGHT` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
 | `Variable` | `$name` user variable, optionally secret (encrypted, never exported) |
 | `ExecutionRecord` / `ExecutionStep` | History: status (SUCCESS / PARTIAL / FAILED / SKIPPED) and per-step log |
@@ -106,7 +106,7 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 ### Variables
 
 * `%notification_app%`, `%notification_title%`, `%notification_text%`, `%event_title%`, `%event_location%` (from the triggering event), `%latitude%`, `%longitude%`, `%location%` (last known location, only with permission), `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
-  `%headphones%`, `%music%` (media playing on/off), `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
+  `%headphones%`, `%music%` (media playing on/off), `%screen%`, `%locked%`, `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
   `%automation%`, `%trigger%`, `%trigger_<detail>%` (e.g. `%trigger_ssid%`, `%trigger_package%`).
   The trailing `%` is optional (`%battery`).
 * `$name` – user variables (global, persisted) or local ones (this run only).
@@ -179,6 +179,8 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 | Calendar event starts / ends (title filter) | `CalendarContract.Instances` + `AlarmManager` | 🔐 | `READ_CALENDAR`. Exact alarm at the next matching start/end (recurring events expanded by the provider, 8-day look-ahead); re-scheduled after each alarm, hourly via WorkManager, on boot and when the app opens. |
 | Media started / stopped playing | `AudioManager.registerAudioPlaybackCallback` + `isMusicActive` | ✅ | No permission. Callbacks only report player changes, so the real state is read after a 1.5 s settle delay and only changes fire (skipping tracks or a quick pause/resume fires nothing). Needs the monitoring service. Covers every app using the media stream (music, video, games). |
 | New file in folder (name filter) | Storage Access Framework tree listing (`DocumentsContract`) | ⚠️ | Only folders the user picked (persisted grant, **no storage permission**). Apps get no file-system events for shared storage, so the monitoring service lists each watched folder every 60 s; the first listing is a baseline (existing files never fire). File name → `%trigger_file%`. |
+| Screen on / off, device unlocked | `ACTION_SCREEN_ON/OFF`, `ACTION_USER_PRESENT` | ✅ | Registered-receiver-only broadcasts → monitoring service. |
+| Shake (sensitivity), face down / face up | Accelerometer (`SensorManager`) | ⚠️ | No permission. Runs in the monitoring service (battery cost noted in the UI). Shake = two peaks ≥ 1.8 g within 600 ms, the weaker peak is compared with each trigger's threshold; flip = gravity on ±Z for 0.8 s, first position is a baseline. Non-wake-up sensor: while the phone sleeps with the screen off Android may pause it. |
 | App opened | `UsageStatsManager.queryEvents` | 🔐 ⚠️ | Needs Usage access. No broadcast exists, so it polls every 2 s while the screen is on. AccessibilityService is deliberately **not** used. |
 
 **Background execution:** monitoring uses a `specialUse` foreground service with a visible,
@@ -202,6 +204,9 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Media control (play/pause, play, pause, next, previous, stop) | `AudioManager.dispatchMediaKeyEvent` | ✅ | Same as a headset button: goes to the app owning the media session (or the last one). No permission, no notification access needed. |
 | Play music from a folder (shuffle, stop after N minutes) | Storage Access Framework tree URI + `MediaPlayer` in a `mediaPlayback` foreground service | ⚠️ | The user picks the folder once (`OPEN_DOCUMENT_TREE`, persisted read grant) — **no storage permission**. Playback continues after the run with a media notification (previous / play-pause / next / stop) and a media session; respects audio focus and pauses when headphones are unplugged. Android 12+ only lets apps start a foreground service from the background in some cases (exact alarm just fired, notification listener bound, "Display over other apps", battery optimization disabled, app visible); otherwise the step fails with that explanation. |
 | Stop AutoFlow music | engine → service | ✅ | Skipped when nothing is playing. |
+| Screen timeout | `Settings.System.SCREEN_OFF_TIMEOUT` | 🔐 | "Modify system settings". |
+| Lock screen | `DevicePolicyManager.lockNow` | 🔐 | Explicit opt-in to a device admin receiver that declares **only** `force-lock` (cannot wipe, reset passwords or read data). Removable in AutoFlow settings (required before uninstalling). AccessibilityService is deliberately not used. |
+| Flashlight on / off / toggle | `CameraManager.setTorchMode` | ✅ | No camera permission. Toggle reads the state via `TorchCallback`. Fails when another app holds the camera. |
 | Write / append, read, list, copy / move, delete file | Storage Access Framework (`DocumentsContract`, `ContentResolver` streams) in user-picked folders | ✅ | Folder picked once with `OPEN_DOCUMENT_TREE` (persisted read + write grant); **no storage permission**, nothing outside the picked folders is reachable. File names are plain names (no `/`, placeholders allowed). Read is UTF-8 text up to 1 MB; list stores names and `<var>_count`; move deletes the original only after a successful copy; delete is permanent and skipped when the file is missing. A revoked grant fails with "pick the folder again". |
 | Dismiss notifications | `NotificationListenerService.cancelNotification` | 🔐 | Only clearable notifications of other apps, optional app / text filter. |
 | HTTP request | OkHttp | ✅ | GET/POST/PUT/PATCH/DELETE, headers, query, body, Basic/Bearer, timeout, response → variables, 1 MB cap. Cleartext HTTP is blocked by Android's default network policy. |
@@ -216,7 +221,9 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Airplane mode | System apps only | Open airplane mode settings |
 | Battery saver | `DEVICE_POWER` is signature-level | Open battery saver settings |
 | Close other apps | `killBackgroundProcesses` only affects cached processes | Not offered |
-| Lock / wake screen | Device admin / accessibility only | Planned via explicit, disclosed opt-in (post-MVP) |
+| Lock screen | Device admin / accessibility only | Implemented with a force-lock-only device admin, explicit opt-in, removable in settings |
+| Wake / unlock the screen | No public API for regular apps (full wake locks deprecated, keyguard can't be dismissed) | Not offered; "Screen turned on" / "Device unlocked" triggers instead |
+| Toggle Quick Settings tiles of other apps / system | Not possible | AutoFlow provides its own tiles (run an automation, master switch) |
 | Covert camera / microphone / location | Forbidden by policy and by design | Never implemented |
 
 ### Post-MVP features and their constraints
@@ -239,6 +246,14 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 * **AutoFlow button** (1×1, resizable): bound to one automation chosen in a configuration screen
   when the widget is placed (reconfigurable on Android 12+). The binding is stored in Glance
   per-widget state. Taps run the automation through WorkManager.
+
+### Quick Settings tiles
+
+Three "AutoFlow 1–3" tiles (`TileService`) run the automation assigned to them in
+Settings → Quick Settings tiles (stored in DataStore, no schema change), plus a toggleable
+master-switch tile. On the lock screen a tile calls `unlockAndRun`, so automations cannot be
+started without unlocking. Tiles are refreshed with `requestListeningState` whenever
+automations or settings change.
 
 ## 6. Permissions
 

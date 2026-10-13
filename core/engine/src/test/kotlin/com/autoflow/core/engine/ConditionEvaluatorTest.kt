@@ -99,4 +99,13 @@ class ConditionEvaluatorTest {
         assertFalse(evaluator.evaluate(ConditionNode.MusicPlaying(true), env(DeviceState(musicPlaying = false))))
         assertFalse("unknown is false", evaluator.evaluate(ConditionNode.MusicPlaying(false), env()))
     }
+
+    @Test
+    fun `screen and lock state`() {
+        val state = DeviceState(screenOn = true, deviceLocked = false)
+        assertTrue(evaluator.evaluate(ConditionNode.ScreenState(on = true), env(state)))
+        assertFalse(evaluator.evaluate(ConditionNode.ScreenState(on = false), env(state)))
+        assertTrue(evaluator.evaluate(ConditionNode.DeviceLocked(locked = false), env(state)))
+        assertFalse("unknown is false", evaluator.evaluate(ConditionNode.DeviceLocked(locked = true), env()))
+    }
 }

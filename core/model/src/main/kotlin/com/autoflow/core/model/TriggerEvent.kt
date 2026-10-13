@@ -119,6 +119,25 @@ sealed interface TriggerEvent {
         override val details get() = mapOf("file" to fileName)
     }
 
+    data class ScreenChanged(val on: Boolean) : TriggerEvent {
+        override val key get() = if (on) "SCREEN_ON" else "SCREEN_OFF"
+    }
+
+    data object DeviceUnlocked : TriggerEvent {
+        override val key get() = "DEVICE_UNLOCKED"
+    }
+
+    /** A shake whose weaker peak reached [peakG] (in g). */
+    data class Shaken(val peakG: Float) : TriggerEvent {
+        override val key get() = "SHAKE"
+        override val details get() = mapOf("force" to "%.1f".format(java.util.Locale.ROOT, peakG))
+    }
+
+    data class Flipped(val position: FlipPosition) : TriggerEvent {
+        override val key get() = "FLIP"
+        override val details get() = mapOf("position" to position.name)
+    }
+
     data class HeadphonesDisconnected(val kind: HeadphoneKind, val name: String?) : TriggerEvent {
         override val key get() = "HEADPHONES_DISCONNECTED"
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())

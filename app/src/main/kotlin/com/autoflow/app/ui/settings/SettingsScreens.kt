@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.autoflow.app.BuildConfig
 import com.autoflow.app.R
+import com.autoflow.app.ui.builder.DropdownField
 import com.autoflow.app.ui.builder.LabeledSwitch
 import com.autoflow.app.ui.builder.SegmentedChoice
 import com.autoflow.app.ui.components.BackButton
@@ -106,6 +107,34 @@ fun SettingsScreen(onBack: () -> Unit, onOpenPermissions: () -> Unit, viewModel:
                     context.startActivity(manager.batteryOptimizationSettingsIntent())
                 } catch (e: ActivityNotFoundException) {
                     context.startActivity(manager.appSettingsIntent())
+                }
+            }
+
+            SectionHeader(stringResource(R.string.settings_quick_tiles))
+            Text(
+                stringResource(R.string.settings_quick_tiles_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            val automations by viewModel.automations.collectAsStateWithLifecycle()
+            val noneLabel = stringResource(R.string.tile_none)
+            val options: List<String?> = listOf<String?>(null) + automations.map { it.id }
+            val names = automations.associate { it.id to it.name }
+            settings.quickTiles.forEachIndexed { slot, assigned ->
+                DropdownField(
+                    stringResource(R.string.tile_label_n, slot + 1),
+                    options,
+                    assigned?.takeIf { it in names },
+                    { id -> id?.let(names::get) ?: noneLabel },
+                ) { viewModel.setQuickTile(slot, it) }
+            }
+            if (manager.isDeviceAdminActive()) {
+                var adminRemoved by remember { mutableStateOf(false) }
+                if (!adminRemoved) {
+                    SettingsLink(stringResource(R.string.settings_remove_admin), stringResource(R.string.settings_remove_admin_hint)) {
+                        manager.removeDeviceAdmin()
+                        adminRemoved = true
+                    }
                 }
             }
 

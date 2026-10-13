@@ -97,4 +97,20 @@ class TriggerMatcherTest {
         assertFalse(matcher.matches(spec, TriggerEvent.FileAdded("content://tree/b", "invoice.pdf")))
         assertTrue(matcher.matches(TriggerSpec.FileAdded("content://tree/b"), TriggerEvent.FileAdded("content://tree/b", "x")))
     }
+
+    @Test
+    fun `screen, shake and flip`() {
+        val matcher = TriggerMatcher()
+        assertTrue(matcher.matches(TriggerSpec.ScreenOn, TriggerEvent.ScreenChanged(on = true)))
+        assertFalse(matcher.matches(TriggerSpec.ScreenOn, TriggerEvent.ScreenChanged(on = false)))
+        assertTrue(matcher.matches(TriggerSpec.ScreenOff, TriggerEvent.ScreenChanged(on = false)))
+        assertTrue(matcher.matches(TriggerSpec.DeviceUnlocked, TriggerEvent.DeviceUnlocked))
+        val gentle = TriggerEvent.Shaken(peakG = 2.0f)
+        assertTrue(matcher.matches(TriggerSpec.Shake(com.autoflow.core.model.ShakeSensitivity.HIGH), gentle))
+        assertFalse(matcher.matches(TriggerSpec.Shake(com.autoflow.core.model.ShakeSensitivity.LOW), gentle))
+        assertTrue(matcher.matches(TriggerSpec.Shake(com.autoflow.core.model.ShakeSensitivity.LOW), TriggerEvent.Shaken(3.5f)))
+        val down = TriggerEvent.Flipped(com.autoflow.core.model.FlipPosition.FACE_DOWN)
+        assertTrue(matcher.matches(TriggerSpec.Flip(com.autoflow.core.model.FlipPosition.FACE_DOWN), down))
+        assertFalse(matcher.matches(TriggerSpec.Flip(com.autoflow.core.model.FlipPosition.FACE_UP), down))
+    }
 }

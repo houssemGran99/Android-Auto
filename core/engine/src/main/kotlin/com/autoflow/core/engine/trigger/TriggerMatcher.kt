@@ -29,6 +29,11 @@ class TriggerMatcher {
             event is TriggerEvent.HeadphonesDisconnected && kindMatches(spec.kind, event.kind)
         TriggerSpec.MediaStarted -> event is TriggerEvent.MediaPlaybackChanged && event.playing
         TriggerSpec.MediaStopped -> event is TriggerEvent.MediaPlaybackChanged && !event.playing
+        TriggerSpec.ScreenOn -> event is TriggerEvent.ScreenChanged && event.on
+        TriggerSpec.ScreenOff -> event is TriggerEvent.ScreenChanged && !event.on
+        TriggerSpec.DeviceUnlocked -> event is TriggerEvent.DeviceUnlocked
+        is TriggerSpec.Shake -> event is TriggerEvent.Shaken && event.peakG >= spec.sensitivity.thresholdG
+        is TriggerSpec.Flip -> event is TriggerEvent.Flipped && event.position == spec.position
         is TriggerSpec.FileAdded ->
             event is TriggerEvent.FileAdded && event.folderUri == spec.folderUri && containsOrBlank(event.fileName, spec.nameContains)
     }

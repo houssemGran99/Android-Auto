@@ -44,4 +44,7 @@ enum class Capability(val optional: Boolean) {
 
     /** READ_CALENDAR, needed for calendar event triggers. */
     CALENDAR(optional = false),
+
+    /** Device admin with only the "lock the screen" policy, needed by the lock screen action. */
+    DEVICE_ADMIN(optional = false),
 }

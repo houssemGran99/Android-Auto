@@ -26,7 +26,10 @@ import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.AudioStream
 import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
+import com.autoflow.core.model.FlashlightMode
+import com.autoflow.core.model.FlipPosition
 import com.autoflow.core.model.HeadphoneKind
+import com.autoflow.core.model.ShakeSensitivity
 import com.autoflow.core.model.HttpAuth
 import com.autoflow.core.model.HttpMethod
 import com.autoflow.core.model.MediaCommand
@@ -140,6 +143,15 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> Unit
         TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> Hint(stringResource(R.string.hint_media_trigger))
+        TriggerSpec.ScreenOn, TriggerSpec.ScreenOff, TriggerSpec.DeviceUnlocked -> Hint(stringResource(R.string.hint_screen_trigger))
+        is TriggerSpec.Shake -> {
+            SegmentedChoice(ShakeSensitivity.entries, spec.sensitivity, f::shakeSensitivity) { onChange(spec.copy(sensitivity = it)) }
+            Hint(stringResource(R.string.hint_sensor_trigger))
+        }
+        is TriggerSpec.Flip -> {
+            SegmentedChoice(FlipPosition.entries, spec.position, f::flipPosition) { onChange(spec.copy(position = it)) }
+            Hint(stringResource(R.string.hint_sensor_trigger))
+        }
         is TriggerSpec.FileAdded -> {
             FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
             TextInput(
@@ -238,6 +250,10 @@ fun ConditionForm(node: ConditionNode, onChange: (ConditionNode) -> Unit) {
             LabeledSwitch(stringResource(R.string.state_playing), node.playing, { onChange(node.copy(playing = it)) })
             Hint(stringResource(R.string.hint_music_playing))
         }
+        is ConditionNode.ScreenState ->
+            LabeledSwitch(stringResource(R.string.state_screen_on), node.on, { onChange(node.copy(on = it)) })
+        is ConditionNode.DeviceLocked ->
+            LabeledSwitch(stringResource(R.string.state_locked), node.locked, { onChange(node.copy(locked = it)) })
         is ConditionNode.FileExists -> {
             FolderPickerField(node.folderUri, node.folderLabel) { uri, label -> onChange(node.copy(folderUri = uri, folderLabel = label)) }
             TextInput(stringResource(R.string.field_file_name), node.fileName, { onChange(node.copy(fileName = it)) })
@@ -366,6 +382,17 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             Hint(stringResource(R.string.hint_play_music_folder))
         }
         ActionSpec.StopMusic -> Hint(stringResource(R.string.hint_stop_music))
+        is ActionSpec.SetScreenTimeout -> {
+            DropdownField(stringResource(R.string.field_timeout), SCREEN_TIMEOUTS, spec.seconds, { f.duration(it * 1000L) }) {
+                onChange(spec.copy(seconds = it))
+            }
+            Hint(stringResource(R.string.hint_screen_timeout))
+        }
+        ActionSpec.LockScreen -> Hint(stringResource(R.string.hint_lock_screen))
+        is ActionSpec.Flashlight -> {
+            SegmentedChoice(FlashlightMode.entries, spec.mode, f::flashlightMode) { onChange(spec.copy(mode = it)) }
+            Hint(stringResource(R.string.hint_flashlight))
+        }
         is ActionSpec.WriteFile -> {
             FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
             FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
@@ -525,6 +552,8 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
         }
     }
 }
+
+private val SCREEN_TIMEOUTS = listOf(15, 30, 60, 120, 300, 600, 1800)
 
 private fun isFolder(uri: String): Boolean = uri.startsWith("content://")
 

@@ -10,7 +10,9 @@ import com.autoflow.platform.triggers.source.BluetoothTriggerSource
 import com.autoflow.platform.triggers.source.FolderWatchTriggerSource
 import com.autoflow.platform.triggers.source.HeadphonesTriggerSource
 import com.autoflow.platform.triggers.source.MediaPlaybackTriggerSource
+import com.autoflow.platform.triggers.source.MotionTriggerSource
 import com.autoflow.platform.triggers.source.PowerTriggerSource
+import com.autoflow.platform.triggers.source.ScreenTriggerSource
 import com.autoflow.platform.triggers.source.WifiTriggerSource
 import kotlinx.coroutines.CoroutineScope
 
@@ -34,5 +36,7 @@ class TriggerSourceFactory(
         TriggerFamily.HEADPHONES -> HeadphonesTriggerSource(context)
         TriggerFamily.MEDIA -> MediaPlaybackTriggerSource(context)
         TriggerFamily.FILES -> FolderWatchTriggerSource(context, scope, watchedFolders)
+        TriggerFamily.SCREEN -> ScreenTriggerSource(context)
+        TriggerFamily.SENSORS -> MotionTriggerSource(context)
     }
 }

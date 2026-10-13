@@ -239,6 +239,8 @@ private fun familyName(family: com.autoflow.core.model.TriggerFamily): String = 
         com.autoflow.core.model.TriggerFamily.CALENDAR -> R.string.family_calendar
         com.autoflow.core.model.TriggerFamily.MEDIA -> R.string.family_media
         com.autoflow.core.model.TriggerFamily.FILES -> R.string.family_files
+        com.autoflow.core.model.TriggerFamily.SCREEN -> R.string.family_screen
+        com.autoflow.core.model.TriggerFamily.SENSORS -> R.string.family_sensors
     },
 )
 

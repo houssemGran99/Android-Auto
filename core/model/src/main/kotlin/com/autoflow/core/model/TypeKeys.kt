@@ -24,6 +24,11 @@ val TriggerSpec.typeKey: String
         TriggerSpec.MediaStarted -> "MEDIA_STARTED"
         TriggerSpec.MediaStopped -> "MEDIA_STOPPED"
         is TriggerSpec.FileAdded -> "FILE_ADDED"
+        TriggerSpec.ScreenOn -> "SCREEN_ON"
+        TriggerSpec.ScreenOff -> "SCREEN_OFF"
+        TriggerSpec.DeviceUnlocked -> "DEVICE_UNLOCKED"
+        is TriggerSpec.Shake -> "SHAKE"
+        is TriggerSpec.Flip -> "FLIP"
     }
 
 val ConditionNode.typeKey: String
@@ -41,6 +46,8 @@ val ConditionNode.typeKey: String
         is ConditionNode.VariableCompare -> "VARIABLE"
         is ConditionNode.MusicPlaying -> "MUSIC_PLAYING"
         is ConditionNode.FileExists -> "FILE_EXISTS"
+        is ConditionNode.ScreenState -> "SCREEN_STATE"
+        is ConditionNode.DeviceLocked -> "DEVICE_LOCKED"
     }
 
 val ActionSpec.typeKey: String
@@ -74,4 +81,7 @@ val ActionSpec.typeKey: String
         is ActionSpec.ListFiles -> "LIST_FILES"
         is ActionSpec.CopyFile -> "COPY_FILE"
         is ActionSpec.DeleteFile -> "DELETE_FILE"
+        is ActionSpec.SetScreenTimeout -> "SCREEN_TIMEOUT"
+        ActionSpec.LockScreen -> "LOCK_SCREEN"
+        is ActionSpec.Flashlight -> "FLASHLIGHT"
     }

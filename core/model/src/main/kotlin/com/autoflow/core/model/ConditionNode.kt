@@ -80,6 +80,16 @@ sealed interface ConditionNode {
         val exists: Boolean = true,
     ) : ConditionNode
 
+    /** Screen on (interactive) or off. */
+    @Serializable
+    @SerialName("SCREEN_STATE")
+    data class ScreenState(val on: Boolean = true) : ConditionNode
+
+    /** Lock screen shown (keyguard locked) or not. */
+    @Serializable
+    @SerialName("DEVICE_LOCKED")
+    data class DeviceLocked(val locked: Boolean = true) : ConditionNode
+
     /** Compares a variable (name without prefix, e.g. "counter" or "battery") with [value]. */
     @Serializable
     @SerialName("VARIABLE")

@@ -73,8 +73,11 @@ class TriggerCoordinator @Inject constructor(
         }
         scope.launch {
             // Widgets show automation names and the master switch.
-            combine(automations.observeAll(), settings.settings.map { it.masterEnabled }) { _, _ -> Unit }
-                .collect { runCatching { QuickActionsWidget.refresh(context) } }
+            combine(automations.observeAll(), settings.settings) { _, _ -> Unit }
+                .collect {
+                    runCatching { QuickActionsWidget.refresh(context) }
+                    QuickTiles.requestRefresh(context)
+                }
         }
     }
 
