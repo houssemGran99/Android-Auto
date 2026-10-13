@@ -21,6 +21,8 @@ val TriggerSpec.typeKey: String
         is TriggerSpec.CalendarEventStart -> "CALENDAR_EVENT_START"
         is TriggerSpec.CalendarEventEnd -> "CALENDAR_EVENT_END"
         is TriggerSpec.SunEvent -> "SUN_EVENT"
+        TriggerSpec.MediaStarted -> "MEDIA_STARTED"
+        TriggerSpec.MediaStopped -> "MEDIA_STOPPED"
     }
 
 val ConditionNode.typeKey: String
@@ -36,6 +38,7 @@ val ConditionNode.typeKey: String
         is ConditionNode.BluetoothState -> "BLUETOOTH_STATE"
         is ConditionNode.HeadphonesState -> "HEADPHONES_STATE"
         is ConditionNode.VariableCompare -> "VARIABLE"
+        is ConditionNode.MusicPlaying -> "MUSIC_PLAYING"
     }
 
 val ActionSpec.typeKey: String
@@ -61,4 +64,7 @@ val ActionSpec.typeKey: String
         ActionSpec.Stop -> "STOP"
         is ActionSpec.VariableOperation -> "VARIABLE_OPERATION"
         is ActionSpec.ParseJson -> "PARSE_JSON"
+        is ActionSpec.MediaControl -> "MEDIA_CONTROL"
+        is ActionSpec.PlayMusicFolder -> "PLAY_MUSIC_FOLDER"
+        ActionSpec.StopMusic -> "STOP_MUSIC"
     }

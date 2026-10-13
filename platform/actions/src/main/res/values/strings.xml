@@ -15,4 +15,13 @@
     <string name="settings_panel_battery_saver">Battery saver</string>
     <string name="settings_panel_airplane">Airplane mode</string>
     <string name="settings_panel_location">Location settings</string>
+    <string name="channel_music">Music playback</string>
+    <string name="channel_music_description">Controls for music started by an automation.</string>
+    <string name="music_starting">Starting music…</string>
+    <string name="music_position">Track %1$d of %2$d · started by AutoFlow</string>
+    <string name="music_previous">Previous</string>
+    <string name="music_play">Play</string>
+    <string name="music_pause">Pause</string>
+    <string name="music_next">Next</string>
+    <string name="music_stop">Stop</string>
 </resources>

@@ -120,4 +120,22 @@ class AutomationJsonTest {
         assertTrue(Capability.WRITE_SETTINGS in caps)
         assertTrue(Capability.BACKGROUND_ACTIVITY_START in caps)
     }
+
+    @Test
+    fun `media specs round trip`() {
+        val automation = Automation(
+            id = "music",
+            name = "Music",
+            triggers = listOf(TriggerSpec.MediaStarted, TriggerSpec.MediaStopped),
+            condition = ConditionNode.MusicPlaying(playing = false),
+            actions = listOf(
+                ActionSpec.MediaControl(MediaCommand.NEXT),
+                ActionSpec.PlayMusicFolder("content://tree/music", "Music", shuffle = false, maxMinutes = 30),
+                ActionSpec.StopMusic,
+            ),
+        )
+        val text = AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation)))
+        assertTrue(text.contains("\"type\": \"PLAY_MUSIC_FOLDER\""))
+        assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
+    }
 }

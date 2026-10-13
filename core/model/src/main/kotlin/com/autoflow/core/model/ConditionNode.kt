@@ -65,6 +65,11 @@ sealed interface ConditionNode {
     @SerialName("HEADPHONES_STATE")
     data class HeadphonesState(val connected: Boolean = true) : ConditionNode
 
+    /** Whether any app is currently playing music / media audio. */
+    @Serializable
+    @SerialName("MUSIC_PLAYING")
+    data class MusicPlaying(val playing: Boolean = true) : ConditionNode
+
     /** Compares a variable (name without prefix, e.g. "counter" or "battery") with [value]. */
     @Serializable
     @SerialName("VARIABLE")

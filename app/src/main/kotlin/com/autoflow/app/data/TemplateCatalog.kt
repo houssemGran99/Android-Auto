@@ -10,6 +10,7 @@ import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.HeadphoneKind
 import com.autoflow.core.model.HttpMethod
+import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.NotificationPriority
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.ThresholdDirection
@@ -151,6 +152,26 @@ class TemplateCatalog @Inject constructor(@ApplicationContext private val contex
                 triggers = listOf(TriggerSpec.NotificationReceived(WHATSAPP, "WhatsApp")),
                 condition = ConditionNode.And(listOf(ConditionNode.HeadphonesState(connected = true))),
                 actions = listOf(ActionSpec.Speak(ctx.getString(R.string.template_read_messages_speech))),
+            )
+        },
+        AutomationTemplate("pause_on_unplug", R.string.template_pause_unplug_title, R.string.template_pause_unplug_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_pause_unplug_title,
+                R.string.template_pause_unplug_description,
+                triggers = listOf(TriggerSpec.HeadphonesDisconnected(HeadphoneKind.BLUETOOTH)),
+                condition = ConditionNode.And(listOf(ConditionNode.MusicPlaying(playing = true))),
+                actions = listOf(ActionSpec.MediaControl(MediaCommand.PAUSE), ActionSpec.StopMusic),
+            )
+        },
+        AutomationTemplate("quiet_media", R.string.template_quiet_media_title, R.string.template_quiet_media_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_quiet_media_title,
+                R.string.template_quiet_media_description,
+                triggers = listOf(TriggerSpec.MediaStarted),
+                condition = ConditionNode.And(listOf(ConditionNode.TimeRange(TimeOfDay(22, 0), TimeOfDay(7, 0)))),
+                actions = listOf(ActionSpec.SetVolume(AudioStream.MEDIA, 25)),
             )
         },
         AutomationTemplate("http_report", R.string.template_http_title, R.string.template_http_description) { ctx ->

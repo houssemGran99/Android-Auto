@@ -11,6 +11,7 @@ object NotificationChannels {
     const val HIGH = "automation_high"
     const val LOW = "automation_low"
     const val SHORTCUTS = "automation_shortcuts"
+    const val MUSIC = "automation_music"
 
     fun forPriority(priority: NotificationPriority): String = when (priority) {
         NotificationPriority.LOW -> LOW
@@ -27,6 +28,10 @@ object NotificationChannels {
                 NotificationChannel(LOW, context.getString(R.string.channel_automation_low), NotificationManager.IMPORTANCE_LOW),
                 NotificationChannel(SHORTCUTS, context.getString(R.string.channel_shortcuts), NotificationManager.IMPORTANCE_HIGH).apply {
                     description = context.getString(R.string.channel_shortcuts_description)
+                },
+                NotificationChannel(MUSIC, context.getString(R.string.channel_music), NotificationManager.IMPORTANCE_LOW).apply {
+                    description = context.getString(R.string.channel_music_description)
+                    setShowBadge(false)
                 },
             ),
         )

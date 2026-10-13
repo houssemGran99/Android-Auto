@@ -91,4 +91,12 @@ class ConditionEvaluatorTest {
         assertFalse(evaluator.evaluate(cond, env(DeviceState(wifiConnected = true, wifiSsid = "Office"))))
         assertTrue(evaluator.evaluate(cond, env(DeviceState(wifiConnected = false))))
     }
+
+    @Test
+    fun `music playing state`() {
+        assertTrue(evaluator.evaluate(ConditionNode.MusicPlaying(true), env(DeviceState(musicPlaying = true))))
+        assertTrue(evaluator.evaluate(ConditionNode.MusicPlaying(false), env(DeviceState(musicPlaying = false))))
+        assertFalse(evaluator.evaluate(ConditionNode.MusicPlaying(true), env(DeviceState(musicPlaying = false))))
+        assertFalse("unknown is false", evaluator.evaluate(ConditionNode.MusicPlaying(false), env()))
+    }
 }

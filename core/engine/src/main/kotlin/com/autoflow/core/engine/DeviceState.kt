@@ -9,6 +9,7 @@ data class DeviceState(
     val bluetoothEnabled: Boolean? = null,
     val headphonesConnected: Boolean? = null,
     val mediaVolumePercent: Int? = null,
+    val musicPlaying: Boolean? = null,
     val brightnessPercent: Int? = null,
     /** Last known location; only filled when location permission is granted. */
     val latitude: Double? = null,

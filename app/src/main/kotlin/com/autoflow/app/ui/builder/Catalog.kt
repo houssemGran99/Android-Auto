@@ -7,6 +7,7 @@ import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.GeoPlace
 import com.autoflow.core.model.HeadphoneKind
+import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
 import com.autoflow.core.model.SunEventType
@@ -46,6 +47,8 @@ object BuilderCatalog {
         CatalogItem("CHARGER_DISCONNECTED", R.string.category_battery, needsConfiguration = false) { TriggerSpec.ChargerDisconnected },
         CatalogItem("HEADPHONES_CONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesConnected(HeadphoneKind.ANY) },
         CatalogItem("HEADPHONES_DISCONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesDisconnected(HeadphoneKind.ANY) },
+        CatalogItem("MEDIA_STARTED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStarted },
+        CatalogItem("MEDIA_STOPPED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStopped },
         CatalogItem("APP_OPENED", R.string.category_apps) { TriggerSpec.AppOpened(packageName = "") },
         CatalogItem("NOTIFICATION_RECEIVED", R.string.category_notifications) { TriggerSpec.NotificationReceived() },
         CatalogItem("CALENDAR_EVENT_START", R.string.category_calendar) { TriggerSpec.CalendarEventStart() },
@@ -65,6 +68,7 @@ object BuilderCatalog {
         CatalogItem("WIFI_STATE", R.string.category_connectivity) { ConditionNode.WifiState(connected = true) },
         CatalogItem("BLUETOOTH_STATE", R.string.category_connectivity) { ConditionNode.BluetoothState(enabled = true) },
         CatalogItem("HEADPHONES_STATE", R.string.category_hardware) { ConditionNode.HeadphonesState(connected = true) },
+        CatalogItem("MUSIC_PLAYING", R.string.category_audio) { ConditionNode.MusicPlaying(playing = true) },
         CatalogItem("VARIABLE", R.string.category_logic) { ConditionNode.VariableCompare("", Comparison.EQUALS, "") },
         CatalogItem(GROUP_AND, R.string.category_logic, title = R.string.group_and, needsConfiguration = false) {
             ConditionNode.And(emptyList())
@@ -86,6 +90,9 @@ object BuilderCatalog {
         CatalogItem("VIBRATE", R.string.category_device) { ActionSpec.Vibrate(500) },
         CatalogItem("SPEAK", R.string.category_audio) { ActionSpec.Speak("") },
         CatalogItem("PLAY_SOUND", R.string.category_audio) { ActionSpec.PlaySound(SoundType.NOTIFICATION) },
+        CatalogItem("MEDIA_CONTROL", R.string.category_audio) { ActionSpec.MediaControl(MediaCommand.PLAY_PAUSE) },
+        CatalogItem("PLAY_MUSIC_FOLDER", R.string.category_audio) { ActionSpec.PlayMusicFolder(folderUri = "") },
+        CatalogItem("STOP_MUSIC", R.string.category_audio, needsConfiguration = false) { ActionSpec.StopMusic },
         CatalogItem("HTTP_REQUEST", R.string.category_web) { ActionSpec.HttpRequest(url = "https://") },
         CatalogItem("DELAY", R.string.category_logic) { ActionSpec.Delay(5_000) },
         CatalogItem("SET_VARIABLE", R.string.category_variables) { ActionSpec.SetVariable("", "") },
