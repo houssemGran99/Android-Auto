@@ -17,6 +17,9 @@ import com.autoflow.core.engine.repository.AutomationRepository
 import com.autoflow.core.engine.repository.EngineSettings
 import com.autoflow.core.engine.repository.ExecutionRepository
 import com.autoflow.core.engine.repository.VariableRepository
+import com.autoflow.app.capture.RecordAudioActionHandler
+import com.autoflow.app.capture.TakePhotoActionHandler
+import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.TriggerSpec
 import com.autoflow.data.storage.AutoFlowDatabase
@@ -114,7 +117,10 @@ object AppModule {
         foregroundTracker: AppForegroundTracker,
         notifications: NotificationListenerBridge,
     ): ActionRegistry =
-        PlatformActions.registry(context, permissions, OkHttpExecutor(), notifications, foregroundTracker::isInForeground)
+        PlatformActions.registry(context, permissions, OkHttpExecutor(), notifications, foregroundTracker::isInForeground) { launcher ->
+            register<ActionSpec.TakePhoto>(TakePhotoActionHandler(context, permissions, launcher))
+            register<ActionSpec.RecordAudio>(RecordAudioActionHandler(context, permissions, launcher))
+        }
 
     @Provides
     @Singleton

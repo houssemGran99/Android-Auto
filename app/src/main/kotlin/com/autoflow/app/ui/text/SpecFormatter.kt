@@ -139,6 +139,8 @@ class SpecFormatter(private val res: Resources) {
         is ActionSpec.SetScreenTimeout -> duration(spec.seconds * 1000L)
         ActionSpec.LockScreen -> ""
         is ActionSpec.Flashlight -> flashlightMode(spec.mode)
+        is ActionSpec.TakePhoto -> "${cameraFacing(spec.camera)} → ${folder(spec.folderLabel)}/${spec.fileName}"
+        is ActionSpec.RecordAudio -> "${duration(spec.durationSeconds * 1000L)} → ${folder(spec.folderLabel)}/${spec.fileName}"
         is ActionSpec.WriteFile -> "${folder(spec.folderLabel)}/${spec.fileName}" +
             (if (spec.append) " (${s(R.string.field_append_short)})" else "")
         is ActionSpec.ReadFile -> "${folder(spec.folderLabel)}/${spec.fileName} → \$${spec.target}"
@@ -292,6 +294,13 @@ class SpecFormatter(private val res: Resources) {
         },
     )
 
+    fun cameraFacing(value: com.autoflow.core.model.CameraFacing): String = s(
+        when (value) {
+            com.autoflow.core.model.CameraFacing.BACK -> R.string.camera_back
+            com.autoflow.core.model.CameraFacing.FRONT -> R.string.camera_front
+        },
+    )
+
     fun flashlightMode(value: com.autoflow.core.model.FlashlightMode): String = s(
         when (value) {
             com.autoflow.core.model.FlashlightMode.ON -> R.string.state_on
@@ -435,6 +444,8 @@ class SpecFormatter(private val res: Resources) {
             "SCREEN_TIMEOUT" to R.string.action_screen_timeout,
             "LOCK_SCREEN" to R.string.action_lock_screen,
             "FLASHLIGHT" to R.string.action_flashlight,
+            "TAKE_PHOTO" to R.string.action_take_photo,
+            "RECORD_AUDIO" to R.string.action_record_audio,
         )
 
         val INFO_TITLES = mapOf(

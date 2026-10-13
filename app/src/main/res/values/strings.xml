@@ -459,7 +459,7 @@
     <string name="import_failed">Import failed: %1$s</string>
     <string name="io_failed">Could not read or write the file</string>
     <string name="settings_privacy">Privacy</string>
-    <string name="privacy_statement">Everything stays on this phone. AutoFlow has no account, no analytics and no server. Data only leaves the device when one of your automations sends an HTTP request you configured. AutoFlow never records audio, video or photos and never keeps a location history. Location is only read on the device: to detect the places you set up as triggers (via Android\'s low-power geofencing), to fill %latitude% / %longitude% when an automation runs, and because Android requires it to read Wi-Fi network names. The ongoing notification shows whenever background monitoring is active.</string>
+    <string name="privacy_statement">Everything stays on this phone. AutoFlow has no account, no analytics and no server. Data only leaves the device when one of your automations sends an HTTP request you configured. AutoFlow never records audio or takes photos in the background: only the \"Take photo\" and \"Record audio\" actions you add can, always on a visible screen (recordings also keep a notification with a Stop button), saving only to a folder you picked. It never keeps a location history. Location is only read on the device: to detect the places you set up as triggers (via Android\'s low-power geofencing), to fill %latitude% / %longitude% when an automation runs, and because Android requires it to read Wi-Fi network names. The ongoing notification shows whenever background monitoring is active.</string>
     <string name="settings_about">About</string>
     <string name="about_version">AutoFlow %1$s</string>
     <string name="about_logcat">Developer logs: adb logcat -s AutoFlow</string>
@@ -492,6 +492,26 @@
     <string name="family_media">media playback</string>
     <string name="family_files">folders</string>
     <string name="family_screen">screen</string>
+    <!-- Phase 8: camera & microphone (visible only) -->
+    <string name="category_capture">Camera &amp; microphone</string>
+    <string name="action_take_photo">Take photo</string>
+    <string name="action_record_audio">Record audio</string>
+    <string name="field_camera">Camera</string>
+    <string name="camera_back">Back</string>
+    <string name="camera_front">Front</string>
+    <string name="field_countdown">Countdown</string>
+    <string name="field_duration_seconds">Duration (seconds)</string>
+    <string name="hint_take_photo">Opens a visible camera screen with a live preview and a countdown you can cancel, then saves one photo to the folder you pick. AutoFlow never takes photos in the background: if Android blocks opening the screen, you get a notification to tap instead.</string>
+    <string name="hint_record_audio">Starts from a visible screen and shows a notification with a Stop button for the whole recording (Android also shows its microphone indicator). Saved as .m4a in the folder you pick. If Android blocks opening the screen, you get a notification to tap instead.</string>
+    <string name="capture_photo_banner">AutoFlow · "%1$s" is taking a photo</string>
+    <string name="capture_saving">Saving…</string>
+    <string name="capture_saved">Saved %1$s</string>
+    <string name="recording_banner">AutoFlow · "%1$s" is recording audio</string>
+    <string name="recording_notification_title">Recording audio · %1$s</string>
+    <string name="recording_stop">Stop recording</string>
+    <string name="recording_idle">Not recording</string>
+    <string name="recording_close">Close (keep recording)</string>
+    <string name="recording_close_hint">The recording continues with a notification you can stop at any time.</string>
     <string name="family_sensors">motion</string>
     <!-- Phase 7: device extras -->
     <string name="category_sensors">Motion</string>

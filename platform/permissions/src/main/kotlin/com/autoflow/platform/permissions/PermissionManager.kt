@@ -90,6 +90,8 @@ class PermissionManager(context: Context) {
             (context.packageName in NotificationManagerCompat.getEnabledListenerPackages(context)).toStatus()
         Capability.CALENDAR -> granted(Manifest.permission.READ_CALENDAR).toStatus()
         Capability.DEVICE_ADMIN -> isDeviceAdminActive().toStatus()
+        Capability.CAMERA -> granted(Manifest.permission.CAMERA).toStatus()
+        Capability.MICROPHONE -> granted(Manifest.permission.RECORD_AUDIO).toStatus()
     }
 
     fun isSatisfied(capability: Capability): Boolean =
@@ -143,6 +145,8 @@ class PermissionManager(context: Context) {
                 .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdminComponent())
                 .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.capability_device_admin_explanation)),
         )
+        Capability.CAMERA -> GrantRequest.Runtime(listOf(Manifest.permission.CAMERA))
+        Capability.MICROPHONE -> GrantRequest.Runtime(listOf(Manifest.permission.RECORD_AUDIO))
     }
 
     /** App details page: fallback when a runtime permission was permanently denied. */
@@ -216,6 +220,16 @@ class PermissionManager(context: Context) {
             R.string.capability_device_admin_title,
             R.string.capability_device_admin_rationale,
             R.string.capability_device_admin_denied,
+        )
+        Capability.CAMERA -> CapabilityInfo(
+            R.string.capability_camera_title,
+            R.string.capability_camera_rationale,
+            R.string.capability_camera_denied,
+        )
+        Capability.MICROPHONE -> CapabilityInfo(
+            R.string.capability_microphone_title,
+            R.string.capability_microphone_rationale,
+            R.string.capability_microphone_denied,
         )
     }
 

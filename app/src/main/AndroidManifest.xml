@@ -28,6 +28,17 @@
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <!-- Camera and microphone are only used on visible screens (Take photo / Record audio). -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
 
     <uses-feature
         android:name="android.hardware.wifi"
@@ -166,6 +177,25 @@
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- Visible capture screens, never shown over the lock screen. -->
+        <activity
+            android:name=".capture.PhotoCaptureActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity="" />
+
+        <activity
+            android:name=".capture.AudioRecordActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity="" />
+
+        <service
+            android:name=".capture.AudioRecordService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <activity
             android:name=".widget.WidgetConfigActivity"

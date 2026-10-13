@@ -178,4 +178,23 @@ class AutomationJsonTest {
         assertTrue(text.contains("\"type\": \"LOCK_SCREEN\""))
         assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
     }
+
+    @Test
+    fun `camera and microphone specs round trip`() {
+        val tree = "content://tree/photos"
+        val automation = Automation(
+            id = "cam",
+            name = "Camera",
+            actions = listOf(
+                ActionSpec.TakePhoto(tree, "Photos", camera = CameraFacing.FRONT, countdownSeconds = 5),
+                ActionSpec.RecordAudio(tree, "Photos", durationSeconds = 120),
+            ),
+        )
+        assertEquals(
+            setOf(Capability.CAMERA, Capability.MICROPHONE, Capability.NOTIFICATIONS),
+            automation.requiredCapabilities,
+        )
+        val text = AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation)))
+        assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
+    }
 }

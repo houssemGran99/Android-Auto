@@ -24,6 +24,7 @@ import com.autoflow.app.ui.text.SpecFormatter
 import com.autoflow.app.ui.text.rememberSpecFormatter
 import com.autoflow.core.model.ActionSpec
 import com.autoflow.core.model.AudioStream
+import com.autoflow.core.model.CameraFacing
 import com.autoflow.core.model.Comparison
 import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.FlashlightMode
@@ -307,6 +308,8 @@ fun isValidAction(spec: ActionSpec): Boolean = when (spec) {
     is ActionSpec.CopyFile -> isFolder(spec.folderUri) && isFolder(spec.destinationUri) &&
         spec.folderUri != spec.destinationUri && spec.fileName.isNotBlank()
     is ActionSpec.DeleteFile -> isFolder(spec.folderUri) && spec.fileName.isNotBlank()
+    is ActionSpec.TakePhoto -> isFolder(spec.folderUri) && isPlainFileName(spec.fileName)
+    is ActionSpec.RecordAudio -> isFolder(spec.folderUri) && isPlainFileName(spec.fileName)
     else -> true
 }
 
@@ -392,6 +395,30 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
         is ActionSpec.Flashlight -> {
             SegmentedChoice(FlashlightMode.entries, spec.mode, f::flashlightMode) { onChange(spec.copy(mode = it)) }
             Hint(stringResource(R.string.hint_flashlight))
+        }
+        is ActionSpec.TakePhoto -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            SegmentedChoice(CameraFacing.entries, spec.camera, f::cameraFacing) { onChange(spec.copy(camera = it)) }
+            PercentSlider(
+                stringResource(R.string.field_countdown),
+                spec.countdownSeconds,
+                { onChange(spec.copy(countdownSeconds = it)) },
+                0..ActionSpec.TakePhoto.MAX_COUNTDOWN,
+                suffix = " s",
+            )
+            Hint(stringResource(R.string.hint_take_photo))
+        }
+        is ActionSpec.RecordAudio -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            NumberField(
+                stringResource(R.string.field_duration_seconds),
+                spec.durationSeconds.toLong(),
+                { onChange(spec.copy(durationSeconds = it.toInt())) },
+                1L..ActionSpec.RecordAudio.MAX_DURATION_SECONDS.toLong(),
+            )
+            Hint(stringResource(R.string.hint_record_audio))
         }
         is ActionSpec.WriteFile -> {
             FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }

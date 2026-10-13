@@ -37,6 +37,8 @@ object PlatformActions {
         httpExecutor: HttpExecutor,
         notifications: NotificationController,
         isAppInForeground: () -> Boolean,
+        /** Lets the app register handlers that need its own activities or services. */
+        extra: ActionRegistry.Builder.(ActivityLauncher) -> Unit = {},
     ): ActionRegistry {
         val appContext = context.applicationContext
         val launcher = ActivityLauncher(appContext, permissions, isAppInForeground)
@@ -64,6 +66,7 @@ object PlatformActions {
             .register<ActionSpec.Vibrate>(VibrateActionHandler(appContext))
             .register<ActionSpec.HttpRequest>(HttpRequestActionHandler(httpExecutor))
             .register<ActionSpec.DismissNotifications>(DismissNotificationsActionHandler(notifications, appContext.packageName))
+            .apply { extra(launcher) }
             .build()
     }
 }

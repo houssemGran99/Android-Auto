@@ -25,4 +25,6 @@
     <string name="music_next">Next</string>
     <string name="music_stop">Stop</string>
     <string name="device_admin_label">AutoFlow lock screen</string>
+    <string name="channel_recording">Recording</string>
+    <string name="channel_recording_description">Shown for the whole time an automation records audio, with a Stop button.</string>
 </resources>

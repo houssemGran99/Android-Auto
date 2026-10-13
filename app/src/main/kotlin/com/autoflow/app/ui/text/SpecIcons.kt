@@ -56,6 +56,8 @@ import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.ScreenRotation
 import androidx.compose.material.icons.outlined.FlashlightOn
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
@@ -139,6 +141,8 @@ object SpecIcons {
         "SCREEN_TIMEOUT" -> Icons.Outlined.Timer
         "LOCK_SCREEN" -> Icons.Outlined.Lock
         "FLASHLIGHT" -> Icons.Outlined.FlashlightOn
+        "TAKE_PHOTO" -> Icons.Outlined.PhotoCamera
+        "RECORD_AUDIO" -> Icons.Outlined.Mic
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

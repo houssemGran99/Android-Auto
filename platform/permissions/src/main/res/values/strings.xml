@@ -44,6 +44,12 @@
 
     <string name="capability_calendar_title">Calendar</string>
     <string name="capability_calendar_rationale">Needed to read the start and end times and titles of your calendar events for calendar triggers. AutoFlow only reads; it never changes or uploads your calendar.</string>
+    <string name="capability_camera_title">Camera</string>
+    <string name="capability_camera_rationale">Needed by the "Take photo" action. AutoFlow only uses the camera on a visible capture screen with a live preview and a countdown you can cancel; it never takes photos in the background. Photos are saved only to the folder you pick.</string>
+    <string name="capability_camera_denied">"Take photo" cannot work until camera permission is granted.</string>
+    <string name="capability_microphone_title">Microphone</string>
+    <string name="capability_microphone_rationale">Needed by the "Record audio" action. Recording always starts from a visible screen and shows a notification with a Stop button for its whole duration; Android also shows its microphone indicator. Recordings are saved only to the folder you pick.</string>
+    <string name="capability_microphone_denied">"Record audio" cannot work until microphone permission is granted.</string>
     <string name="capability_device_admin_title">Lock screen access</string>
     <string name="capability_device_admin_rationale">Android only lets apps lock the screen as a "device admin app". AutoFlow asks for the single "lock the screen" policy: it cannot wipe, reset, change passwords or read anything. You can remove this access at any time in AutoFlow settings (needed before uninstalling).</string>
     <string name="capability_device_admin_denied">The lock screen action cannot work until lock screen access is activated.</string>
