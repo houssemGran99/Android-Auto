@@ -115,6 +115,8 @@ object BuilderCatalog {
             ActionSpec.CopyFile(folderUri = "", fileName = "", destinationUri = "")
         },
         CatalogItem("DELETE_FILE", R.string.category_files) { ActionSpec.DeleteFile(folderUri = "", fileName = "") },
+        CatalogItem("TAKE_PHOTO", R.string.category_capture) { ActionSpec.TakePhoto(folderUri = "") },
+        CatalogItem("RECORD_AUDIO", R.string.category_capture) { ActionSpec.RecordAudio(folderUri = "") },
         CatalogItem("HTTP_REQUEST", R.string.category_web) { ActionSpec.HttpRequest(url = "https://") },
         CatalogItem("DELAY", R.string.category_logic) { ActionSpec.Delay(5_000) },
         CatalogItem("SET_VARIABLE", R.string.category_variables) { ActionSpec.SetVariable("", "") },

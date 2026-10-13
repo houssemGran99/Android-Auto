@@ -84,4 +84,6 @@ val ActionSpec.typeKey: String
         is ActionSpec.SetScreenTimeout -> "SCREEN_TIMEOUT"
         ActionSpec.LockScreen -> "LOCK_SCREEN"
         is ActionSpec.Flashlight -> "FLASHLIGHT"
+        is ActionSpec.TakePhoto -> "TAKE_PHOTO"
+        is ActionSpec.RecordAudio -> "RECORD_AUDIO"
     }

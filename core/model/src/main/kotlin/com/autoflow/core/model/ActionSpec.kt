@@ -20,6 +20,9 @@ enum class MediaCommand { PLAY_PAUSE, PLAY, PAUSE, NEXT, PREVIOUS, STOP }
 enum class FlashlightMode { ON, OFF, TOGGLE }
 
 @Serializable
+enum class CameraFacing { BACK, FRONT }
+
+@Serializable
 enum class HttpMethod { GET, POST, PUT, DELETE, PATCH }
 
 @Serializable
@@ -290,6 +293,54 @@ sealed interface ActionSpec {
     @Serializable
     @SerialName("FLASHLIGHT")
     data class Flashlight(val mode: FlashlightMode) : ActionSpec
+
+    /**
+     * Opens a visible capture screen (live preview + [countdownSeconds] countdown, cancellable),
+     * takes one photo and saves it as [fileName] in a user-picked folder. Never runs hidden: when
+     * Android blocks opening the screen from the background, a tap-to-open notification is shown.
+     */
+    @Serializable
+    @SerialName("TAKE_PHOTO")
+    data class TakePhoto(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String = "photo-%timestamp%.jpg",
+        val camera: CameraFacing = CameraFacing.BACK,
+        val countdownSeconds: Int = 3,
+    ) : ActionSpec {
+        init {
+            require(countdownSeconds in 0..MAX_COUNTDOWN) { "Countdown must be in 0..$MAX_COUNTDOWN seconds" }
+        }
+
+        override val capabilities get() = setOf(Capability.CAMERA, Capability.NOTIFICATIONS)
+
+        companion object {
+            const val MAX_COUNTDOWN = 10
+        }
+    }
+
+    /**
+     * Records audio for [durationSeconds] into [fileName] (AAC .m4a) in a user-picked folder.
+     * Starts from a visible screen and keeps a notification with a Stop button while recording.
+     */
+    @Serializable
+    @SerialName("RECORD_AUDIO")
+    data class RecordAudio(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String = "recording-%timestamp%.m4a",
+        val durationSeconds: Int = 30,
+    ) : ActionSpec {
+        init {
+            require(durationSeconds in 1..MAX_DURATION_SECONDS) { "Duration must be in 1..$MAX_DURATION_SECONDS seconds" }
+        }
+
+        override val capabilities get() = setOf(Capability.MICROPHONE, Capability.NOTIFICATIONS)
+
+        companion object {
+            const val MAX_DURATION_SECONDS = 10 * 60
+        }
+    }
 
     @Serializable
     @SerialName("VIBRATE")

@@ -47,4 +47,10 @@ enum class Capability(val optional: Boolean) {
 
     /** Device admin with only the "lock the screen" policy, needed by the lock screen action. */
     DEVICE_ADMIN(optional = false),
+
+    /** CAMERA runtime permission, only used by the visible photo capture screen. */
+    CAMERA(optional = false),
+
+    /** RECORD_AUDIO runtime permission, only used by visible recordings with a notification. */
+    MICROPHONE(optional = false),
 }

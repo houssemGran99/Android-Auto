@@ -91,6 +91,9 @@ class SafFolder(context: Context, val treeUri: Uri) {
         return target
     }
 
+    /** URI of [name] for writing: the existing file, or a newly created empty one. */
+    fun fileForWrite(name: String): Uri = find(name)?.uri ?: create(name)
+
     /** Deletes the file; false when it did not exist. */
     fun delete(name: String): Boolean {
         val entry = find(name) ?: return false
