@@ -87,4 +87,14 @@ class TriggerMatcherTest {
         assertTrue(matcher.matches(TriggerSpec.MediaStopped, TriggerEvent.MediaPlaybackChanged(playing = false)))
         assertFalse(matcher.matches(TriggerSpec.MediaStopped, TriggerEvent.ChargerConnected))
     }
+
+    @Test
+    fun `file added in watched folder with name filter`() {
+        val matcher = TriggerMatcher()
+        val spec = TriggerSpec.FileAdded("content://tree/a", nameContains = "invoice")
+        assertTrue(matcher.matches(spec, TriggerEvent.FileAdded("content://tree/a", "Invoice-2026.pdf")))
+        assertFalse(matcher.matches(spec, TriggerEvent.FileAdded("content://tree/a", "photo.jpg")))
+        assertFalse(matcher.matches(spec, TriggerEvent.FileAdded("content://tree/b", "invoice.pdf")))
+        assertTrue(matcher.matches(TriggerSpec.FileAdded("content://tree/b"), TriggerEvent.FileAdded("content://tree/b", "x")))
+    }
 }

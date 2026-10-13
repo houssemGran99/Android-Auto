@@ -43,6 +43,13 @@ import androidx.compose.material.icons.outlined.MusicOff
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.LibraryMusic
+import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material.icons.outlined.FindInPage
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.FileCopy
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
@@ -68,6 +75,7 @@ object SpecIcons {
         "LOCATION_EXIT" -> Icons.Outlined.LocationOff
         "MEDIA_STARTED" -> Icons.Outlined.PlayCircle
         "MEDIA_STOPPED" -> Icons.Outlined.MusicOff
+        "FILE_ADDED" -> Icons.Outlined.CreateNewFolder
         else -> Icons.AutoMirrored.Outlined.Rule
     }
 
@@ -80,6 +88,7 @@ object SpecIcons {
         "BLUETOOTH_STATE" -> Icons.Outlined.Bluetooth
         "HEADPHONES_STATE" -> Icons.Outlined.Headphones
         "MUSIC_PLAYING" -> Icons.Outlined.GraphicEq
+        "FILE_EXISTS" -> Icons.Outlined.FindInPage
         "VARIABLE" -> Icons.Outlined.DataObject
         else -> Icons.AutoMirrored.Outlined.Rule
     }
@@ -109,6 +118,11 @@ object SpecIcons {
         "MEDIA_CONTROL" -> Icons.Outlined.SkipNext
         "PLAY_MUSIC_FOLDER" -> Icons.Outlined.LibraryMusic
         "STOP_MUSIC" -> Icons.Outlined.MusicOff
+        "WRITE_FILE" -> Icons.Outlined.EditNote
+        "READ_FILE" -> Icons.Outlined.Description
+        "LIST_FILES" -> Icons.Outlined.FolderOpen
+        "COPY_FILE" -> Icons.Outlined.FileCopy
+        "DELETE_FILE" -> Icons.Outlined.DeleteOutline
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

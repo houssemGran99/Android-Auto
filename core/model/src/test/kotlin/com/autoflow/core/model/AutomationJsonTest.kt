@@ -138,4 +138,24 @@ class AutomationJsonTest {
         assertTrue(text.contains("\"type\": \"PLAY_MUSIC_FOLDER\""))
         assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
     }
+
+    @Test
+    fun `file specs round trip`() {
+        val tree = "content://com.android.externalstorage.documents/tree/primary%3ADocuments"
+        val automation = Automation(
+            id = "files",
+            name = "Files",
+            triggers = listOf(TriggerSpec.FileAdded(tree, "Documents", "pdf")),
+            condition = ConditionNode.FileExists(tree, "Documents", "lock.txt", exists = false),
+            actions = listOf(
+                ActionSpec.WriteFile(tree, "Documents", "log.txt", "%datetime% %battery%", append = true),
+                ActionSpec.ReadFile(tree, fileName = "config.json", target = "config"),
+                ActionSpec.ListFiles(tree, target = "files", nameContains = ".pdf"),
+                ActionSpec.CopyFile(tree, fileName = "%trigger_file%", destinationUri = tree, move = true),
+                ActionSpec.DeleteFile(tree, fileName = "old.txt"),
+            ),
+        )
+        val text = AutomationJson.encodeBundle(AutomationBundle(automations = listOf(automation)))
+        assertEquals(listOf(automation), AutomationJson.decodeBundle(text).automations)
+    }
 }

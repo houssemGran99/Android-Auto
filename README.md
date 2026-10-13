@@ -10,9 +10,9 @@ THEN  set media volume to 70% · launch Spotify · show "Music mode activated"
 
 * Visual builder: triggers, an AND / OR / NOT condition tree, drag-and-drop action list
   with nested If/Else and Repeat
-* Triggers: time, interval, sunrise / sunset, arrive at / leave a place (geofences), notifications (app / text), calendar event start / end, media started / stopped playing, Wi-Fi, Bluetooth, battery level, charger, headphones, app opened
+* Triggers: time, interval, sunrise / sunset, arrive at / leave a place (geofences), notifications (app / text), calendar event start / end, media started / stopped playing, new file in a folder, Wi-Fi, Bluetooth, battery level, charger, headphones, app opened
 * Actions: notification, dismiss notifications, launch app, open URL, settings panels, brightness, volume,
-  Do Not Disturb, text-to-speech, sound, media controls (play / pause / next…), random music from a folder, vibration, HTTP requests, wait, variables, if/else, repeat, while, wait until, stop,
+  Do Not Disturb, text-to-speech, sound, media controls (play / pause / next…), random music from a folder, file write / read / list / copy / move / delete (in folders you pick), vibration, HTTP requests, wait, variables, if/else, repeat, while, wait until, stop,
   variable operations (math, text, regex), read JSON values
 * Variables (`%battery%`, `$myVar`, JSON paths `$http.data.temp`), arithmetic
 * Execution history with a step-by-step log, templates, global search, JSON export / import,

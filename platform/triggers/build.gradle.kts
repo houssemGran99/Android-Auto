@@ -32,6 +32,7 @@ kotlin {
 dependencies {
     api(project(":core:engine"))
     implementation(project(":platform:permissions"))
+    implementation(project(":platform:files"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.play.services.location)

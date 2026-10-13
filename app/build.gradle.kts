@@ -62,6 +62,7 @@ dependencies {
     implementation(project(":platform:permissions"))
     implementation(project(":platform:triggers"))
     implementation(project(":platform:actions"))
+    implementation(project(":platform:files"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

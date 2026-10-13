@@ -14,7 +14,10 @@ import com.autoflow.core.model.FailureKind
 import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.TriggerEvent
 import com.autoflow.core.model.Variable
+import com.autoflow.platform.actions.handler.CopyFileActionHandler
 import com.autoflow.platform.actions.handler.MediaControlActionHandler
+import com.autoflow.platform.actions.handler.ReadFileActionHandler
+import com.autoflow.platform.actions.handler.WriteFileActionHandler
 import com.autoflow.platform.actions.handler.PlayMusicFolderActionHandler
 import com.autoflow.platform.actions.handler.StopMusicActionHandler
 import com.autoflow.platform.actions.music.AudioFolderScanner
@@ -30,7 +33,7 @@ import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
-class MediaActionsTest {
+class MediaAndFileActionsTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     private val automationContext = AutomationContext(
@@ -81,5 +84,21 @@ class MediaActionsTest {
     @Test
     fun stopMusicIsSkippedWhenNothingPlays() = runTest {
         assertTrue(StopMusicActionHandler().execute(ActionSpec.StopMusic, automationContext) is ActionResult.Skipped)
+    }
+
+    @Test
+    fun fileActionsExplainMissingFolderAccess() = runTest {
+        val tree = "content://com.android.externalstorage.documents/tree/primary%3ADocuments"
+        val noFolder = WriteFileActionHandler(context).execute(ActionSpec.WriteFile("", fileName = "a.txt", content = "x"), automationContext)
+        assertEquals(FailureKind.INVALID_CONFIGURATION, (noFolder as ActionResult.Failure).kind)
+        val noGrant = ReadFileActionHandler(context).execute(ActionSpec.ReadFile(tree, fileName = "a.txt", target = "a"), automationContext)
+        assertEquals(FailureKind.PERMISSION_DENIED, (noGrant as ActionResult.Failure).kind)
+        val badTarget = ReadFileActionHandler(context).execute(ActionSpec.ReadFile(tree, fileName = "a.txt", target = "1 bad"), automationContext)
+        assertEquals(FailureKind.INVALID_CONFIGURATION, (badTarget as ActionResult.Failure).kind)
+        val copy = CopyFileActionHandler(context).execute(
+            ActionSpec.CopyFile(tree, fileName = "a.txt", destinationUri = tree),
+            automationContext,
+        )
+        assertEquals(FailureKind.PERMISSION_DENIED, (copy as ActionResult.Failure).kind)
     }
 }

@@ -70,6 +70,16 @@ sealed interface ConditionNode {
     @SerialName("MUSIC_PLAYING")
     data class MusicPlaying(val playing: Boolean = true) : ConditionNode
 
+    /** Whether [fileName] exists in a user-picked folder (Storage Access Framework tree URI). */
+    @Serializable
+    @SerialName("FILE_EXISTS")
+    data class FileExists(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String,
+        val exists: Boolean = true,
+    ) : ConditionNode
+
     /** Compares a variable (name without prefix, e.g. "counter" or "battery") with [value]. */
     @Serializable
     @SerialName("VARIABLE")

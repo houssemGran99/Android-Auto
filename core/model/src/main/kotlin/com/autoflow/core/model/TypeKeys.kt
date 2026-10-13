@@ -23,6 +23,7 @@ val TriggerSpec.typeKey: String
         is TriggerSpec.SunEvent -> "SUN_EVENT"
         TriggerSpec.MediaStarted -> "MEDIA_STARTED"
         TriggerSpec.MediaStopped -> "MEDIA_STOPPED"
+        is TriggerSpec.FileAdded -> "FILE_ADDED"
     }
 
 val ConditionNode.typeKey: String
@@ -39,6 +40,7 @@ val ConditionNode.typeKey: String
         is ConditionNode.HeadphonesState -> "HEADPHONES_STATE"
         is ConditionNode.VariableCompare -> "VARIABLE"
         is ConditionNode.MusicPlaying -> "MUSIC_PLAYING"
+        is ConditionNode.FileExists -> "FILE_EXISTS"
     }
 
 val ActionSpec.typeKey: String
@@ -67,4 +69,9 @@ val ActionSpec.typeKey: String
         is ActionSpec.MediaControl -> "MEDIA_CONTROL"
         is ActionSpec.PlayMusicFolder -> "PLAY_MUSIC_FOLDER"
         ActionSpec.StopMusic -> "STOP_MUSIC"
+        is ActionSpec.WriteFile -> "WRITE_FILE"
+        is ActionSpec.ReadFile -> "READ_FILE"
+        is ActionSpec.ListFiles -> "LIST_FILES"
+        is ActionSpec.CopyFile -> "COPY_FILE"
+        is ActionSpec.DeleteFile -> "DELETE_FILE"
     }
