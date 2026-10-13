@@ -91,6 +91,8 @@ class ConditionEvaluator(
             is ConditionNode.MusicPlaying ->
                 (state.musicPlaying != null && state.musicPlaying == node.playing) to
                     "music=${state.musicPlaying ?: "unknown"}"
+            // Needs platform file access: provided as a custom evaluator by the app.
+            is ConditionNode.FileExists -> false to "file access unavailable"
             is ConditionNode.VariableCompare -> {
                 val actual = env.variable(node.variable)
                 (actual != null && compareValues(actual, node.value, node.comparison)) to

@@ -26,7 +26,10 @@ platform/permissions   Capability → permission / special-access mapping, ratio
 platform/triggers      Trigger sources (Wi-Fi, Bluetooth, battery, charger, headphones,
                        app usage), AlarmManager scheduler, device state provider.
 platform/actions       Action handlers (notification, launch app, brightness, volume, DND,
-                       TTS, sound, vibration, settings panels, OkHttp transport).
+                       TTS, sound, vibration, settings panels, media, music service,
+                       files, OkHttp transport).
+platform/files         Storage Access Framework helper (`SafFolder`) for user-picked folders,
+                       shared by file actions, the folder-watch trigger and "File exists".
 ```
 
 Dependency direction: `app → platform/*, data/storage → core/engine → core/model`.
@@ -91,9 +94,9 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED`, `MEDIA_STARTED`, `MEDIA_STOPPED` |
-| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `MUSIC_PLAYING`, `VARIABLE` |
-| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT`, `MEDIA_CONTROL`, `PLAY_MUSIC_FOLDER` (SAF folder URI, shuffle, max minutes), `STOP_MUSIC` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED`, `MEDIA_STARTED`, `MEDIA_STOPPED`, `FILE_ADDED` |
+| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `MUSIC_PLAYING`, `FILE_EXISTS` (custom evaluator in `platform:triggers`), `VARIABLE` |
+| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT`, `MEDIA_CONTROL`, `PLAY_MUSIC_FOLDER` (SAF folder URI, shuffle, max minutes), `STOP_MUSIC`, `WRITE_FILE`, `READ_FILE`, `LIST_FILES`, `COPY_FILE`, `DELETE_FILE` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
 | `Variable` | `$name` user variable, optionally secret (encrypted, never exported) |
 | `ExecutionRecord` / `ExecutionStep` | History: status (SUCCESS / PARTIAL / FAILED / SKIPPED) and per-step log |
@@ -175,6 +178,7 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 | Notification received (any app / specific app / text) | `NotificationListenerService` | 🔐 | User enables "Notification access". The system binds the listener itself (no foreground service). Android 13+ blocks this for sideloaded apps until "Allow restricted settings" is enabled in App info — the permission card explains it. Ongoing notifications, group summaries and silent updates are ignored; content is available to actions as variables but **never written to history**. |
 | Calendar event starts / ends (title filter) | `CalendarContract.Instances` + `AlarmManager` | 🔐 | `READ_CALENDAR`. Exact alarm at the next matching start/end (recurring events expanded by the provider, 8-day look-ahead); re-scheduled after each alarm, hourly via WorkManager, on boot and when the app opens. |
 | Media started / stopped playing | `AudioManager.registerAudioPlaybackCallback` + `isMusicActive` | ✅ | No permission. Callbacks only report player changes, so the real state is read after a 1.5 s settle delay and only changes fire (skipping tracks or a quick pause/resume fires nothing). Needs the monitoring service. Covers every app using the media stream (music, video, games). |
+| New file in folder (name filter) | Storage Access Framework tree listing (`DocumentsContract`) | ⚠️ | Only folders the user picked (persisted grant, **no storage permission**). Apps get no file-system events for shared storage, so the monitoring service lists each watched folder every 60 s; the first listing is a baseline (existing files never fire). File name → `%trigger_file%`. |
 | App opened | `UsageStatsManager.queryEvents` | 🔐 ⚠️ | Needs Usage access. No broadcast exists, so it polls every 2 s while the screen is on. AccessibilityService is deliberately **not** used. |
 
 **Background execution:** monitoring uses a `specialUse` foreground service with a visible,
@@ -198,6 +202,7 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Media control (play/pause, play, pause, next, previous, stop) | `AudioManager.dispatchMediaKeyEvent` | ✅ | Same as a headset button: goes to the app owning the media session (or the last one). No permission, no notification access needed. |
 | Play music from a folder (shuffle, stop after N minutes) | Storage Access Framework tree URI + `MediaPlayer` in a `mediaPlayback` foreground service | ⚠️ | The user picks the folder once (`OPEN_DOCUMENT_TREE`, persisted read grant) — **no storage permission**. Playback continues after the run with a media notification (previous / play-pause / next / stop) and a media session; respects audio focus and pauses when headphones are unplugged. Android 12+ only lets apps start a foreground service from the background in some cases (exact alarm just fired, notification listener bound, "Display over other apps", battery optimization disabled, app visible); otherwise the step fails with that explanation. |
 | Stop AutoFlow music | engine → service | ✅ | Skipped when nothing is playing. |
+| Write / append, read, list, copy / move, delete file | Storage Access Framework (`DocumentsContract`, `ContentResolver` streams) in user-picked folders | ✅ | Folder picked once with `OPEN_DOCUMENT_TREE` (persisted read + write grant); **no storage permission**, nothing outside the picked folders is reachable. File names are plain names (no `/`, placeholders allowed). Read is UTF-8 text up to 1 MB; list stores names and `<var>_count`; move deletes the original only after a successful copy; delete is permanent and skipped when the file is missing. A revoked grant fails with "pick the folder again". |
 | Dismiss notifications | `NotificationListenerService.cancelNotification` | 🔐 | Only clearable notifications of other apps, optional app / text filter. |
 | HTTP request | OkHttp | ✅ | GET/POST/PUT/PATCH/DELETE, headers, query, body, Basic/Bearer, timeout, response → variables, 1 MB cap. Cleartext HTTP is blocked by Android's default network policy. |
 | Delay, variables, If/Else, Repeat, While (iteration cap), Wait until (timeout), Stop, variable operations (increment/decrement, append, replace, case, trim, substring, split, regex extract, length, URL-encode), Read JSON value | engine | ✅ | |
@@ -220,7 +225,7 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 |---|---|
 | SMS / calls | `RECEIVE_SMS`, `SEND_SMS`, `READ_PHONE_STATE`, `READ_CALL_LOG` – restricted by Google Play policy unless the app is a default handler or qualifies for an exception |
 | Camera / microphone | Only from a visible activity or a `camera`/`microphone` foreground service with a visible notification; never hidden |
-| Files | Storage Access Framework (user-picked folders) — already used by "Play music from folder" |
+| Files | Implemented with the Storage Access Framework (user-picked folders only); `MANAGE_EXTERNAL_STORAGE` is deliberately not used (Play-restricted and far broader than needed) |
 | Sunrise / sunset | Computable offline from coarse location |
 | Webhook trigger | Needs a reachable endpoint (push service or local server) – privacy review required |
 

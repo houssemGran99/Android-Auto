@@ -49,6 +49,7 @@ object BuilderCatalog {
         CatalogItem("HEADPHONES_DISCONNECTED", R.string.category_hardware) { TriggerSpec.HeadphonesDisconnected(HeadphoneKind.ANY) },
         CatalogItem("MEDIA_STARTED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStarted },
         CatalogItem("MEDIA_STOPPED", R.string.category_audio, needsConfiguration = false) { TriggerSpec.MediaStopped },
+        CatalogItem("FILE_ADDED", R.string.category_files) { TriggerSpec.FileAdded(folderUri = "") },
         CatalogItem("APP_OPENED", R.string.category_apps) { TriggerSpec.AppOpened(packageName = "") },
         CatalogItem("NOTIFICATION_RECEIVED", R.string.category_notifications) { TriggerSpec.NotificationReceived() },
         CatalogItem("CALENDAR_EVENT_START", R.string.category_calendar) { TriggerSpec.CalendarEventStart() },
@@ -69,6 +70,7 @@ object BuilderCatalog {
         CatalogItem("BLUETOOTH_STATE", R.string.category_connectivity) { ConditionNode.BluetoothState(enabled = true) },
         CatalogItem("HEADPHONES_STATE", R.string.category_hardware) { ConditionNode.HeadphonesState(connected = true) },
         CatalogItem("MUSIC_PLAYING", R.string.category_audio) { ConditionNode.MusicPlaying(playing = true) },
+        CatalogItem("FILE_EXISTS", R.string.category_files) { ConditionNode.FileExists(folderUri = "", fileName = "") },
         CatalogItem("VARIABLE", R.string.category_logic) { ConditionNode.VariableCompare("", Comparison.EQUALS, "") },
         CatalogItem(GROUP_AND, R.string.category_logic, title = R.string.group_and, needsConfiguration = false) {
             ConditionNode.And(emptyList())
@@ -93,6 +95,13 @@ object BuilderCatalog {
         CatalogItem("MEDIA_CONTROL", R.string.category_audio) { ActionSpec.MediaControl(MediaCommand.PLAY_PAUSE) },
         CatalogItem("PLAY_MUSIC_FOLDER", R.string.category_audio) { ActionSpec.PlayMusicFolder(folderUri = "") },
         CatalogItem("STOP_MUSIC", R.string.category_audio, needsConfiguration = false) { ActionSpec.StopMusic },
+        CatalogItem("WRITE_FILE", R.string.category_files) { ActionSpec.WriteFile(folderUri = "", fileName = "autoflow.txt", content = "") },
+        CatalogItem("READ_FILE", R.string.category_files) { ActionSpec.ReadFile(folderUri = "", fileName = "", target = "file") },
+        CatalogItem("LIST_FILES", R.string.category_files) { ActionSpec.ListFiles(folderUri = "", target = "files") },
+        CatalogItem("COPY_FILE", R.string.category_files) {
+            ActionSpec.CopyFile(folderUri = "", fileName = "", destinationUri = "")
+        },
+        CatalogItem("DELETE_FILE", R.string.category_files) { ActionSpec.DeleteFile(folderUri = "", fileName = "") },
         CatalogItem("HTTP_REQUEST", R.string.category_web) { ActionSpec.HttpRequest(url = "https://") },
         CatalogItem("DELAY", R.string.category_logic) { ActionSpec.Delay(5_000) },
         CatalogItem("SET_VARIABLE", R.string.category_variables) { ActionSpec.SetVariable("", "") },

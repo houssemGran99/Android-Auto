@@ -92,6 +92,7 @@
     <string name="view_log">View log</string>
     <string name="error_name_required">Give this automation a name</string>
     <string name="error_action_required">Add at least one action</string>
+    <string name="error_incomplete_step">Some steps are not set up yet (for example no folder or app picked). Tap them to finish.</string>
     <string name="discard_title">Discard changes?</string>
     <string name="discard_message">Your unsaved changes will be lost.</string>
     <string name="pick_app">Choose an app</string>
@@ -489,6 +490,41 @@
     <string name="family_notification">notifications</string>
     <string name="family_calendar">calendar</string>
     <string name="family_media">media playback</string>
+    <string name="family_files">folders</string>
+    <!-- Phase 5: files -->
+    <string name="category_files">Files</string>
+    <string name="trigger_file_added">New file in folder</string>
+    <string name="hint_file_added">AutoFlow checks the folder about once a minute while the monitoring notification is shown (Android has no folder events for apps). Files already there when you save never fire. The file name is available as %trigger_file%.</string>
+    <string name="condition_file_exists">File exists</string>
+    <string name="state_exists">Exists</string>
+    <string name="state_missing">missing</string>
+    <string name="hint_file_exists">Exact file name, case-sensitive. False when AutoFlow can no longer read the folder.</string>
+    <string name="action_write_file">Write file</string>
+    <string name="action_read_file">Read file</string>
+    <string name="action_list_files">List files</string>
+    <string name="action_copy_file">Copy / move file</string>
+    <string name="action_delete_file">Delete file</string>
+    <string name="field_file_name">File name</string>
+    <string name="field_name_contains">Name contains (optional)</string>
+    <string name="field_content">Content</string>
+    <string name="field_append">Append instead of replacing</string>
+    <string name="field_append_short">append</string>
+    <string name="field_move">Move (delete the original after copying)</string>
+    <string name="field_move_short">move</string>
+    <string name="pick_source_folder">Pick the source folder</string>
+    <string name="pick_destination_folder">Pick the destination folder</string>
+    <string name="same_folder">Source and destination must be different folders.</string>
+    <string name="hint_file_name" formatted="false">A name inside the folder (no "/"); placeholders work, e.g. log-%date%.txt or %trigger_file%.</string>
+    <string name="hint_write_file">Creates the file if needed. Only folders you pick are accessible to AutoFlow; no storage permission is used.</string>
+    <string name="hint_read_file">Reads a text file (UTF-8, up to 1 MB) into a variable. Combine with "Read JSON value" for JSON files.</string>
+    <string name="hint_list_files">Stores the names (one per line) in $%1$s and the number of files in $%1$s_count.</string>
+    <string name="hint_copy_file">Replaces a file with the same name in the destination. When moving, the original is deleted only after the copy succeeded.</string>
+    <string name="hint_delete_file">Permanently deletes the file (no recycle bin). Skipped when it does not exist.</string>
+    <string name="template_battery_log_title">Battery log</string>
+    <string name="template_battery_log_description">Every hour → append time, battery level and charging state to a daily CSV file in a folder you pick.</string>
+    <string name="template_new_file_title">New PDF alert</string>
+    <string name="template_new_file_description">A new PDF appears in a folder you pick (e.g. Download) → show a notification with its name.</string>
+    <string name="template_new_file_notification_title">New file</string>
     <!-- Phase 4: media & audio -->
     <string name="trigger_media_started">Media started playing</string>
     <string name="trigger_media_stopped">Media stopped playing</string>
@@ -503,7 +539,7 @@
     <string name="field_command">Command</string>
     <string name="field_shuffle">Shuffle (random order)</string>
     <string name="field_max_minutes">Stop after (minutes, 0 = never)</string>
-    <string name="pick_folder">Pick a music folder</string>
+    <string name="pick_folder">Pick a folder</string>
     <string name="no_folder">No folder</string>
     <string name="music_shuffled">shuffled</string>
     <string name="music_in_order">in order</string>

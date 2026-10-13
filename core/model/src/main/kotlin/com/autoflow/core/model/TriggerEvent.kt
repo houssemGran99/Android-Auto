@@ -113,6 +113,12 @@ sealed interface TriggerEvent {
         override val key get() = if (playing) "MEDIA_STARTED" else "MEDIA_STOPPED"
     }
 
+    /** A new file [fileName] appeared in the watched folder [folderUri]. */
+    data class FileAdded(val folderUri: String, val fileName: String) : TriggerEvent {
+        override val key get() = "FILE_ADDED"
+        override val details get() = mapOf("file" to fileName)
+    }
+
     data class HeadphonesDisconnected(val kind: HeadphoneKind, val name: String?) : TriggerEvent {
         override val key get() = "HEADPHONES_DISCONNECTED"
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())

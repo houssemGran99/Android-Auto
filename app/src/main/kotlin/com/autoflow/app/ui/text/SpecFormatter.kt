@@ -56,6 +56,10 @@ class SpecFormatter(private val res: Resources) {
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> ""
         TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> ""
+        is TriggerSpec.FileAdded -> listOfNotNull(
+            folder(spec.folderLabel),
+            spec.nameContains?.takeIf { it.isNotBlank() }?.let { s(R.string.contains_format, it) },
+        ).joinToString(" · ")
         is TriggerSpec.AppOpened -> spec.appLabel.ifBlank { spec.packageName }
         is TriggerSpec.HeadphonesConnected -> headphoneKind(spec.kind)
         is TriggerSpec.HeadphonesDisconnected -> headphoneKind(spec.kind)
@@ -68,6 +72,8 @@ class SpecFormatter(private val res: Resources) {
         is TriggerSpec.LocationEnter -> place(spec.place)
         is TriggerSpec.LocationExit -> place(spec.place)
     }
+
+    private fun folder(label: String): String = label.ifBlank { s(R.string.no_folder) }
 
     fun place(place: com.autoflow.core.model.GeoPlace): String = s(R.string.place_detail, place.name, place.radiusMeters)
 
@@ -96,6 +102,8 @@ class SpecFormatter(private val res: Resources) {
         }
         is ConditionNode.BluetoothState -> s(if (node.enabled) R.string.state_on else R.string.state_off)
         is ConditionNode.HeadphonesState -> s(if (node.connected) R.string.state_connected else R.string.state_disconnected)
+        is ConditionNode.FileExists ->
+            "${folder(node.folderLabel)}/${node.fileName} " + s(if (node.exists) R.string.state_exists else R.string.state_missing)
         is ConditionNode.MusicPlaying -> s(if (node.playing) R.string.state_playing else R.string.state_not_playing)
         is ConditionNode.VariableCompare -> "${node.variable} ${comparison(node.comparison)} ${node.value}"
     }
@@ -123,6 +131,13 @@ class SpecFormatter(private val res: Resources) {
             spec.maxMinutes.takeIf { it > 0 }?.let { duration(it * 60_000L) },
         ).joinToString(" · ")
         ActionSpec.StopMusic -> ""
+        is ActionSpec.WriteFile -> "${folder(spec.folderLabel)}/${spec.fileName}" +
+            (if (spec.append) " (${s(R.string.field_append_short)})" else "")
+        is ActionSpec.ReadFile -> "${folder(spec.folderLabel)}/${spec.fileName} → \$${spec.target}"
+        is ActionSpec.ListFiles -> "${folder(spec.folderLabel)} → \$${spec.target}"
+        is ActionSpec.CopyFile -> "${folder(spec.folderLabel)}/${spec.fileName} → ${folder(spec.destinationLabel)}" +
+            (if (spec.move) " (${s(R.string.field_move_short)})" else "")
+        is ActionSpec.DeleteFile -> "${folder(spec.folderLabel)}/${spec.fileName}"
         is ActionSpec.Vibrate -> s(R.string.duration_ms, spec.durationMs)
         is ActionSpec.HttpRequest -> "${spec.method} ${spec.url}" + when (spec.auth) {
             is HttpAuth.Basic, is HttpAuth.Bearer -> " 🔒"
@@ -323,6 +338,7 @@ class SpecFormatter(private val res: Resources) {
             "CALENDAR_EVENT_END" to R.string.trigger_calendar_end,
             "MEDIA_STARTED" to R.string.trigger_media_started,
             "MEDIA_STOPPED" to R.string.trigger_media_stopped,
+            "FILE_ADDED" to R.string.trigger_file_added,
         )
 
         val EVENT_TITLES = TRIGGER_TITLES + mapOf(
@@ -342,6 +358,7 @@ class SpecFormatter(private val res: Resources) {
             "BLUETOOTH_STATE" to R.string.condition_bluetooth,
             "HEADPHONES_STATE" to R.string.condition_headphones,
             "MUSIC_PLAYING" to R.string.condition_music_playing,
+            "FILE_EXISTS" to R.string.condition_file_exists,
             "VARIABLE" to R.string.condition_variable,
             "IF_ELSE" to R.string.action_if_else,
             "WHILE" to R.string.action_while,
@@ -372,6 +389,11 @@ class SpecFormatter(private val res: Resources) {
             "MEDIA_CONTROL" to R.string.action_media_control,
             "PLAY_MUSIC_FOLDER" to R.string.action_play_music_folder,
             "STOP_MUSIC" to R.string.action_stop_music,
+            "WRITE_FILE" to R.string.action_write_file,
+            "READ_FILE" to R.string.action_read_file,
+            "LIST_FILES" to R.string.action_list_files,
+            "COPY_FILE" to R.string.action_copy_file,
+            "DELETE_FILE" to R.string.action_delete_file,
         )
 
         val INFO_TITLES = mapOf(

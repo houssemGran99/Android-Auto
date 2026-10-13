@@ -174,6 +174,36 @@ class TemplateCatalog @Inject constructor(@ApplicationContext private val contex
                 actions = listOf(ActionSpec.SetVolume(AudioStream.MEDIA, 25)),
             )
         },
+        AutomationTemplate("battery_log", R.string.template_battery_log_title, R.string.template_battery_log_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_battery_log_title,
+                R.string.template_battery_log_description,
+                triggers = listOf(TriggerSpec.Interval(60)),
+                actions = listOf(
+                    ActionSpec.WriteFile(
+                        folderUri = "",
+                        fileName = "battery-%date%.csv",
+                        content = "%time%,%battery%,%charging%\n",
+                        append = true,
+                    ),
+                ),
+            )
+        },
+        AutomationTemplate("new_file_alert", R.string.template_new_file_title, R.string.template_new_file_description) { ctx ->
+            automation(
+                ctx,
+                R.string.template_new_file_title,
+                R.string.template_new_file_description,
+                triggers = listOf(TriggerSpec.FileAdded(folderUri = "", nameContains = ".pdf")),
+                actions = listOf(
+                    ActionSpec.ShowNotification(
+                        ctx.getString(R.string.template_new_file_notification_title),
+                        "%trigger_file%",
+                    ),
+                ),
+            )
+        },
         AutomationTemplate("http_report", R.string.template_http_title, R.string.template_http_description) { ctx ->
             automation(
                 ctx,

@@ -204,6 +204,62 @@ sealed interface ActionSpec {
     @SerialName("STOP_MUSIC")
     data object StopMusic : ActionSpec
 
+    /**
+     * Writes [content] to [fileName] in a user-picked folder ([folderUri] is a Storage Access
+     * Framework tree URI). Creates the file if needed; [append] adds to the end instead of replacing.
+     */
+    @Serializable
+    @SerialName("WRITE_FILE")
+    data class WriteFile(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String,
+        val content: String,
+        val append: Boolean = false,
+    ) : ActionSpec
+
+    /** Reads a text file (at most 1 MB) into variable [target]. */
+    @Serializable
+    @SerialName("READ_FILE")
+    data class ReadFile(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String,
+        val target: String,
+        val scope: VariableScope = VariableScope.LOCAL,
+    ) : ActionSpec
+
+    /** Stores the file names of a folder (one per line) in [target] and their number in `<target>_count`. */
+    @Serializable
+    @SerialName("LIST_FILES")
+    data class ListFiles(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val target: String,
+        val nameContains: String? = null,
+        val scope: VariableScope = VariableScope.LOCAL,
+    ) : ActionSpec
+
+    /** Copies (or moves, when [move]) [fileName] to another picked folder, replacing a file with the same name. */
+    @Serializable
+    @SerialName("COPY_FILE")
+    data class CopyFile(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String,
+        val destinationUri: String,
+        val destinationLabel: String = "",
+        val move: Boolean = false,
+    ) : ActionSpec
+
+    @Serializable
+    @SerialName("DELETE_FILE")
+    data class DeleteFile(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val fileName: String,
+    ) : ActionSpec
+
     @Serializable
     @SerialName("VIBRATE")
     data class Vibrate(val durationMs: Long = 500) : ActionSpec

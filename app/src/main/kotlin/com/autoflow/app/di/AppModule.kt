@@ -17,6 +17,8 @@ import com.autoflow.core.engine.repository.AutomationRepository
 import com.autoflow.core.engine.repository.EngineSettings
 import com.autoflow.core.engine.repository.ExecutionRepository
 import com.autoflow.core.engine.repository.VariableRepository
+import com.autoflow.core.model.ConditionNode
+import com.autoflow.core.model.TriggerSpec
 import com.autoflow.data.storage.AutoFlowDatabase
 import com.autoflow.data.storage.repository.RoomAutomationRepository
 import com.autoflow.data.storage.repository.RoomExecutionRepository
@@ -29,6 +31,7 @@ import com.autoflow.platform.permissions.PermissionManager
 import com.autoflow.platform.triggers.AndroidDeviceStateProvider
 import com.autoflow.platform.triggers.CalendarScheduler
 import com.autoflow.platform.triggers.CurrentLocation
+import com.autoflow.platform.triggers.FileConditionEvaluator
 import com.autoflow.platform.triggers.GeofenceScheduler
 import com.autoflow.platform.triggers.TimeTriggerScheduler
 import com.autoflow.platform.triggers.TriggerSourceFactory
@@ -115,7 +118,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun conditionEvaluator(): ConditionEvaluator = ConditionEvaluator()
+    fun conditionEvaluator(@ApplicationContext context: Context): ConditionEvaluator =
+        ConditionEvaluator(mapOf(ConditionNode.FileExists::class to FileConditionEvaluator(context)))
 
     @Provides
     @Singleton
@@ -178,5 +182,11 @@ object AppModule {
     fun triggerSourceFactory(
         @ApplicationContext context: Context,
         permissions: PermissionManager,
-    ): TriggerSourceFactory = TriggerSourceFactory(context, permissions)
+        automations: AutomationRepository,
+    ): TriggerSourceFactory = TriggerSourceFactory(context, permissions) {
+        automations.getEnabled()
+            .flatMap { it.triggers }
+            .filterIsInstance<TriggerSpec.FileAdded>()
+            .mapTo(mutableSetOf()) { it.folderUri }
+    }
 }

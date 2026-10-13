@@ -7,6 +7,7 @@ import com.autoflow.platform.permissions.PermissionManager
 import com.autoflow.platform.triggers.source.AppUsageTriggerSource
 import com.autoflow.platform.triggers.source.BatteryTriggerSource
 import com.autoflow.platform.triggers.source.BluetoothTriggerSource
+import com.autoflow.platform.triggers.source.FolderWatchTriggerSource
 import com.autoflow.platform.triggers.source.HeadphonesTriggerSource
 import com.autoflow.platform.triggers.source.MediaPlaybackTriggerSource
 import com.autoflow.platform.triggers.source.PowerTriggerSource
@@ -17,6 +18,8 @@ import kotlinx.coroutines.CoroutineScope
 class TriggerSourceFactory(
     private val context: Context,
     private val permissions: PermissionManager,
+    /** Folder URIs used by enabled "New file in folder" triggers. */
+    private val watchedFolders: suspend () -> Set<String> = { emptySet() },
 ) {
     fun create(family: TriggerFamily, scope: CoroutineScope): TriggerSource? = when (family) {
         TriggerFamily.TIME -> null // AlarmManager, see TimeTriggerScheduler
@@ -30,5 +33,6 @@ class TriggerSourceFactory(
         TriggerFamily.APP -> AppUsageTriggerSource(context, scope, permissions)
         TriggerFamily.HEADPHONES -> HeadphonesTriggerSource(context)
         TriggerFamily.MEDIA -> MediaPlaybackTriggerSource(context)
+        TriggerFamily.FILES -> FolderWatchTriggerSource(context, scope, watchedFolders)
     }
 }

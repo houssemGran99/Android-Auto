@@ -29,6 +29,8 @@ class TriggerMatcher {
             event is TriggerEvent.HeadphonesDisconnected && kindMatches(spec.kind, event.kind)
         TriggerSpec.MediaStarted -> event is TriggerEvent.MediaPlaybackChanged && event.playing
         TriggerSpec.MediaStopped -> event is TriggerEvent.MediaPlaybackChanged && !event.playing
+        is TriggerSpec.FileAdded ->
+            event is TriggerEvent.FileAdded && event.folderUri == spec.folderUri && containsOrBlank(event.fileName, spec.nameContains)
     }
 
     /** Whether the location trigger [spec] corresponds to the transition direction of [event]. */

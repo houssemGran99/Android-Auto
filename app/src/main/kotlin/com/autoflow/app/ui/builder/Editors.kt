@@ -67,12 +67,36 @@ fun <T> SpecEditorDialog(
     )
 }
 
+/** True when every trigger, condition and (nested) action is fully configured, e.g. templates whose folder was picked. */
+fun isComplete(automation: com.autoflow.core.model.Automation): Boolean =
+    automation.triggers.all(::isValidTrigger) &&
+        (automation.condition?.let(::isConditionTreeValid) ?: true) &&
+        automation.actions.all(::isActionTreeValid)
+
+private fun isConditionTreeValid(node: ConditionNode): Boolean = when (node) {
+    is ConditionNode.And -> node.children.all(::isConditionTreeValid)
+    is ConditionNode.Or -> node.children.all(::isConditionTreeValid)
+    is ConditionNode.Not -> isConditionTreeValid(node.child)
+    else -> isValidCondition(node)
+}
+
+private fun isActionTreeValid(spec: ActionSpec): Boolean {
+    val condition = when (spec) {
+        is ActionSpec.IfElse -> spec.condition
+        is ActionSpec.While -> spec.condition
+        is ActionSpec.WaitUntil -> spec.condition
+        else -> null
+    }
+    return isValidAction(spec) && (condition?.let(::isConditionTreeValid) ?: true) && spec.children.all(::isActionTreeValid)
+}
+
 // region Triggers
 
 fun isValidTrigger(spec: TriggerSpec): Boolean = when (spec) {
     is TriggerSpec.AppOpened -> spec.packageName.isNotBlank()
     is TriggerSpec.SunEvent -> hasCoordinates(spec.latitude, spec.longitude)
     is TriggerSpec.LocationEnter -> isValidPlace(spec.place)
+    is TriggerSpec.FileAdded -> isFolder(spec.folderUri)
     is TriggerSpec.LocationExit -> isValidPlace(spec.place)
     else -> true
 }
@@ -116,6 +140,15 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> Unit
         TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> Hint(stringResource(R.string.hint_media_trigger))
+        is TriggerSpec.FileAdded -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            TextInput(
+                stringResource(R.string.field_name_contains),
+                spec.nameContains.orEmpty(),
+                { onChange(spec.copy(nameContains = it.ifEmpty { null })) },
+            )
+            Hint(stringResource(R.string.hint_file_added))
+        }
         is TriggerSpec.AppOpened -> {
             AppPickerField(spec.packageName, spec.appLabel) { onChange(spec.copy(packageName = it.packageName, appLabel = it.label)) }
             Hint(stringResource(R.string.hint_app_opened))
@@ -173,6 +206,7 @@ private fun DeviceField(name: String?, onChange: (String?) -> Unit) {
 
 fun isValidCondition(node: ConditionNode): Boolean = when (node) {
     is ConditionNode.VariableCompare -> node.variable.isNotBlank()
+    is ConditionNode.FileExists -> isFolder(node.folderUri) && isPlainFileName(node.fileName)
     else -> true
 }
 
@@ -203,6 +237,12 @@ fun ConditionForm(node: ConditionNode, onChange: (ConditionNode) -> Unit) {
         is ConditionNode.MusicPlaying -> {
             LabeledSwitch(stringResource(R.string.state_playing), node.playing, { onChange(node.copy(playing = it)) })
             Hint(stringResource(R.string.hint_music_playing))
+        }
+        is ConditionNode.FileExists -> {
+            FolderPickerField(node.folderUri, node.folderLabel) { uri, label -> onChange(node.copy(folderUri = uri, folderLabel = label)) }
+            TextInput(stringResource(R.string.field_file_name), node.fileName, { onChange(node.copy(fileName = it)) })
+            LabeledSwitch(stringResource(R.string.state_exists), node.exists, { onChange(node.copy(exists = it)) })
+            Hint(stringResource(R.string.hint_file_exists))
         }
         is ConditionNode.VariableCompare -> {
             TextInput(
@@ -244,7 +284,13 @@ fun isValidAction(spec: ActionSpec): Boolean = when (spec) {
     is ActionSpec.VariableOperation -> Variable.isValidName(spec.name) &&
         (spec.target.isNullOrBlank() || Variable.isValidName(spec.target.orEmpty()))
     is ActionSpec.ParseJson -> Variable.isValidName(spec.target) && spec.path.isNotBlank() && spec.source.isNotBlank()
-    is ActionSpec.PlayMusicFolder -> spec.folderUri.startsWith("content://")
+    is ActionSpec.PlayMusicFolder -> isFolder(spec.folderUri)
+    is ActionSpec.WriteFile -> isFolder(spec.folderUri) && spec.fileName.isNotBlank()
+    is ActionSpec.ReadFile -> isFolder(spec.folderUri) && spec.fileName.isNotBlank() && Variable.isValidName(spec.target)
+    is ActionSpec.ListFiles -> isFolder(spec.folderUri) && Variable.isValidName(spec.target)
+    is ActionSpec.CopyFile -> isFolder(spec.folderUri) && isFolder(spec.destinationUri) &&
+        spec.folderUri != spec.destinationUri && spec.fileName.isNotBlank()
+    is ActionSpec.DeleteFile -> isFolder(spec.folderUri) && spec.fileName.isNotBlank()
     else -> true
 }
 
@@ -320,6 +366,52 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             Hint(stringResource(R.string.hint_play_music_folder))
         }
         ActionSpec.StopMusic -> Hint(stringResource(R.string.hint_stop_music))
+        is ActionSpec.WriteFile -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            TextInput(
+                stringResource(R.string.field_content),
+                spec.content,
+                { onChange(spec.copy(content = it)) },
+                singleLine = false,
+                supporting = stringResource(R.string.hint_placeholders),
+            )
+            LabeledSwitch(stringResource(R.string.field_append), spec.append, { onChange(spec.copy(append = it)) })
+            Hint(stringResource(R.string.hint_write_file))
+        }
+        is ActionSpec.ReadFile -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            TargetFields(spec.target, spec.scope, { onChange(spec.copy(target = it)) }) { onChange(spec.copy(scope = it)) }
+            Hint(stringResource(R.string.hint_read_file))
+        }
+        is ActionSpec.ListFiles -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            TextInput(
+                stringResource(R.string.field_name_contains),
+                spec.nameContains.orEmpty(),
+                { onChange(spec.copy(nameContains = it.ifEmpty { null })) },
+            )
+            TargetFields(spec.target, spec.scope, { onChange(spec.copy(target = it)) }) { onChange(spec.copy(scope = it)) }
+            Hint(stringResource(R.string.hint_list_files, spec.target.ifBlank { "files" }))
+        }
+        is ActionSpec.CopyFile -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel, stringResource(R.string.pick_source_folder)) { uri, label ->
+                onChange(spec.copy(folderUri = uri, folderLabel = label))
+            }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            FolderPickerField(spec.destinationUri, spec.destinationLabel, stringResource(R.string.pick_destination_folder)) { uri, label ->
+                onChange(spec.copy(destinationUri = uri, destinationLabel = label))
+            }
+            LabeledSwitch(stringResource(R.string.field_move), spec.move, { onChange(spec.copy(move = it)) })
+            if (spec.folderUri.isNotBlank() && spec.folderUri == spec.destinationUri) Hint(stringResource(R.string.same_folder))
+            Hint(stringResource(R.string.hint_copy_file))
+        }
+        is ActionSpec.DeleteFile -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            FileNameField(spec.fileName) { onChange(spec.copy(fileName = it)) }
+            Hint(stringResource(R.string.hint_delete_file))
+        }
         is ActionSpec.Vibrate -> PercentSlider(
             stringResource(R.string.field_duration),
             spec.durationMs.toInt(),
@@ -432,6 +524,23 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
             )
         }
     }
+}
+
+private fun isFolder(uri: String): Boolean = uri.startsWith("content://")
+
+/** Plain file names only; placeholders like %date% are allowed and checked again when the action runs. */
+private fun isPlainFileName(name: String): Boolean =
+    name.isNotBlank() && name.trim() != "." && name.trim() != ".." && name.none { it == '/' || it == '\\' }
+
+@Composable
+private fun FileNameField(name: String, onChange: (String) -> Unit) {
+    TextInput(
+        stringResource(R.string.field_file_name),
+        name,
+        { onChange(it) },
+        isError = name.isNotEmpty() && !isPlainFileName(name),
+        supporting = stringResource(R.string.hint_file_name),
+    )
 }
 
 @Composable

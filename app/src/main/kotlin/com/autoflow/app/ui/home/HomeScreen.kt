@@ -238,6 +238,7 @@ private fun familyName(family: com.autoflow.core.model.TriggerFamily): String = 
         com.autoflow.core.model.TriggerFamily.NOTIFICATION -> R.string.family_notification
         com.autoflow.core.model.TriggerFamily.CALENDAR -> R.string.family_calendar
         com.autoflow.core.model.TriggerFamily.MEDIA -> R.string.family_media
+        com.autoflow.core.model.TriggerFamily.FILES -> R.string.family_files
     },
 )
 

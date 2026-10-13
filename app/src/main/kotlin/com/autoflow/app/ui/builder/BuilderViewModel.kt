@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
-enum class BuilderError { NAME_REQUIRED, ACTION_REQUIRED }
+enum class BuilderError { NAME_REQUIRED, ACTION_REQUIRED, INCOMPLETE_STEP }
 
 data class BuilderUiState(
     val loaded: Boolean = false,
@@ -126,6 +126,7 @@ class BuilderViewModel @Inject constructor(
         val error = when {
             draft.name.isBlank() -> BuilderError.NAME_REQUIRED
             draft.actions.isEmpty() -> BuilderError.ACTION_REQUIRED
+            !isComplete(draft) -> BuilderError.INCOMPLETE_STEP
             else -> null
         }
         _state.update { it.copy(error = error) }

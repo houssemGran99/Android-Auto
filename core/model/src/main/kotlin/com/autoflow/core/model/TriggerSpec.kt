@@ -25,6 +25,9 @@ enum class TriggerFamily {
 
     /** Audio playback start/stop, observed with an AudioPlaybackCallback (needs the monitor). */
     MEDIA,
+
+    /** New files in user-picked folders; Android has no folder events for apps, so the monitor polls. */
+    FILES,
     ;
 
     /** True when the family can only be observed while a monitoring service is running. */
@@ -249,6 +252,20 @@ sealed interface TriggerSpec {
     @SerialName("MEDIA_STOPPED")
     data object MediaStopped : TriggerSpec {
         override val family get() = TriggerFamily.MEDIA
+    }
+
+    /**
+     * A new file appears in a user-picked folder ([folderUri] is a Storage Access Framework tree URI).
+     * [nameContains] (case-insensitive) filters by file name.
+     */
+    @Serializable
+    @SerialName("FILE_ADDED")
+    data class FileAdded(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val nameContains: String? = null,
+    ) : TriggerSpec {
+        override val family get() = TriggerFamily.FILES
     }
 
     /** Fires when the device enters (arrives at) [place]. */

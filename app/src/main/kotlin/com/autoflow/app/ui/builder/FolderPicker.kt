@@ -19,17 +19,28 @@ import com.autoflow.app.R
  * Storage Access Framework grant), so no storage permission is ever requested.
  */
 @Composable
-fun FolderPickerField(folderUri: String, label: String, onPick: (uri: String, label: String) -> Unit) {
+fun FolderPickerField(
+    folderUri: String,
+    label: String,
+    emptyText: String = stringResource(R.string.pick_folder),
+    onPick: (uri: String, label: String) -> Unit,
+) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
+        // Read + write when the provider allows it (file actions write), otherwise read-only.
         runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }.recoverCatching {
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         onPick(uri.toString(), folderLabel(uri))
     }
     OutlinedButton(onClick = { launcher.launch(null) }, modifier = Modifier.fillMaxWidth()) {
-        Text(if (folderUri.isBlank()) stringResource(R.string.pick_folder) else label.ifBlank { folderUri })
+        Text(if (folderUri.isBlank()) emptyText else label.ifBlank { folderUri })
     }
 }
 

@@ -196,6 +196,9 @@ fun BuilderScreen(
                 if (state.error == BuilderError.ACTION_REQUIRED) {
                     Text(stringResource(R.string.error_action_required), color = MaterialTheme.colorScheme.error)
                 }
+                if (state.error == BuilderError.INCOMPLETE_STEP) {
+                    Text(stringResource(R.string.error_incomplete_step), color = MaterialTheme.colorScheme.error)
+                }
                 ActionListEditor(
                     actions = draft.actions,
                     ref = ActionListRef(),
