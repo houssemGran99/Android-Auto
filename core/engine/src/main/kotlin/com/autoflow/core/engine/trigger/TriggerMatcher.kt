@@ -27,6 +27,8 @@ class TriggerMatcher {
         is TriggerSpec.HeadphonesConnected -> event is TriggerEvent.HeadphonesConnected && kindMatches(spec.kind, event.kind)
         is TriggerSpec.HeadphonesDisconnected ->
             event is TriggerEvent.HeadphonesDisconnected && kindMatches(spec.kind, event.kind)
+        TriggerSpec.MediaStarted -> event is TriggerEvent.MediaPlaybackChanged && event.playing
+        TriggerSpec.MediaStopped -> event is TriggerEvent.MediaPlaybackChanged && !event.playing
     }
 
     /** Whether the location trigger [spec] corresponds to the transition direction of [event]. */

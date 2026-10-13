@@ -123,6 +123,7 @@ class AutomationMonitorService : Service() {
             TriggerFamily.LOCATION -> R.string.family_location
             TriggerFamily.NOTIFICATION -> R.string.family_notification
             TriggerFamily.CALENDAR -> R.string.family_calendar
+            TriggerFamily.MEDIA -> R.string.family_media
         }
     }
 }

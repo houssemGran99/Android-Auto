@@ -78,4 +78,13 @@ class TriggerMatcherTest {
         assertEquals(29, next.dayOfMonth)
         assertEquals(3, next.hour)
     }
+
+    @Test
+    fun `media playback start and stop`() {
+        val matcher = TriggerMatcher()
+        assertTrue(matcher.matches(TriggerSpec.MediaStarted, TriggerEvent.MediaPlaybackChanged(playing = true)))
+        assertFalse(matcher.matches(TriggerSpec.MediaStarted, TriggerEvent.MediaPlaybackChanged(playing = false)))
+        assertTrue(matcher.matches(TriggerSpec.MediaStopped, TriggerEvent.MediaPlaybackChanged(playing = false)))
+        assertFalse(matcher.matches(TriggerSpec.MediaStopped, TriggerEvent.ChargerConnected))
+    }
 }

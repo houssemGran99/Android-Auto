@@ -38,6 +38,11 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Vibration
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.MusicOff
+import androidx.compose.material.icons.outlined.GraphicEq
+import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material.icons.outlined.WifiOff
@@ -61,6 +66,8 @@ object SpecIcons {
         "CALENDAR_EVENT_END" -> Icons.Outlined.EventAvailable
         "LOCATION_ENTER" -> Icons.Outlined.LocationOn
         "LOCATION_EXIT" -> Icons.Outlined.LocationOff
+        "MEDIA_STARTED" -> Icons.Outlined.PlayCircle
+        "MEDIA_STOPPED" -> Icons.Outlined.MusicOff
         else -> Icons.AutoMirrored.Outlined.Rule
     }
 
@@ -72,6 +79,7 @@ object SpecIcons {
         "WIFI_STATE" -> Icons.Outlined.Wifi
         "BLUETOOTH_STATE" -> Icons.Outlined.Bluetooth
         "HEADPHONES_STATE" -> Icons.Outlined.Headphones
+        "MUSIC_PLAYING" -> Icons.Outlined.GraphicEq
         "VARIABLE" -> Icons.Outlined.DataObject
         else -> Icons.AutoMirrored.Outlined.Rule
     }
@@ -98,6 +106,9 @@ object SpecIcons {
         "STOP" -> Icons.Outlined.StopCircle
         "VARIABLE_OPERATION" -> Icons.Outlined.Calculate
         "PARSE_JSON" -> Icons.Outlined.DataArray
+        "MEDIA_CONTROL" -> Icons.Outlined.SkipNext
+        "PLAY_MUSIC_FOLDER" -> Icons.Outlined.LibraryMusic
+        "STOP_MUSIC" -> Icons.Outlined.MusicOff
         else -> Icons.AutoMirrored.Outlined.OpenInNew
     }
 }

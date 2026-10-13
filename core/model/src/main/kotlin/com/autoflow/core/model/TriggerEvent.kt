@@ -108,6 +108,11 @@ sealed interface TriggerEvent {
         override val details get() = mapOf("place" to placeName)
     }
 
+    /** Media playback started ([playing] = true) or stopped in all apps. */
+    data class MediaPlaybackChanged(val playing: Boolean) : TriggerEvent {
+        override val key get() = if (playing) "MEDIA_STARTED" else "MEDIA_STOPPED"
+    }
+
     data class HeadphonesDisconnected(val kind: HeadphoneKind, val name: String?) : TriggerEvent {
         override val key get() = "HEADPHONES_DISCONNECTED"
         override val details get() = mapOf("kind" to kind.name, "device" to name.orEmpty())

@@ -22,6 +22,9 @@ enum class TriggerFamily {
 
     /** Event start/end times scheduled with AlarmManager. */
     CALENDAR,
+
+    /** Audio playback start/stop, observed with an AudioPlaybackCallback (needs the monitor). */
+    MEDIA,
     ;
 
     /** True when the family can only be observed while a monitoring service is running. */
@@ -232,6 +235,20 @@ sealed interface TriggerSpec {
     data class CalendarEventEnd(val titleContains: String? = null) : TriggerSpec {
         override val family get() = TriggerFamily.CALENDAR
         override val capabilities get() = setOf(Capability.CALENDAR, Capability.EXACT_ALARMS)
+    }
+
+    /** Any app starts playing media (music, video, podcast) after nothing was playing. */
+    @Serializable
+    @SerialName("MEDIA_STARTED")
+    data object MediaStarted : TriggerSpec {
+        override val family get() = TriggerFamily.MEDIA
+    }
+
+    /** Media playback stopped or paused in every app. */
+    @Serializable
+    @SerialName("MEDIA_STOPPED")
+    data object MediaStopped : TriggerSpec {
+        override val family get() = TriggerFamily.MEDIA
     }
 
     /** Fires when the device enters (arrives at) [place]. */

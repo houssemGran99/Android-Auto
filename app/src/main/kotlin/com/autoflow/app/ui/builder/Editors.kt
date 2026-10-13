@@ -29,6 +29,7 @@ import com.autoflow.core.model.ConditionNode
 import com.autoflow.core.model.HeadphoneKind
 import com.autoflow.core.model.HttpAuth
 import com.autoflow.core.model.HttpMethod
+import com.autoflow.core.model.MediaCommand
 import com.autoflow.core.model.NotificationPriority
 import com.autoflow.core.model.SettingsPanel
 import com.autoflow.core.model.SoundType
@@ -114,6 +115,7 @@ fun TriggerForm(spec: TriggerSpec, onChange: (TriggerSpec) -> Unit) {
             Hint(stringResource(R.string.hint_battery_trigger))
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> Unit
+        TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> Hint(stringResource(R.string.hint_media_trigger))
         is TriggerSpec.AppOpened -> {
             AppPickerField(spec.packageName, spec.appLabel) { onChange(spec.copy(packageName = it.packageName, appLabel = it.label)) }
             Hint(stringResource(R.string.hint_app_opened))
@@ -198,6 +200,10 @@ fun ConditionForm(node: ConditionNode, onChange: (ConditionNode) -> Unit) {
             LabeledSwitch(stringResource(R.string.field_bluetooth_on), node.enabled, { onChange(node.copy(enabled = it)) })
         is ConditionNode.HeadphonesState ->
             LabeledSwitch(stringResource(R.string.state_connected), node.connected, { onChange(node.copy(connected = it)) })
+        is ConditionNode.MusicPlaying -> {
+            LabeledSwitch(stringResource(R.string.state_playing), node.playing, { onChange(node.copy(playing = it)) })
+            Hint(stringResource(R.string.hint_music_playing))
+        }
         is ConditionNode.VariableCompare -> {
             TextInput(
                 stringResource(R.string.field_variable),
@@ -238,6 +244,7 @@ fun isValidAction(spec: ActionSpec): Boolean = when (spec) {
     is ActionSpec.VariableOperation -> Variable.isValidName(spec.name) &&
         (spec.target.isNullOrBlank() || Variable.isValidName(spec.target.orEmpty()))
     is ActionSpec.ParseJson -> Variable.isValidName(spec.target) && spec.path.isNotBlank() && spec.source.isNotBlank()
+    is ActionSpec.PlayMusicFolder -> spec.folderUri.startsWith("content://")
     else -> true
 }
 
@@ -295,6 +302,24 @@ fun ActionForm(spec: ActionSpec, onChange: (ActionSpec) -> Unit) {
                 suffix = " s",
             )
         }
+        is ActionSpec.MediaControl -> {
+            DropdownField(stringResource(R.string.field_command), MediaCommand.entries, spec.command, f::mediaCommand) {
+                onChange(spec.copy(command = it))
+            }
+            Hint(stringResource(R.string.hint_media_control))
+        }
+        is ActionSpec.PlayMusicFolder -> {
+            FolderPickerField(spec.folderUri, spec.folderLabel) { uri, label -> onChange(spec.copy(folderUri = uri, folderLabel = label)) }
+            LabeledSwitch(stringResource(R.string.field_shuffle), spec.shuffle, { onChange(spec.copy(shuffle = it)) })
+            NumberField(
+                stringResource(R.string.field_max_minutes),
+                spec.maxMinutes.toLong(),
+                { onChange(spec.copy(maxMinutes = it.toInt())) },
+                0L..ActionSpec.PlayMusicFolder.MAX_MINUTES.toLong(),
+            )
+            Hint(stringResource(R.string.hint_play_music_folder))
+        }
+        ActionSpec.StopMusic -> Hint(stringResource(R.string.hint_stop_music))
         is ActionSpec.Vibrate -> PercentSlider(
             stringResource(R.string.field_duration),
             spec.durationMs.toInt(),

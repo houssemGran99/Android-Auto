@@ -12,6 +12,10 @@ enum class AudioStream { MEDIA, RING, NOTIFICATION, ALARM, VOICE_CALL }
 @Serializable
 enum class SoundType { NOTIFICATION, ALARM, RINGTONE }
 
+/** Commands sent to whichever app currently owns media playback (via a media key event). */
+@Serializable
+enum class MediaCommand { PLAY_PAUSE, PLAY, PAUSE, NEXT, PREVIOUS, STOP }
+
 @Serializable
 enum class HttpMethod { GET, POST, PUT, DELETE, PATCH }
 
@@ -163,6 +167,42 @@ sealed interface ActionSpec {
         val sound: SoundType = SoundType.NOTIFICATION,
         val maxDurationSeconds: Int = 10,
     ) : ActionSpec
+
+    /** Sends [command] to the active media player (Spotify, YouTube Music, ...). No permission needed. */
+    @Serializable
+    @SerialName("MEDIA_CONTROL")
+    data class MediaControl(val command: MediaCommand) : ActionSpec
+
+    /**
+     * Plays the audio files of a folder the user picked with the system folder picker
+     * ([folderUri] is a Storage Access Framework tree URI; no storage permission is used).
+     * Playback continues after the run in a visible, user-stoppable media notification.
+     * [maxMinutes] = 0 plays until the queue ends.
+     */
+    @Serializable
+    @SerialName("PLAY_MUSIC_FOLDER")
+    data class PlayMusicFolder(
+        val folderUri: String,
+        val folderLabel: String = "",
+        val shuffle: Boolean = true,
+        val maxMinutes: Int = 0,
+    ) : ActionSpec {
+        init {
+            require(maxMinutes in 0..MAX_MINUTES) { "Max duration must be in 0..$MAX_MINUTES minutes" }
+        }
+
+        // "Display over other apps" also lets Android start playback from the background.
+        override val capabilities get() = setOf(Capability.NOTIFICATIONS, Capability.BACKGROUND_ACTIVITY_START)
+
+        companion object {
+            const val MAX_MINUTES = 24 * 60
+        }
+    }
+
+    /** Stops music started by [PlayMusicFolder]. */
+    @Serializable
+    @SerialName("STOP_MUSIC")
+    data object StopMusic : ActionSpec
 
     @Serializable
     @SerialName("VIBRATE")

@@ -55,6 +55,7 @@ class SpecFormatter(private val res: Resources) {
             ThresholdDirection.ABOVE -> s(R.string.battery_above, spec.threshold)
         }
         TriggerSpec.ChargerConnected, TriggerSpec.ChargerDisconnected -> ""
+        TriggerSpec.MediaStarted, TriggerSpec.MediaStopped -> ""
         is TriggerSpec.AppOpened -> spec.appLabel.ifBlank { spec.packageName }
         is TriggerSpec.HeadphonesConnected -> headphoneKind(spec.kind)
         is TriggerSpec.HeadphonesDisconnected -> headphoneKind(spec.kind)
@@ -95,6 +96,7 @@ class SpecFormatter(private val res: Resources) {
         }
         is ConditionNode.BluetoothState -> s(if (node.enabled) R.string.state_on else R.string.state_off)
         is ConditionNode.HeadphonesState -> s(if (node.connected) R.string.state_connected else R.string.state_disconnected)
+        is ConditionNode.MusicPlaying -> s(if (node.playing) R.string.state_playing else R.string.state_not_playing)
         is ConditionNode.VariableCompare -> "${node.variable} ${comparison(node.comparison)} ${node.value}"
     }
     // endregion
@@ -114,6 +116,13 @@ class SpecFormatter(private val res: Resources) {
         is ActionSpec.SetDoNotDisturb -> s(if (spec.enabled) R.string.state_on else R.string.state_off)
         is ActionSpec.Speak -> spec.text
         is ActionSpec.PlaySound -> sound(spec.sound)
+        is ActionSpec.MediaControl -> mediaCommand(spec.command)
+        is ActionSpec.PlayMusicFolder -> listOfNotNull(
+            spec.folderLabel.ifBlank { s(R.string.no_folder) },
+            s(if (spec.shuffle) R.string.music_shuffled else R.string.music_in_order),
+            spec.maxMinutes.takeIf { it > 0 }?.let { duration(it * 60_000L) },
+        ).joinToString(" · ")
+        ActionSpec.StopMusic -> ""
         is ActionSpec.Vibrate -> s(R.string.duration_ms, spec.durationMs)
         is ActionSpec.HttpRequest -> "${spec.method} ${spec.url}" + when (spec.auth) {
             is HttpAuth.Basic, is HttpAuth.Bearer -> " 🔒"
@@ -234,6 +243,17 @@ class SpecFormatter(private val res: Resources) {
         },
     )
 
+    fun mediaCommand(command: com.autoflow.core.model.MediaCommand): String = s(
+        when (command) {
+            com.autoflow.core.model.MediaCommand.PLAY_PAUSE -> R.string.media_play_pause
+            com.autoflow.core.model.MediaCommand.PLAY -> R.string.media_play
+            com.autoflow.core.model.MediaCommand.PAUSE -> R.string.media_pause
+            com.autoflow.core.model.MediaCommand.NEXT -> R.string.media_next
+            com.autoflow.core.model.MediaCommand.PREVIOUS -> R.string.media_previous
+            com.autoflow.core.model.MediaCommand.STOP -> R.string.media_stop
+        },
+    )
+
     fun priority(priority: NotificationPriority): String = s(
         when (priority) {
             NotificationPriority.LOW -> R.string.priority_low
@@ -301,6 +321,8 @@ class SpecFormatter(private val res: Resources) {
             "NOTIFICATION_RECEIVED" to R.string.trigger_notification,
             "CALENDAR_EVENT_START" to R.string.trigger_calendar_start,
             "CALENDAR_EVENT_END" to R.string.trigger_calendar_end,
+            "MEDIA_STARTED" to R.string.trigger_media_started,
+            "MEDIA_STOPPED" to R.string.trigger_media_stopped,
         )
 
         val EVENT_TITLES = TRIGGER_TITLES + mapOf(
@@ -319,6 +341,7 @@ class SpecFormatter(private val res: Resources) {
             "WIFI_STATE" to R.string.condition_wifi,
             "BLUETOOTH_STATE" to R.string.condition_bluetooth,
             "HEADPHONES_STATE" to R.string.condition_headphones,
+            "MUSIC_PLAYING" to R.string.condition_music_playing,
             "VARIABLE" to R.string.condition_variable,
             "IF_ELSE" to R.string.action_if_else,
             "WHILE" to R.string.action_while,
@@ -346,6 +369,9 @@ class SpecFormatter(private val res: Resources) {
             "STOP" to R.string.action_stop,
             "VARIABLE_OPERATION" to R.string.action_variable_operation,
             "PARSE_JSON" to R.string.action_parse_json,
+            "MEDIA_CONTROL" to R.string.action_media_control,
+            "PLAY_MUSIC_FOLDER" to R.string.action_play_music_folder,
+            "STOP_MUSIC" to R.string.action_stop_music,
         )
 
         val INFO_TITLES = mapOf(

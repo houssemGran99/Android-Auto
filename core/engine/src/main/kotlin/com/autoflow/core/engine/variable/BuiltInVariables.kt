@@ -11,7 +11,7 @@ import java.util.Locale
 object BuiltInVariables {
     /** Built-in names shown in the variables screen (trigger_* names depend on the event). */
     val NAMES: List<String> = listOf(
-        "battery", "charging", "wifi", "ssid", "bluetooth", "headphones", "volume", "brightness",
+        "battery", "charging", "wifi", "ssid", "bluetooth", "headphones", "music", "volume", "brightness",
         "latitude", "longitude", "location", "time", "date", "datetime", "day", "timestamp", "device", "android", "automation", "trigger",
         "notification_app", "notification_title", "notification_text", "event_title", "event_location",
     )
@@ -33,6 +33,7 @@ object BuiltInVariables {
         "ssid" -> state.wifiSsid
         "bluetooth" -> state.bluetoothEnabled?.onOff()
         "headphones" -> state.headphonesConnected?.onOff()
+        "music" -> state.musicPlaying?.onOff()
         "volume" -> state.mediaVolumePercent?.toString()
         "brightness" -> state.brightnessPercent?.toString()
         "latitude" -> state.latitude?.let(::coordinate)

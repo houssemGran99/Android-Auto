@@ -88,6 +88,9 @@ class ConditionEvaluator(
             is ConditionNode.HeadphonesState ->
                 (state.headphonesConnected != null && state.headphonesConnected == node.connected) to
                     "headphones=${state.headphonesConnected ?: "unknown"}"
+            is ConditionNode.MusicPlaying ->
+                (state.musicPlaying != null && state.musicPlaying == node.playing) to
+                    "music=${state.musicPlaying ?: "unknown"}"
             is ConditionNode.VariableCompare -> {
                 val actual = env.variable(node.variable)
                 (actual != null && compareValues(actual, node.value, node.comparison)) to

@@ -46,6 +46,7 @@ class AndroidDeviceStateProvider(
             }.getOrNull(),
             headphonesConnected = HeadphonesTriggerSource.isHeadphoneConnected(audio),
             mediaVolumePercent = volumePercent(audio, AudioManager.STREAM_MUSIC),
+            musicPlaying = audio.isMusicActive,
             brightnessPercent = runCatching {
                 Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS) * 100 / MAX_BRIGHTNESS
             }.getOrNull(),

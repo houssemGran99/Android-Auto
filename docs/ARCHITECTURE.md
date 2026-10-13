@@ -91,9 +91,9 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 | Type | Purpose |
 |---|---|
 | `Automation` | id, name, description, enabled, triggers (OR), condition tree, actions, stopOnError, quickAction, timestamps |
-| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED` |
-| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `VARIABLE` |
-| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT` |
+| `TriggerSpec` (sealed) | `TIME`, `INTERVAL`, `LOCATION_ENTER`, `LOCATION_EXIT` (with a `GeoPlace`: name, lat, lng, radius), `NOTIFICATION_RECEIVED`, `CALENDAR_EVENT_START`, `CALENDAR_EVENT_END`, `SUN_EVENT`, `WIFI_CONNECTED/DISCONNECTED`, `BLUETOOTH_CONNECTED/DISCONNECTED`, `BATTERY_LEVEL`, `CHARGER_CONNECTED/DISCONNECTED`, `APP_OPENED`, `HEADPHONES_CONNECTED/DISCONNECTED`, `MEDIA_STARTED`, `MEDIA_STOPPED` |
+| `ConditionNode` (sealed tree) | `AND`, `OR`, `NOT`, `TIME_RANGE`, `DAYS_OF_WEEK`, `BATTERY_LEVEL`, `CHARGING`, `WIFI_STATE`, `BLUETOOTH_STATE`, `HEADPHONES_STATE`, `MUSIC_PLAYING`, `VARIABLE` |
+| `ActionSpec` (sealed) | `WHILE`, `WAIT_UNTIL`, `STOP`, `VARIABLE_OPERATION`, `PARSE_JSON`, `NOTIFICATION`, `DISMISS_NOTIFICATIONS`, `LAUNCH_APP`, `OPEN_URL`, `OPEN_SETTINGS`, `SET_BRIGHTNESS`, `SET_VOLUME`, `DO_NOT_DISTURB`, `SPEAK`, `PLAY_SOUND`, `VIBRATE`, `HTTP_REQUEST`, `DELAY`, `SET_VARIABLE`, `IF_ELSE`, `REPEAT`, `MEDIA_CONTROL`, `PLAY_MUSIC_FOLDER` (SAF folder URI, shuffle, max minutes), `STOP_MUSIC` |
 | `TriggerEvent` | Something that happened (with details exposed as `%trigger_*%`) |
 | `Variable` | `$name` user variable, optionally secret (encrypted, never exported) |
 | `ExecutionRecord` / `ExecutionStep` | History: status (SUCCESS / PARTIAL / FAILED / SKIPPED) and per-step log |
@@ -103,7 +103,7 @@ it in `PlatformActions`, plus UI text/icon/form. The engine itself is unchanged.
 ### Variables
 
 * `%notification_app%`, `%notification_title%`, `%notification_text%`, `%event_title%`, `%event_location%` (from the triggering event), `%latitude%`, `%longitude%`, `%location%` (last known location, only with permission), `%battery%`, `%time%`, `%date%`, `%datetime%`, `%day%`, `%wifi%`, `%ssid%`, `%bluetooth%`,
-  `%headphones%`, `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
+  `%headphones%`, `%music%` (media playing on/off), `%charging%`, `%volume%`, `%brightness%`, `%device%`, `%android%`,
   `%automation%`, `%trigger%`, `%trigger_<detail>%` (e.g. `%trigger_ssid%`, `%trigger_package%`).
   The trailing `%` is optional (`%battery`).
 * `$name` – user variables (global, persisted) or local ones (this run only).
@@ -174,6 +174,7 @@ Legend: ✅ fully supported · 🔐 needs a runtime permission or special access
 | Arrive at / leave a place | Play services `GeofencingClient` | 🔐 ⚠️ | Needs fine **and** background location ("Allow all the time"). Delivered to a broadcast receiver by the system — no monitoring service. Android detects transitions with low power, so they can be a few minutes late; radius ≥ 100 m. Geofences are re-registered after boot, app update, location toggling (`PROVIDERS_CHANGED`) and whenever the app opens; no initial trigger, so re-registering never fires "arrive" again. |
 | Notification received (any app / specific app / text) | `NotificationListenerService` | 🔐 | User enables "Notification access". The system binds the listener itself (no foreground service). Android 13+ blocks this for sideloaded apps until "Allow restricted settings" is enabled in App info — the permission card explains it. Ongoing notifications, group summaries and silent updates are ignored; content is available to actions as variables but **never written to history**. |
 | Calendar event starts / ends (title filter) | `CalendarContract.Instances` + `AlarmManager` | 🔐 | `READ_CALENDAR`. Exact alarm at the next matching start/end (recurring events expanded by the provider, 8-day look-ahead); re-scheduled after each alarm, hourly via WorkManager, on boot and when the app opens. |
+| Media started / stopped playing | `AudioManager.registerAudioPlaybackCallback` + `isMusicActive` | ✅ | No permission. Callbacks only report player changes, so the real state is read after a 1.5 s settle delay and only changes fire (skipping tracks or a quick pause/resume fires nothing). Needs the monitoring service. Covers every app using the media stream (music, video, games). |
 | App opened | `UsageStatsManager.queryEvents` | 🔐 ⚠️ | Needs Usage access. No broadcast exists, so it polls every 2 s while the screen is on. AccessibilityService is deliberately **not** used. |
 
 **Background execution:** monitoring uses a `specialUse` foreground service with a visible,
@@ -194,6 +195,9 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 | Text-to-speech | `TextToSpeech` | ✅ | Waits until speech finishes. |
 | Play sound | `MediaPlayer` + `RingtoneManager` default sounds | ✅ | Max duration enforced. |
 | Vibrate | `Vibrator` / `VibratorManager` | ✅ | |
+| Media control (play/pause, play, pause, next, previous, stop) | `AudioManager.dispatchMediaKeyEvent` | ✅ | Same as a headset button: goes to the app owning the media session (or the last one). No permission, no notification access needed. |
+| Play music from a folder (shuffle, stop after N minutes) | Storage Access Framework tree URI + `MediaPlayer` in a `mediaPlayback` foreground service | ⚠️ | The user picks the folder once (`OPEN_DOCUMENT_TREE`, persisted read grant) — **no storage permission**. Playback continues after the run with a media notification (previous / play-pause / next / stop) and a media session; respects audio focus and pauses when headphones are unplugged. Android 12+ only lets apps start a foreground service from the background in some cases (exact alarm just fired, notification listener bound, "Display over other apps", battery optimization disabled, app visible); otherwise the step fails with that explanation. |
+| Stop AutoFlow music | engine → service | ✅ | Skipped when nothing is playing. |
 | Dismiss notifications | `NotificationListenerService.cancelNotification` | 🔐 | Only clearable notifications of other apps, optional app / text filter. |
 | HTTP request | OkHttp | ✅ | GET/POST/PUT/PATCH/DELETE, headers, query, body, Basic/Bearer, timeout, response → variables, 1 MB cap. Cleartext HTTP is blocked by Android's default network policy. |
 | Delay, variables, If/Else, Repeat, While (iteration cap), Wait until (timeout), Stop, variable operations (increment/decrement, append, replace, case, trim, substring, split, regex extract, length, URL-encode), Read JSON value | engine | ✅ | |
@@ -216,7 +220,7 @@ Time triggers and widget runs go through WorkManager (expedited when quota allow
 |---|---|
 | SMS / calls | `RECEIVE_SMS`, `SEND_SMS`, `READ_PHONE_STATE`, `READ_CALL_LOG` – restricted by Google Play policy unless the app is a default handler or qualifies for an exception |
 | Camera / microphone | Only from a visible activity or a `camera`/`microphone` foreground service with a visible notification; never hidden |
-| Files | Storage Access Framework (user-picked folders) |
+| Files | Storage Access Framework (user-picked folders) — already used by "Play music from folder" |
 | Sunrise / sunset | Computable offline from coarse location |
 | Webhook trigger | Needs a reachable endpoint (push service or local server) – privacy review required |
 
